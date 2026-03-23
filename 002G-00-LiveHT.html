@@ -1,0 +1,1853 @@
+<!-- Built with AI-augmented development. The code is the demo. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scope Alignment Response</title>
+  <meta name="description" content="A scope alignment response for AI capability development engagement.">
+  <meta property="og:title" content="Scope Alignment Response">
+  <meta property="og:description" content="Reframing the AI capability engagement around what actually builds lasting team capability.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       A. Reset + Custom Properties
+       ======================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #FAFAF8;
+      --bg-elevated:     #FFFFFF;
+      --surface-subtle:  #F3F2EE;
+      --text-primary:    #1A1A2E;
+      --text-secondary:  #5A5A72;
+      --text-tertiary:   #9494A8;
+      --accent:          #2D5F8A;
+      --accent-warm:     #C4704B;
+      --accent-cool:     #6B8FA3;
+      --danger-subtle:   #E8D5CF;
+      --success-subtle:  #D4E4D9;
+      --border:          rgba(26,26,46,0.08);
+      --shadow:          0 2px 24px rgba(26,26,46,0.06);
+      --shadow-hover:    0 4px 32px rgba(26,26,46,0.10);
+
+      --font-heading: 'Instrument Serif', Georgia, serif;
+      --font-body:    'Inter', -apple-system, system-ui, sans-serif;
+
+      --section-padding: 120px;
+      --content-max:     880px;
+      --nav-width:       56px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-primary);
+      background: var(--bg);
+    }
+
+    /* ========================================
+       B. Typography
+       ======================================== */
+    h1 {
+      font-family: var(--font-heading);
+      font-size: 56px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: 40px;
+      line-height: 1.15;
+      font-weight: 400;
+      margin-bottom: 24px;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      line-height: 1.3;
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+
+    h4 {
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    p:last-child { margin-bottom: 0; }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ========================================
+       C. Layout
+       ======================================== */
+
+    /* Left Nav Rail */
+    .nav-rail {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--nav-width);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      z-index: 100;
+    }
+
+    .nav-rail-track {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-rail-line {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      width: 1px;
+      background: var(--border);
+      z-index: 0;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-tertiary);
+      background: var(--bg);
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      text-decoration: none;
+    }
+
+    .nav-dot.active {
+      background: var(--text-primary);
+      border-color: var(--text-primary);
+    }
+
+    .nav-dot-label {
+      position: absolute;
+      left: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+
+    .nav-dot:hover .nav-dot-label {
+      opacity: 1;
+    }
+
+    /* Floating Top Bar */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: var(--nav-width);
+      right: 0;
+      height: 56px;
+      background: rgba(250,250,248,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .top-bar.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .top-bar-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+
+    .top-bar-section {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+    }
+
+    .top-bar-back {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-tertiary);
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .top-bar-back:hover {
+      border-color: var(--text-tertiary);
+      color: var(--text-primary);
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Main Content */
+    main {
+      margin-left: var(--nav-width);
+    }
+
+    .section {
+      padding: var(--section-padding) 40px;
+      scroll-margin-top: 56px;
+    }
+
+    .section-inner {
+      max-width: var(--content-max);
+      margin: 0 auto;
+    }
+
+    .section-alt {
+      background: var(--surface-subtle);
+    }
+
+    /* ========================================
+       D. Hero
+       ======================================== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 40px;
+      position: relative;
+    }
+
+    .hero-inner {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .hero-brand {
+      margin-bottom: 48px;
+    }
+
+    .hero-entity {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .hero-author {
+      font-family: var(--font-heading);
+      font-style: italic;
+      font-size: 20px;
+      color: var(--accent-warm);
+    }
+
+    .hero-author-site {
+      font-family: var(--font-body);
+      font-style: normal;
+      font-size: 15px;
+      color: #a8b4d4;
+      text-decoration: none;
+      margin-left: 12px;
+    }
+
+    .hero-author-site:hover {
+      text-decoration: underline;
+    }
+
+    .hero h1 {
+      margin-bottom: 24px;
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      max-width: 600px;
+    }
+
+    .hero-prepared {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .hero-prepared-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-prepared-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .google-logo {
+      height: 28px;
+      width: auto;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      animation: fadeInScroll 0.6s ease 2s forwards;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .scroll-indicator:hover {
+      color: var(--accent-warm);
+    }
+
+    .scroll-indicator:hover .scroll-arrow {
+      border-color: var(--accent-warm);
+    }
+
+    .scroll-label {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeInScroll {
+      to { opacity: 1; }
+    }
+
+    .scroll-arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 1.5px solid var(--text-tertiary);
+      border-bottom: 1.5px solid var(--text-tertiary);
+      transform: rotate(45deg);
+    }
+
+    /* ========================================
+       E. Section 1 — Workstream Cards
+       ======================================== */
+    .workstream-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .workstream-header {
+      padding: 24px 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .workstream-header:hover {
+      background: rgba(0,0,0,0.01);
+    }
+
+    .workstream-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .workstream-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+
+    .workstream-chevron {
+      width: 20px;
+      height: 20px;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+      margin-left: 16px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .workstream-card.collapsed .workstream-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .workstream-body-wrap {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .workstream-card.collapsed .workstream-body-wrap {
+      grid-template-rows: 0fr;
+    }
+
+    .workstream-body {
+      overflow: hidden;
+      padding: 0 32px;
+    }
+
+    .workstream-body-inner {
+      padding-bottom: 32px;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .comparison-col {
+      padding: 24px;
+      border-radius: 8px;
+    }
+
+    .comparison-col--contractor {
+      background: rgba(107,143,163,0.06);
+      border-left: 3px solid var(--accent-cool);
+    }
+
+    .comparison-col--cm {
+      background: rgba(196,112,75,0.06);
+      border-left: 3px solid var(--accent-warm);
+    }
+
+    .comparison-col h4 {
+      margin-bottom: 16px;
+    }
+
+    .comparison-item {
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-item:last-child {
+      border-bottom: none;
+    }
+
+    .comparison-item--empty {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+
+    .remains-callout {
+      background: var(--danger-subtle);
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .remains-callout strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-warm);
+      margin-bottom: 8px;
+    }
+
+    /* The Pattern block */
+    .pattern-block {
+      background: var(--surface-subtle);
+      border-radius: 16px;
+      padding: 48px 40px;
+      margin-top: 48px;
+    }
+
+    .pattern-block h3 {
+      margin-bottom: 24px;
+    }
+
+    .pattern-keyline {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      line-height: 1.35;
+      margin: 32px 0;
+    }
+
+    .text-depreciate {
+      color: var(--accent-cool);
+    }
+
+    .text-compound {
+      color: var(--accent-warm);
+    }
+
+    /* ========================================
+       F. Section 2 — Phase Timeline
+       ======================================== */
+    .phase-timeline {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 56px;
+    }
+
+    .phase-node {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+
+    .phase-box {
+      display: inline-block;
+      padding: 16px 24px;
+      border-radius: 10px;
+      border: 2px solid var(--text-primary);
+      background: var(--bg-elevated);
+      min-width: 180px;
+    }
+
+    .phase-box--future {
+      border-style: dashed;
+      border-color: var(--text-tertiary);
+      opacity: 0.5;
+    }
+
+    .phase-box-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .phase-box-title {
+      font-family: var(--font-heading);
+      font-size: 17px;
+      color: var(--text-primary);
+    }
+
+    .phase-box--future .phase-box-title {
+      color: var(--text-tertiary);
+    }
+
+    .phase-arrow {
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--text-tertiary);
+    }
+
+    .phase-arrow svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Phase Detail Cards */
+    .phase-detail {
+      margin-bottom: 64px;
+    }
+
+    .phase-detail:last-child {
+      margin-bottom: 0;
+    }
+
+    .phase-detail-header {
+      margin-bottom: 32px;
+    }
+
+    .phase-detail h3 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .phase-detail-sub {
+      font-size: 15px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .phase-content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .phase-content-block {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .phase-content-block h4 {
+      margin-bottom: 12px;
+    }
+
+    .phase-content-block p {
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .phase-content-block--full {
+      grid-column: 1 / -1;
+    }
+
+    /* AI Assistant Cards */
+    .assistant-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .assistant-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .assistant-card h4 {
+      color: var(--text-primary);
+      font-size: 14px;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .assistant-card p {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .assistant-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(196,112,75,0.1);
+      color: var(--accent-warm);
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    /* Phase 3 Note */
+    .phase3-note {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      opacity: 0.65;
+      margin-top: 48px;
+    }
+
+    .phase3-note h3 {
+      color: var(--text-tertiary);
+    }
+
+    .phase3-note p {
+      color: var(--text-tertiary);
+    }
+
+    /* ========================================
+       G. Section 3 — Tabs + SOW Tables
+       ======================================== */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 12px 24px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--text-primary);
+    }
+
+    .tab-btn--disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .sow-block {
+      margin-bottom: 40px;
+    }
+
+    .sow-block h4 {
+      margin-bottom: 16px;
+    }
+
+    .sow-scope {
+      background: var(--surface-subtle);
+      border-radius: 10px;
+      padding: 24px 28px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    .sow-services-list {
+      list-style: none;
+    }
+
+    .sow-service-item {
+      padding: 16px 0 16px 20px;
+      border-left: 3px solid var(--border);
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      margin-left: 4px;
+      position: relative;
+    }
+
+    .sow-service-item + .sow-service-item {
+      border-top: 1px solid var(--border);
+    }
+
+    .sow-service-num {
+      position: absolute;
+      left: -28px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .sow-deliverables-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .sow-deliv-col {
+      padding: 24px;
+      border-radius: 10px;
+    }
+
+    .sow-deliv-col--contractor {
+      background: rgba(107,143,163,0.06);
+      border-left: 3px solid var(--accent-cool);
+    }
+
+    .sow-deliv-col--cm {
+      background: rgba(196,112,75,0.06);
+      border-left: 3px solid var(--accent-warm);
+    }
+
+    .sow-deliv-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .sow-deliv-item:last-child {
+      border-bottom: none;
+    }
+
+    .sow-deliv-item strong {
+      display: block;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .sow-deliv-note {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .sow-cm-label {
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-tertiary);
+      margin-bottom: 16px;
+    }
+
+    /* Phase 3 tab card */
+    .phase3-sow-card {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .phase3-sow-card p {
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ========================================
+       H. Section 4 — IC Compliance
+       ======================================== */
+    .ic-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .ic-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .ic-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--surface-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: var(--text-tertiary);
+    }
+
+    .ic-card h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .ic-card-question {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+
+    .ic-card p {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Summary Table */
+    .ic-table-wrap {
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .ic-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+
+    .ic-table th {
+      text-align: left;
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .ic-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.55;
+    }
+
+    .ic-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ic-table td:first-child {
+      font-weight: 500;
+      color: var(--text-primary);
+      width: 30%;
+    }
+
+    .ic-table td:last-child {
+      color: var(--text-secondary);
+    }
+
+    .ic-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--success-subtle);
+      color: #4a7c59;
+      font-size: 13px;
+      margin-right: 10px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    /* ========================================
+       I. Fixed Footer (Branding)
+       ======================================== */
+    .footer-mark {
+      position: fixed;
+      bottom: 24px;
+      right: 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      z-index: 80;
+    }
+
+    .footer-mark .name {
+      font-family: var(--font-heading);
+      font-style: italic;
+      font-size: 20px;
+      color: var(--accent-warm);
+    }
+
+    .footer-mark .site {
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: #a8b4d4;
+      text-decoration: none;
+    }
+
+    .footer-mark .site:hover {
+      text-decoration: underline;
+    }
+
+    /* Page-bottom attribution */
+    .page-footer {
+      padding: 48px 40px;
+      margin-left: var(--nav-width);
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .page-footer p {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       J. Scroll Animations
+       ======================================== */
+    .animate-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .animate-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .animate-in.delay-1 { transition-delay: 80ms; }
+    .animate-in.delay-2 { transition-delay: 160ms; }
+    .animate-in.delay-3 { transition-delay: 240ms; }
+    .animate-in.delay-4 { transition-delay: 320ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .scroll-indicator { animation: none; opacity: 1; }
+      .workstream-body-wrap { transition: none; }
+    }
+
+    /* ========================================
+       K. Responsive
+       ======================================== */
+    @media (max-width: 1023px) {
+      :root {
+        --nav-width: 0px;
+        --section-padding: 80px;
+      }
+      .nav-rail { display: none; }
+      .top-bar { left: 0; }
+      h1 { font-size: 40px; }
+      h2 { font-size: 32px; }
+      .phase-timeline { flex-direction: column; gap: 16px; }
+      .phase-arrow { transform: rotate(90deg); }
+      .phase-node { width: 100%; }
+      .phase-box { width: 100%; }
+      .page-footer { margin-left: 0; }
+      .footer-mark { right: 24px; bottom: 16px; }
+    }
+
+    @media (max-width: 767px) {
+      :root {
+        --section-padding: 56px;
+      }
+      body { font-size: 16px; }
+      h1 { font-size: 32px; }
+      h2 { font-size: 28px; }
+      .hero { padding: 56px 24px; }
+      .section { padding: var(--section-padding) 24px; }
+      .comparison-grid { grid-template-columns: 1fr; }
+      .phase-content-grid { grid-template-columns: 1fr; }
+      .assistant-grid { grid-template-columns: 1fr; }
+      .sow-deliverables-grid { grid-template-columns: 1fr; }
+      .ic-cards { grid-template-columns: 1fr; }
+      .workstream-header { padding: 20px 24px; }
+      .workstream-body { padding: 0 24px; }
+      .pattern-block { padding: 32px 24px; }
+      .pattern-keyline { font-size: 22px; }
+      .page-footer { padding: 40px 24px; }
+      .footer-mark { display: none; }
+      .google-logo { height: 22px; }
+    }
+
+    /* ========================================
+       L. Print
+       ======================================== */
+    @media print {
+      .nav-rail, .top-bar, .scroll-indicator, .footer-mark { display: none; }
+      main { margin-left: 0; }
+      .section { padding: 32px 0; }
+      .hero { min-height: auto; }
+      .workstream-card { break-inside: avoid; }
+      .workstream-card.collapsed .workstream-body-wrap { grid-template-rows: 1fr; }
+      .phase3-note { opacity: 1; }
+      .animate-in { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav Rail -->
+  <nav class="nav-rail" aria-label="Section navigation">
+    <div class="nav-rail-track">
+      <div class="nav-rail-line"></div>
+      <a href="#section-1" class="nav-dot active" data-section="0" aria-label="Section 1">
+        <span class="nav-dot-label">Current Scope</span>
+      </a>
+      <a href="#section-2" class="nav-dot" data-section="1" aria-label="Section 2">
+        <span class="nav-dot-label">Proposed Structure</span>
+      </a>
+      <a href="#section-3" class="nav-dot" data-section="2" aria-label="Section 3">
+        <span class="nav-dot-label">Revised Scope</span>
+      </a>
+      <a href="#section-4" class="nav-dot" data-section="3" aria-label="Section 4">
+        <span class="nav-dot-label">IC Compliance</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Floating Top Bar -->
+  <header class="top-bar" role="banner">
+    <span class="top-bar-title">Scope Alignment Response</span>
+    <div class="top-bar-right">
+      <span class="top-bar-section">Section 1 of 4</span>
+      <a href="#" class="top-bar-back" aria-label="Back to top">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="7" y1="11" x2="7" y2="3"/><polyline points="3,6 7,2 11,6"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Fixed Footer Branding -->
+  <footer class="footer-mark" aria-hidden="true">
+    <span class="name">Haris Rahi</span>
+    <a class="site" href="https://harisrahi.ai" target="_blank">harisrahi.ai</a>
+  </footer>
+
+  <main>
+    <!-- ============================================
+         HERO
+         ============================================ -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-brand">
+          <div class="hero-entity">Helsingor LLC</div>
+          <span class="hero-author">Haris Rahi</span>
+          <a class="hero-author-site" href="https://harisrahi.ai" target="_blank">harisrahi.ai</a>
+        </div>
+
+        <h1>Scope Alignment<br>Response</h1>
+        <p class="hero-subtitle">A response to the proposed Statement of Work for AI Capability Development. This document reframes the engagement around what actually builds lasting team capability.</p>
+
+        <div class="hero-prepared">
+          <div class="hero-prepared-row">
+            <span class="hero-prepared-label">Prepared for</span>
+            <!-- Google logo SVG -->
+            <svg class="google-logo" viewBox="0 0 272 92" xmlns="http://www.w3.org/2000/svg" aria-label="Google">
+              <path d="M115.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18C71.25 34.32 81.24 25 93.5 25s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44S80.99 39.2 80.99 47.18c0 7.9 5.79 13.44 12.51 13.44s12.51-5.54 12.51-13.44z" fill="#EA4335"/>
+              <path d="M163.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18c0-12.85 9.99-22.18 22.25-22.18s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44s-12.51 5.46-12.51 13.44c0 7.9 5.79 13.44 12.51 13.44s12.51-5.54 12.51-13.44z" fill="#FBBC05"/>
+              <path d="M209.75 26.34v39.82c0 16.38-9.66 23.07-21.08 23.07-10.75 0-17.22-7.19-19.66-13.07l8.48-3.53c1.51 3.61 5.21 7.87 11.17 7.87 7.31 0 11.84-4.51 11.84-13v-3.19h-.34c-2.18 2.69-6.38 5.04-11.68 5.04-11.09 0-21.25-9.66-21.25-22.09 0-12.52 10.16-22.26 21.25-22.26 5.29 0 9.49 2.35 11.68 4.96h.34v-3.61h9.25zm-8.56 20.92c0-7.81-5.21-13.52-11.84-13.52-6.72 0-12.35 5.71-12.35 13.52 0 7.73 5.63 13.36 12.35 13.36 6.63 0 11.84-5.63 11.84-13.36z" fill="#4285F4"/>
+              <path d="M225 3v65h-9.5V3h9.5z" fill="#34A853"/>
+              <path d="M262.02 54.48l7.56 5.04c-2.44 3.61-8.32 9.83-18.48 9.83-12.6 0-22.01-9.74-22.01-22.18 0-13.19 9.49-22.18 20.92-22.18 11.51 0 17.14 9.16 18.98 14.11l1.01 2.52-29.65 12.28c2.27 4.45 5.8 6.72 10.75 6.72 4.96 0 8.4-2.44 10.92-6.14zm-23.27-7.98l19.82-8.23c-1.09-2.77-4.37-4.7-8.23-4.7-4.95 0-11.84 4.37-11.59 12.93z" fill="#EA4335"/>
+              <path d="M35.29 41.19V32H67.6c.32 1.68.49 3.67.49 5.82 0 7.23-1.98 16.17-8.35 22.55C53.51 66.82 45.74 70 35.29 70 16.12 70 0 54.38 0 35.18S16.12.36 35.29.36c10.61 0 18.16 4.16 23.81 9.57l-6.7 6.7c-4.04-3.78-9.49-6.72-17.11-6.72-13.96 0-24.88 11.26-24.88 25.27 0 14.01 10.92 25.27 24.88 25.27 9.07 0 14.23-3.64 17.53-6.97 2.67-2.67 4.43-6.49 5.12-11.72L35.29 41.19z" fill="#4285F4"/>
+            </svg>
+          </div>
+          <span class="hero-prepared-label">Version 2</span>
+        </div>
+      </div>
+
+      <a href="#section-1" class="scroll-indicator">
+        <span class="scroll-label">Begin Reading</span>
+        <div class="scroll-arrow"></div>
+      </a>
+    </section>
+
+    <!-- ============================================
+         SECTION 1 — What the Current Scope Actually Produces
+         ============================================ -->
+    <section id="section-1" class="section">
+      <div class="section-inner">
+        <h2 class="animate-in">What the Current Scope Actually Produces</h2>
+        <p class="animate-in delay-1">The table below strips each workstream to its operational reality: who does the work, what the CMs actually do, and what remains when the engagement ends.</p>
+
+        <!-- Workstream A -->
+        <div class="workstream-card animate-in delay-2">
+          <div class="workstream-header" role="button" tabindex="0" aria-expanded="true">
+            <div>
+              <div class="workstream-label">Workstream A</div>
+              <div class="workstream-title">Workflow Analysis &amp; Modernization Roadmap</div>
+            </div>
+            <svg class="workstream-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="6,8 10,12 14,8" /></svg>
+          </div>
+          <div class="workstream-body-wrap">
+            <div class="workstream-body">
+              <div class="workstream-body-inner">
+                <div class="comparison-grid">
+                  <div class="comparison-col comparison-col--contractor">
+                    <h4>What the SOW Requires of Contractor</h4>
+                    <div class="comparison-item">Analyze workflows and map pain points</div>
+                    <div class="comparison-item">Analyze Google's process documentation</div>
+                    <div class="comparison-item">Perform independent analysis of Google's AI stack</div>
+                    <div class="comparison-item">Build the scoring/prioritization framework</div>
+                    <div class="comparison-item">Write a comprehensive Workflow Modernization Report</div>
+                    <div class="comparison-item">Write a Solution Blueprint with architecture and project plan</div>
+                    <div class="comparison-item">Write a Knowledge Transfer Addendum</div>
+                  </div>
+                  <div class="comparison-col comparison-col--cm">
+                    <h4>What the CMs Actually Do</h4>
+                    <div class="comparison-item">Attend workshops</div>
+                    <div class="comparison-item">Receive insights</div>
+                    <div class="comparison-item">Observe findings</div>
+                    <div class="comparison-item">"Co-validate" (approve what Contractor built)</div>
+                    <div class="comparison-item comparison-item--empty">&mdash;</div>
+                    <div class="comparison-item comparison-item--empty">&mdash;</div>
+                    <div class="comparison-item comparison-item--empty">&mdash;</div>
+                  </div>
+                </div>
+                <div class="remains-callout">
+                  <strong>What remains when Contractor leaves</strong>
+                  Three documents. No CM built anything. No CM learned the analytical methodology. The roadmap reflects the Contractor's judgment, not capability the team can replicate on the next workflow.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workstream B -->
+        <div class="workstream-card collapsed animate-in delay-3">
+          <div class="workstream-header" role="button" tabindex="0" aria-expanded="false">
+            <div>
+              <div class="workstream-label">Workstream B</div>
+              <div class="workstream-title">Multi-Agent Orchestration Blueprint &amp; Concept</div>
+            </div>
+            <svg class="workstream-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="6,8 10,12 14,8" /></svg>
+          </div>
+          <div class="workstream-body-wrap">
+            <div class="workstream-body">
+              <div class="workstream-body-inner">
+                <div class="comparison-grid">
+                  <div class="comparison-col comparison-col--contractor">
+                    <h4>What the SOW Requires of Contractor</h4>
+                    <div class="comparison-item">Analyze agent interoperability requirements</div>
+                    <div class="comparison-item">Design orchestration logic and communication patterns</div>
+                    <div class="comparison-item">Create UI/UX wireframes and user flows</div>
+                    <div class="comparison-item">Write a System Integration Specification</div>
+                  </div>
+                  <div class="comparison-col comparison-col--cm">
+                    <h4>What the CMs Actually Do</h4>
+                    <div class="comparison-item">Hear discussion of trade-offs</div>
+                    <div class="comparison-item">Get walked through design principles</div>
+                    <div class="comparison-item">Give usability feedback</div>
+                    <div class="comparison-item">Receive explanation of challenges</div>
+                  </div>
+                </div>
+                <div class="remains-callout">
+                  <strong>What remains when Contractor leaves</strong>
+                  An architecture blueprint, wireframes, and an integration spec. No CM designed anything. No CM understands the orchestration logic well enough to modify it when requirements change, and they will change.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workstream C -->
+        <div class="workstream-card collapsed animate-in delay-4">
+          <div class="workstream-header" role="button" tabindex="0" aria-expanded="false">
+            <div>
+              <div class="workstream-label">Workstream C</div>
+              <div class="workstream-title">Proof-of-Concept Development</div>
+            </div>
+            <svg class="workstream-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="6,8 10,12 14,8" /></svg>
+          </div>
+          <div class="workstream-body-wrap">
+            <div class="workstream-body">
+              <div class="workstream-body-inner">
+                <div class="comparison-grid">
+                  <div class="comparison-col comparison-col--contractor">
+                    <h4>What the SOW Requires of Contractor</h4>
+                    <div class="comparison-item">Build the PoC application</div>
+                    <div class="comparison-item">Implement data processing logic and analytical models</div>
+                    <div class="comparison-item">Package the application for deployment</div>
+                    <div class="comparison-item">Write comprehensive technical documentation</div>
+                    <div class="comparison-item">Answer ad-hoc questions</div>
+                  </div>
+                  <div class="comparison-col comparison-col--cm">
+                    <h4>What the CMs Actually Do</h4>
+                    <div class="comparison-item">Shadow the development</div>
+                    <div class="comparison-item">Receive explanations of structure and logic</div>
+                    <div class="comparison-item">Watch the packaging demonstration</div>
+                    <div class="comparison-item comparison-item--empty">&mdash;</div>
+                    <div class="comparison-item">Ask questions</div>
+                  </div>
+                </div>
+                <div class="remains-callout">
+                  <strong>What remains when Contractor leaves</strong>
+                  A packaged application and a documentation set. No CM wrote a line of logic. No CM understands the architecture deeply enough to debug it when it breaks, and it will break.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workstream D -->
+        <div class="workstream-card collapsed animate-in">
+          <div class="workstream-header" role="button" tabindex="0" aria-expanded="false">
+            <div>
+              <div class="workstream-label">Workstream D</div>
+              <div class="workstream-title">End-to-End Solution Development &amp; Enablement</div>
+            </div>
+            <svg class="workstream-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="6,8 10,12 14,8" /></svg>
+          </div>
+          <div class="workstream-body-wrap">
+            <div class="workstream-body">
+              <div class="workstream-body-inner">
+                <div class="comparison-grid">
+                  <div class="comparison-col comparison-col--contractor">
+                    <h4>What the SOW Requires of Contractor</h4>
+                    <div class="comparison-item">Build the production-ready application</div>
+                    <div class="comparison-item">Test the application rigorously</div>
+                    <div class="comparison-item">Write operational playbooks and architectural diagrams</div>
+                    <div class="comparison-item">Design and document a training curriculum</div>
+                    <div class="comparison-item">Create presentation decks and recorded tutorials</div>
+                    <div class="comparison-item">Run train-the-trainer sessions</div>
+                  </div>
+                  <div class="comparison-col comparison-col--cm">
+                    <h4>What the CMs Actually Do</h4>
+                    <div class="comparison-item">Pair on "specific components"</div>
+                    <div class="comparison-item">Participate in test execution</div>
+                    <div class="comparison-item">Co-draft "where appropriate"</div>
+                    <div class="comparison-item comparison-item--empty">&mdash;</div>
+                    <div class="comparison-item comparison-item--empty">&mdash;</div>
+                    <div class="comparison-item">Attend sessions</div>
+                  </div>
+                </div>
+                <div class="remains-callout">
+                  <strong>What remains when Contractor leaves</strong>
+                  A production application, playbooks, and a training binder. The CMs were trained on what someone else built. They can operate it. They cannot evolve it, fix it, or build the next one.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- The Pattern -->
+        <div class="pattern-block animate-in">
+          <h3>The Pattern Across All Four Workstreams</h3>
+          <p>The Contractor produces every artifact. The CMs observe, validate, shadow, attend, and receive explanations. The knowledge transfer language, "walking CMs through," "sharing best practices," "explaining rationale," describes <em>presentation</em>, not <em>capability building</em>.</p>
+          <p>This structure follows the conventional model for technology engagements built around traditional software delivery. But AI capability doesn't transfer the same way. Tools not owned by the team freeze the moment the engagement ends. Static documents become outdated. Neither produces a team that can build what comes next.</p>
+
+          <div class="pattern-keyline">
+            The key question is whether Google wants to buy <span class="text-depreciate">artifacts that depreciate</span> or <span class="text-compound">capability that compounds</span>.
+          </div>
+
+          <p>The current scope assumes AI capability is something that gets delivered. It isn't. It's something that gets built by the people who will use it, on the work they actually do, under expert direction and methodology-based review.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 2 — How the Engagement Must Be Structured
+         ============================================ -->
+    <section id="section-2" class="section section-alt">
+      <div class="section-inner">
+        <h2 class="animate-in">How the Engagement Must Be Structured</h2>
+
+        <!-- Phase Timeline -->
+        <div class="phase-timeline animate-in delay-1">
+          <div class="phase-node">
+            <div class="phase-box">
+              <div class="phase-box-label">Phase 1</div>
+              <div class="phase-box-title">Foundation Fluency &amp;<br>Workflow Modernization</div>
+            </div>
+          </div>
+          <div class="phase-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="12" x2="20" y2="12" /><polyline points="14,6 20,12 14,18" /></svg>
+          </div>
+          <div class="phase-node">
+            <div class="phase-box">
+              <div class="phase-box-label">Phase 2</div>
+              <div class="phase-box-title">Augmented Execution &amp;<br>Applied Development</div>
+            </div>
+          </div>
+          <div class="phase-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="12" x2="20" y2="12" /><polyline points="14,6 20,12 14,18" /></svg>
+          </div>
+          <div class="phase-node">
+            <div class="phase-box phase-box--future">
+              <div class="phase-box-label">Phase 3</div>
+              <div class="phase-box-title">Advanced Development<br><em style="font-size:13px; font-family: var(--font-body);">(Follow-On)</em></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 1 Detail -->
+        <div class="phase-detail">
+          <div class="phase-detail-header animate-in">
+            <h3>Phase 1: Foundation Fluency &amp; Workflow Modernization</h3>
+            <div class="phase-detail-sub">CMs bring their actual work into the engagement, not hypothetical scenarios.</div>
+          </div>
+
+          <div class="phase-content-block phase-content-block--full animate-in" style="margin-bottom: 24px;">
+            <h4>What Happens</h4>
+            <p>Up to 15 Category Managers bring their actual work into the engagement. Their real workflows, their real pain points, their real deliverables. Under expert direction, the CMs learn how to think critically about where AI creates leverage in their work. They analyze their own workflows, not a report a contractor handed them. They learn to prompt effectively, understand how to challenge AI outputs, and identify when AI is helping versus when it's producing confidently wrong outputs.</p>
+            <p>Then they build. Each CM constructs working AI assistants on Google's platform stack, applied to their actual workflows.</p>
+          </div>
+
+          <div class="assistant-grid animate-in">
+            <div class="assistant-card">
+              <div class="assistant-badge">Built by CMs</div>
+              <h4>Market &amp; Supplier Research</h4>
+              <p>Synthesizes supplier intelligence, financial data, and market signals into decision-ready analysis</p>
+            </div>
+            <div class="assistant-card">
+              <div class="assistant-badge">Built by CMs</div>
+              <h4>Contract Drafting &amp; Review</h4>
+              <p>Drafts, redlines, and flags risk against organizational standards and precedent</p>
+            </div>
+            <div class="assistant-card">
+              <div class="assistant-badge">Built by CMs</div>
+              <h4>Bid &amp; Proposal Analysis</h4>
+              <p>Extracts vendor commitments, compares proposals side-by-side, surfaces gaps and inconsistencies</p>
+            </div>
+            <div class="assistant-card">
+              <div class="assistant-badge">Built by CMs</div>
+              <h4>RFx Development</h4>
+              <p>Accelerates requirements drafting, ensures completeness, improves clarity for vendors</p>
+            </div>
+          </div>
+
+          <p class="animate-in" style="margin-top: 24px; font-size: 15px; color: var(--text-tertiary);">These are starting points, not endpoints. As the CMs work through their own workflows, use-case-specific assistants will emerge, tools unique to how Google's Category Management operates that no outside contractor could anticipate or predefine.</p>
+
+          <div class="phase-content-grid animate-in" style="margin-top: 32px;">
+            <div class="phase-content-block">
+              <h4>What CMs Walk Away With</h4>
+              <p>Working tools they built, understand, and can modify. Not tools someone else built and explained to them. When a workflow changes, when priorities shift, when AI platforms evolve, the CMs can adapt what they built. That's the difference between owning capability and renting it.</p>
+            </div>
+            <div class="phase-content-block">
+              <h4>What the Contractor Delivers</h4>
+              <p>The structured methodology and curriculum tailored to Google's context. A workflow opportunity assessment identifying where AI creates the highest leverage. Capability evaluations with clear visibility into which CMs are advancing, where gaps exist, and who shows aptitude for more advanced development. Methodology-based review of every assistant the CMs produce.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 2 Detail -->
+        <div class="phase-detail">
+          <div class="phase-detail-header animate-in">
+            <h3>Phase 2: Augmented Execution &amp; Applied Development</h3>
+            <div class="phase-detail-sub">Foundation training creates literacy. Proficiency develops when it's applied to live work.</div>
+          </div>
+
+          <div class="phase-content-block phase-content-block--full animate-in" style="margin-bottom: 24px;">
+            <h4>What Happens</h4>
+            <p>Phase 2 builds directly on Phase 1. The CMs apply their new capability to active category management work. The Contractor provides structured expert guidance and review: reviewing CM-built tools in live workflow context, identifying brittle solutions before they fail, guiding CMs toward more sophisticated AI augmentation as literacy develops into fluency.</p>
+            <p>This is also where the AI tools portfolio expands and matures. The tools built in Phase 1 get tested against live workflow context. Some will work as designed. Some will need refinement. Some will reveal entirely new opportunities. Phase 2 is designed so that a core group of CMs develop into sustained builders within the organization.</p>
+          </div>
+
+          <div class="phase-content-grid animate-in">
+            <div class="phase-content-block">
+              <h4>What CMs Walk Away With</h4>
+              <p>A validated, workflow-tested portfolio of AI solutions built and refined by the team. Changed workflows already in daily use. The confidence and capability to build the next tool, and the foundation to determine whether advanced development warrants a deeper engagement.</p>
+            </div>
+            <div class="phase-content-block">
+              <h4>What the Contractor Delivers</h4>
+              <p>Ongoing capability assessments documenting team progression. A final readiness report evaluating team capability, tool maturity, and a recommendation on whether and how to proceed to advanced development. Methodology documentation retained by Google for continued internal use.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3 Note -->
+        <div class="phase3-note animate-in">
+          <h3>Phase 3: Advanced Development (Follow-On Engagement)</h3>
+          <p>Phase 3 is not included in this SOW. It is described here to show the full capability arc and to frame why the sequencing matters.</p>
+          <p style="margin-top: 12px;">A subset of CMs will demonstrate aptitude that goes beyond assistant-building. These individuals can learn to develop sophisticated, production-quality AI applications, the work the current SOW attempts in Workstreams C and D. But that work requires practitioners who have proven foundation fluency through augmented execution on real work. Skipping to production development produces operators, not builders.</p>
+          <p style="margin-top: 12px;">A separate SOW would be scoped after Phase 1/2 completion, contingent on demonstrated CM aptitude and sufficient real-world validation of Phase 1/2 tools in live operating conditions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 3 — Proposed Revised Scope
+         ============================================ -->
+    <section id="section-3" class="section">
+      <div class="section-inner">
+        <h2 class="animate-in">Proposed Revised Scope: Services and Deliverables</h2>
+        <p class="animate-in delay-1">Contractor will provide the following Services and Deliverables to Google. The engagement is structured in two phases for a cohort of up to 15 Category Managers. In each phase, CMs are the primary builders; Contractor delivers structured methodology, instructional materials, analytical frameworks, and methodology-based review.</p>
+
+        <!-- Tabs -->
+        <div class="tab-bar animate-in delay-2" role="tablist">
+          <button class="tab-btn active" role="tab" aria-selected="true" data-tab="phase1-tab">Phase 1</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="phase2-tab">Phase 2</button>
+          <button class="tab-btn tab-btn--disabled" role="tab" aria-selected="false" data-tab="phase3-tab">Phase 3 <span style="font-weight: 400; color: var(--text-tertiary);">(Not in Scope)</span></button>
+        </div>
+
+        <!-- Phase 1 Tab -->
+        <div class="tab-panel active" id="phase1-tab" role="tabpanel">
+          <h3>Phase 1: Foundation Fluency &amp; Workflow Modernization</h3>
+
+          <div class="sow-block">
+            <h4>Scope</h4>
+            <div class="sow-scope">CMs develop foundational AI fluency by analyzing their own workflows and building working AI assistants on Google's platform stack (Vertex AI, ADK, Gems, Google Enterprise Agents, NotebookLM, etc.), utilizing Contractor-provided methodology, instructional materials, and analytical frameworks. Contractor provides methodology-based review of CM work product.</div>
+          </div>
+
+          <div class="sow-block">
+            <h4>Services</h4>
+            <ol class="sow-services-list">
+              <li class="sow-service-item"><span class="sow-service-num">1.</span>Design and deliver a structured engagement methodology and curriculum tailored to Google's Category Management context, workflows, and platform stack.</li>
+              <li class="sow-service-item"><span class="sow-service-num">2.</span>Provide an analytical framework and methodology for CMs to conduct a systematic analysis of their existing workflows, tools, and pain points, enabling CMs to identify and prioritize AI modernization opportunities independently.</li>
+              <li class="sow-service-item"><span class="sow-service-num">3.</span>Deliver structured training modules covering AI fundamentals, prompt engineering, critical evaluation of AI outputs, and assistant development, anchored to CMs' actual workflows and deliverables.</li>
+              <li class="sow-service-item"><span class="sow-service-num">4.</span>Provide development frameworks, best practices, and expert feedback for CMs to design and develop a portfolio of working AI assistants, including category-agnostic assistants (Market &amp; Supplier Research, Contract Drafting &amp; Review, Bid &amp; Proposal Analysis, RFx Development) and use-case-specific assistants identified during the workflow analysis.</li>
+              <li class="sow-service-item"><span class="sow-service-num">5.</span>Conduct methodology-based review of all CM-built assistants to assess rigor, reliability, and alignment with Google's standards.</li>
+              <li class="sow-service-item"><span class="sow-service-num">6.</span>Produce a capability evaluation report at a defined checkpoint, documenting fluency progression, adoption patterns, and aptitude for advanced development.</li>
+            </ol>
+          </div>
+
+          <div class="sow-block">
+            <div class="sow-deliverables-grid">
+              <div class="sow-deliv-col sow-deliv-col--contractor">
+                <h4>Contractor Deliverables</h4>
+                <div class="sow-deliv-item">
+                  <strong>1. Engagement Methodology &amp; Curriculum</strong>
+                  The structured methodology, curriculum, and instructional materials tailored to Google's CM context.
+                  <div class="sow-deliv-note">Contractor's underlying methodology is pre-existing intellectual property, licensed for Google's use in this engagement.</div>
+                </div>
+                <div class="sow-deliv-item">
+                  <strong>2. Workflow Opportunity Assessment</strong>
+                  A documented analysis of identified AI modernization opportunities across CM workflows, scored against a Contractor-provided impact/feasibility framework applied independently by the CMs.
+                </div>
+                <div class="sow-deliv-item">
+                  <strong>3. Phase 1 Capability Evaluation</strong>
+                  An assessment of each CM's fluency progression, adoption speed, and readiness for Phase 2, with identification of gaps and recommended focus areas.
+                </div>
+              </div>
+              <div class="sow-deliv-col sow-deliv-col--cm">
+                <h4>CM Outputs</h4>
+                <div class="sow-cm-label">Produced by CMs utilizing Contractor-provided methodology and frameworks, subject to Contractor's methodology-based review</div>
+                <div class="sow-deliv-item">
+                  <strong>1. Working AI Assistant Portfolio</strong>
+                  A set of functional, CM-built AI assistants deployed on Google's platform stack, covering both category-agnostic and use-case-specific applications.
+                </div>
+                <div class="sow-deliv-item">
+                  <strong>2. Workflow Analysis &amp; Redesign Documentation</strong>
+                  CM-authored documentation of analyzed workflows, identified opportunities, and redesigned processes incorporating the AI assistants they built.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 2 Tab -->
+        <div class="tab-panel" id="phase2-tab" role="tabpanel">
+          <h3>Phase 2: Augmented Execution &amp; Applied Development</h3>
+
+          <div class="sow-block">
+            <h4>Scope</h4>
+            <div class="sow-scope">CMs apply and extend their Phase 1 capability on live Category Management work. Contractor delivers expert review, advanced reference materials, and capability assessments to support CMs in maturing their tools in live workflow context, advancing toward more sophisticated applications, and developing the ability to operate independently.</div>
+          </div>
+
+          <div class="sow-block">
+            <h4>Services</h4>
+            <ol class="sow-services-list">
+              <li class="sow-service-item"><span class="sow-service-num">1.</span>Deliver expert review and feedback on CMs' application of AI assistants to active Category Management deliverables and workflows.</li>
+              <li class="sow-service-item"><span class="sow-service-num">2.</span>Review and stress-test CM-built tools in live workflow context, identifying brittle solutions, missed opportunities, and areas for refinement.</li>
+              <li class="sow-service-item"><span class="sow-service-num">3.</span>Provide advanced reference materials, best practices, and expert feedback to support CMs in developing more sophisticated applications as fluency matures, including advanced prompting techniques, multi-step workflows, and complex use cases beyond Phase 1 scope.</li>
+              <li class="sow-service-item"><span class="sow-service-num">4.</span>Produce capability assessments at defined checkpoints, documenting team progression, tool maturity, and emerging gaps.</li>
+              <li class="sow-service-item"><span class="sow-service-num">5.</span>Produce an assessment identifying CMs who demonstrate aptitude for advanced AI application development (potential Phase 3 candidates).</li>
+            </ol>
+          </div>
+
+          <div class="sow-block">
+            <div class="sow-deliverables-grid">
+              <div class="sow-deliv-col sow-deliv-col--contractor">
+                <h4>Contractor Deliverables</h4>
+                <div class="sow-deliv-item">
+                  <strong>1. Ongoing Capability Assessments</strong>
+                  Documented evaluations of CM progression, tool performance in live conditions, and team readiness at defined checkpoints.
+                </div>
+                <div class="sow-deliv-item">
+                  <strong>2. Final Readiness Assessment</strong>
+                  A comprehensive assessment of team capability, validated tool portfolio, and a recommendation on Phase 3 readiness, including identification of high-aptitude CMs and proposed scope for advanced development.
+                </div>
+                <div class="sow-deliv-item">
+                  <strong>3. Methodology Reference Materials</strong>
+                  Documentation of the engagement methodology, frameworks, and instructional approach, retained by Google for continued internal use and scaling.
+                </div>
+              </div>
+              <div class="sow-deliv-col sow-deliv-col--cm">
+                <h4>CM Outputs</h4>
+                <div class="sow-cm-label">Produced by CMs utilizing Contractor-provided methodology and frameworks, subject to Contractor's methodology-based review</div>
+                <div class="sow-deliv-item">
+                  <strong>1. Validated &amp; Expanded Assistant Portfolio</strong>
+                  The Phase 1 assistant portfolio, refined through real-world application and expanded with additional assistants developed during Phase 2.
+                </div>
+                <div class="sow-deliv-item">
+                  <strong>2. Production-Tested Workflow Documentation</strong>
+                  CM-authored documentation of workflows operating with AI assistants in live workflow context, including performance observations and refinement history.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3 Tab -->
+        <div class="tab-panel" id="phase3-tab" role="tabpanel">
+          <div class="phase3-sow-card">
+            <h3 style="color: var(--text-tertiary); margin-bottom: 16px;">Phase 3: Advanced Development</h3>
+            <p>Phase 3 is not included in this SOW. It is referenced to define the full capability arc. Phase 3 would cover advanced AI application development by high-aptitude CMs identified in Phase 2, including production-quality builds, multi-agent orchestration, and complex workflow automation.</p>
+            <p style="margin-top: 12px;">A separate SOW would be scoped upon completion of Phase 2, informed by the Final Readiness Report, and contingent on (a) demonstrated CM aptitude in Phases 1 and 2, and (b) sufficient real-world validation of Phase 1/2 tools in live operating conditions.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 4 — Independent Contractor Compliance
+         ============================================ -->
+    <section id="section-4" class="section section-alt">
+      <div class="section-inner">
+        <h2 class="animate-in">Independent Contractor Compliance</h2>
+        <p class="animate-in delay-1">This section addresses how the proposed engagement structure aligns with independent contractor classification requirements under applicable federal and state standards. It is provided for reference in internal review and is not a legal opinion.</p>
+        <p class="animate-in delay-1" style="margin-bottom: 40px;">Independent contractor classification is evaluated across three dimensions: <strong>behavioral control</strong>, <strong>financial control</strong>, and <strong>relationship type</strong>. The proposed engagement satisfies the key indicators on all three.</p>
+
+        <div class="ic-cards animate-in delay-2">
+          <!-- Behavioral Control -->
+          <div class="ic-card">
+            <div class="ic-card-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M10 2 L10 10 L16 10" />
+                <circle cx="10" cy="10" r="8" />
+              </svg>
+            </div>
+            <h3>Behavioral Control</h3>
+            <div class="ic-card-question">Who determines how the work is performed?</div>
+            <p>The Contractor brings a pre-existing, proprietary methodology developed independently and prior to the engagement. The Contractor determines how instruction is designed and delivered, how workshops are structured, how capability is assessed, what analytical frameworks are applied, and the sequence in which the engagement progresses. The client defines the desired outcomes. The Contractor determines how those outcomes are achieved.</p>
+            <p style="margin-top: 8px;">The Contractor does not receive task-level direction from client management, does not follow client-prescribed processes, and does not operate under client supervision in determining the approach to the work.</p>
+          </div>
+
+          <!-- Financial Control -->
+          <div class="ic-card">
+            <div class="ic-card-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <rect x="3" y="6" width="14" height="10" rx="2" />
+                <line x1="3" y1="10" x2="17" y2="10" />
+                <line x1="7" y1="4" x2="7" y2="6" />
+                <line x1="13" y1="4" x2="13" y2="6" />
+              </svg>
+            </div>
+            <h3>Financial Control</h3>
+            <div class="ic-card-question">Is the Contractor operating as an independent business?</div>
+            <p>The Contractor operates through a separately formed legal entity, provides all equipment necessary to perform the services, and has a core methodology that is pre-existing intellectual property developed at the Contractor's own investment and risk, not created at the client's direction or expense. This methodology is licensed for use, not assigned.</p>
+            <p style="margin-top: 8px;">The Contractor is compensated against defined deliverables and milestones, bearing the risk of performance against those commitments. The Contractor is free to offer services to other clients and is not economically dependent on a single engagement.</p>
+          </div>
+
+          <!-- Relationship Type -->
+          <div class="ic-card">
+            <div class="ic-card-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <circle cx="7" cy="7" r="3" />
+                <circle cx="14" cy="13" r="3" />
+                <line x1="9" y1="9" x2="12" y2="11" />
+              </svg>
+            </div>
+            <h3>Relationship Type</h3>
+            <div class="ic-card-question">What is the nature and duration of the engagement?</div>
+            <p>The proposed engagement has a defined scope structured in two distinct phases, each with specific deliverables, defined completion criteria, and a clear end state. Phase 1 concludes with a documented Capability Evaluation. Phase 2 concludes with a Final Readiness Report. The engagement has a defined term. It is not open-ended.</p>
+            <p style="margin-top: 8px;">The Contractor is not integrated into the client's management hierarchy, does not report to a client manager for daily work direction, and does not function as a member of a client team. The Contractor operates as an external expert engaged to deliver a defined outcome within a bounded period.</p>
+          </div>
+        </div>
+
+        <!-- Summary Table -->
+        <h3 class="animate-in" style="margin-bottom: 20px;">Structural Characteristics Supporting IC Classification</h3>
+        <div class="ic-table-wrap animate-in delay-1">
+          <table class="ic-table">
+            <thead>
+              <tr>
+                <th>IC Factor</th>
+                <th>How This Engagement Satisfies It</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="ic-check">&#10003;</span>Control over method of work</td>
+                <td>Contractor applies proprietary methodology developed independently; client does not direct how services are performed</td>
+              </tr>
+              <tr>
+                <td><span class="ic-check">&#10003;</span>Defined deliverables</td>
+                <td>Specific deliverables with defined completion criteria at each phase</td>
+              </tr>
+              <tr>
+                <td><span class="ic-check">&#10003;</span>Bounded duration</td>
+                <td>Two phases with clear end states; not open-ended</td>
+              </tr>
+              <tr>
+                <td><span class="ic-check">&#10003;</span>Organizational independence</td>
+                <td>Contractor is not integrated into client management structure or daily operations</td>
+              </tr>
+              <tr>
+                <td><span class="ic-check">&#10003;</span>Pre-existing intellectual property</td>
+                <td>Contractor's methodology exists independent of the engagement and is licensed, not created for the client</td>
+              </tr>
+              <tr>
+                <td><span class="ic-check">&#10003;</span>Financial independence</td>
+                <td>Contractor operates through separate entity, provides own equipment, bears delivery risk, serves open market</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Page-bottom attribution -->
+  <div class="page-footer">
+    <p>&copy; 2026 Haris Rahi. All rights reserved. All content on this website, including text, graphics, images and other materials, is owned by Haris Rahi and is protected by applicable copyright and other intellectual property laws. Unauthorized use, reproduction, modification, distribution, republication, scraping, mirroring, or exploitation of any content is prohibited without prior written permission.</p>
+    <p style="margin-top: 16px;"><a href="mailto:haris@harisrahi.ai" style="color: var(--accent-warm); text-decoration: none;">haris@harisrahi.ai</a></p>
+  </div>
+
+  <script>
+    // === Accordion toggle (workstream cards) ===
+    document.querySelectorAll('.workstream-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const card = header.closest('.workstream-card');
+        const isCollapsed = card.classList.contains('collapsed');
+        card.classList.toggle('collapsed');
+        header.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+      });
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          header.click();
+        }
+      });
+    });
+
+    // === Tab switching (Section 3) ===
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        const panel = document.getElementById(btn.dataset.tab);
+        if (panel) panel.classList.add('active');
+      });
+    });
+
+    // === Scroll animations (IntersectionObserver) ===
+    const animateObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          animateObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.animate-in').forEach(el => {
+      animateObserver.observe(el);
+    });
+
+    // === Nav rail + floating top bar ===
+    const sections = document.querySelectorAll('section[id]');
+    const navDots = document.querySelectorAll('.nav-dot');
+    const topBar = document.querySelector('.top-bar');
+    const topBarSection = document.querySelector('.top-bar-section');
+    const hero = document.querySelector('.hero');
+
+    const sectionNames = [
+      'Current Scope',
+      'Proposed Structure',
+      'Revised Scope',
+      'IC Compliance'
+    ];
+
+    function updateNav() {
+      const scrollY = window.scrollY;
+      const heroBottom = hero.offsetTop + hero.offsetHeight;
+
+      // Floating top bar visibility
+      if (scrollY > heroBottom - 100) {
+        topBar.classList.add('visible');
+      } else {
+        topBar.classList.remove('visible');
+      }
+
+      // Active section detection
+      let activeIndex = 0;
+      sections.forEach((section, i) => {
+        const top = section.offsetTop - 120;
+        if (scrollY >= top) {
+          activeIndex = i;
+        }
+      });
+
+      navDots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === activeIndex);
+      });
+
+      topBarSection.textContent = 'Section ' + (activeIndex + 1) + ' of 4: ' + sectionNames[activeIndex];
+    }
+
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
+
+    // Back to top
+    document.querySelector('.top-bar-back').addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+
+</body>
+</html>
