@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watching — CLF Video</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #1D1E4E;
+      --teal:   #0DB5C6;
+      --yellow: #FBCF14;
+      --coral:  #F5463B;
+      --cream:  #EEECED;
+      --white:  #FFFFFF;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0b22;
+      font-family: 'Lato', sans-serif;
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      background: rgba(29,30,78,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(13,181,198,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--white);
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 100px;
+      border: 2px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      background: none;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+    .back-btn:hover {
+      border-color: var(--teal);
+      background: rgba(13,181,198,0.12);
+      transform: translateX(-3px);
+    }
+    .back-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    .topbar-center {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-logo { height: 36px; opacity: 0.9; }
+
+    .topbar-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.04em;
+    }
+    .topbar-title span { color: var(--teal); }
+
+    .version-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+    }
+    .badge-A { background: var(--teal);   color: var(--white); }
+    .badge-B { background: var(--yellow); color: var(--navy);  }
+    .badge-C { background: var(--coral);  color: var(--white); }
+
+    /* ── VIDEO STAGE ── */
+    .stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .video-wrap {
+      width: 100%;
+      max-width: 1000px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      position: relative;
+    }
+    .video-wrap video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+    }
+
+    /* ── TAP-TO-PLAY OVERLAY (shown until first user gesture) ── */
+    #tapOverlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: rgba(10, 11, 34, 0.72);
+      cursor: pointer;
+      z-index: 10;
+      transition: opacity 0.3s;
+    }
+    #tapOverlay.hidden { opacity: 0; pointer-events: none; }
+
+    .tap-circle {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+    }
+    #tapOverlay:hover .tap-circle {
+      transform: scale(1.12);
+    }
+    .tap-circle svg { width: 38px; height: 38px; fill: var(--white); margin-left: 6px; }
+    .tap-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* color the tap circle per version */
+    .tap-A { background: var(--teal);   box-shadow: 0 0 40px rgba(13,181,198,0.5); }
+    .tap-B { background: var(--yellow); box-shadow: 0 0 40px rgba(251,207,20,0.4); }
+    .tap-C { background: var(--coral);  box-shadow: 0 0 40px rgba(245,70,59,0.4); }
+    .tap-B svg { fill: var(--navy); }
+
+    .video-wrap.glow-A { box-shadow: 0 30px 100px rgba(0,0,0,0.7), 0 0 60px rgba(13,181,198,0.25),  0 0 0 1px rgba(13,181,198,0.3); }
+    .video-wrap.glow-B { box-shadow: 0 30px 100px rgba(0,0,0,0.7), 0 0 60px rgba(251,207,20,0.2),   0 0 0 1px rgba(251,207,20,0.3); }
+    .video-wrap.glow-C { box-shadow: 0 30px 100px rgba(0,0,0,0.7), 0 0 60px rgba(245,70,59,0.2),    0 0 0 1px rgba(245,70,59,0.3); }
+
+    .video-meta {
+      margin-top: 24px;
+      text-align: center;
+    }
+    .video-meta-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+    .label-A { color: var(--teal); }
+    .label-B { color: var(--yellow); }
+    .label-C { color: var(--coral); }
+
+    .video-meta-sub {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Version switcher ── */
+    .version-nav {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .version-nav button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 100px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .version-nav button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+    .version-nav button.active { outline: 3px solid var(--white); outline-offset: 3px; }
+
+    .nav-A { background: var(--teal);   color: var(--white); }
+    .nav-B { background: var(--yellow); color: var(--navy);  }
+    .nav-C { background: var(--coral);  color: var(--white); }
+
+    /* ── bg canvas ── */
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .topbar { position: relative; z-index: 100; }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- ── TOP BAR ── -->
+<nav class="topbar">
+  <button class="back-btn" onclick="window.close()">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    All Videos
+  </button>
+
+  <div class="topbar-center">
+    <img class="topbar-logo"
+         src="https://images.squarespace-cdn.com/content/v1/65369143d2036a3fa33be6ea/18805e67-7cc5-450e-8dcb-9b698034900c/CLF+Logo_stacked_reverse.png?format=1500w"
+         alt="CLF" />
+    <span class="topbar-title">Watching <span id="topbarVersion">Version A</span></span>
+  </div>
+
+  <span class="version-badge" id="topbarBadge">A</span>
+</nav>
+
+<!-- ── VIDEO STAGE ── -->
+<main class="stage">
+  <div class="video-wrap" id="videoWrap">
+    <video id="mainVideo" controls playsinline>
+      <source id="videoSource" src="" type="video/mp4" />
+      Your browser does not support HTML5 video.
+    </video>
+    <div id="tapOverlay" onclick="startPlayback()">
+      <div class="tap-circle tap-A" id="tapCircle">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+      </div>
+      <span class="tap-label">Tap to Play</span>
+    </div>
+  </div>
+
+  <div class="video-meta">
+    <div class="video-meta-label" id="metaLabel">Version A</div>
+    <p class="video-meta-sub">CLF Private Preview &middot; For Kristen</p>
+  </div>
+
+  <div class="version-nav">
+    <button class="nav-A" id="navA" onclick="switchTo('A')">Version A</button>
+    <button class="nav-B" id="navB" onclick="switchTo('B')">Version B</button>
+    <button class="nav-C" id="navC" onclick="switchTo('C')">Version C</button>
+  </div>
+</main>
+
+<script>
+  const FILE  = { A: 'A.mp4',     B: 'B.mp4',     C: 'C.mp4'     };
+  const LABEL = { A: 'Version A', B: 'Version B', C: 'Version C' };
+
+  let gestureUnlocked = false;
+
+  // Called when user clicks the tap-to-play overlay
+  function startPlayback() {
+    gestureUnlocked = true;
+    document.getElementById('tapOverlay').classList.add('hidden');
+    document.getElementById('mainVideo').play().catch(() => {});
+  }
+
+  function applyVersion(v, autoplay) {
+    const vid = document.getElementById('mainVideo');
+
+    // Video source
+    document.getElementById('videoSource').src = FILE[v];
+    vid.load();
+
+    // Only play if we already have a gesture (version switcher clicks)
+    if (autoplay && gestureUnlocked) {
+      vid.play().catch(() => {});
+    }
+
+    // Show/hide tap overlay — only show on first load, not on version switch
+    const overlay = document.getElementById('tapOverlay');
+    if (!gestureUnlocked) {
+      overlay.classList.remove('hidden');
+    }
+
+    // Update tap circle color
+    const tapCircle = document.getElementById('tapCircle');
+    tapCircle.className = 'tap-circle tap-' + v;
+
+    // Topbar
+    document.getElementById('topbarVersion').textContent = LABEL[v];
+    const badge = document.getElementById('topbarBadge');
+    badge.textContent = v;
+    badge.className = 'version-badge badge-' + v;
+
+    // Meta
+    const metaLabel = document.getElementById('metaLabel');
+    metaLabel.textContent = LABEL[v];
+    metaLabel.className = 'video-meta-label label-' + v;
+
+    // Glow
+    document.getElementById('videoWrap').className = 'video-wrap glow-' + v;
+
+    // Nav active state
+    ['A','B','C'].forEach(id => {
+      document.getElementById('nav' + id).classList.toggle('active', id === v);
+    });
+
+    document.title = LABEL[v] + ' — CLF Preview';
+    history.replaceState(null, '', '?v=' + v);
+  }
+
+  // Version switcher — gesture already unlocked, autoplay freely
+  function switchTo(v) { applyVersion(v, true); }
+
+  // Init from URL param — no autoplay yet, show tap overlay
+  const params  = new URLSearchParams(window.location.search);
+  const version = (['A','B','C'].includes((params.get('v') || '').toUpperCase()))
+                  ? params.get('v').toUpperCase() : 'A';
+  applyVersion(version, false);
+
+  /* ── Subtle bg star particles ── */
+  const canvas = document.getElementById('bgCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H;
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const stars = Array.from({ length: 80 }, () => ({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.5 + 0.4,
+    vx: (Math.random() - 0.5) * 0.15,
+    vy: (Math.random() - 0.5) * 0.15,
+    alpha: Math.random() * 0.5 + 0.1
+  }));
+
+  function drawBg() {
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(s => {
+      s.x = (s.x + s.vx + W) % W;
+      s.y = (s.y + s.vy + H) % H;
+      ctx.save();
+      ctx.globalAlpha = s.alpha;
+      ctx.fillStyle = '#0DB5C6';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(drawBg);
+  }
+  drawBg();
+</script>
+</body>
+</html>
