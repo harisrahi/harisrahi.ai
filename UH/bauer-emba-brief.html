@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bauer EMBA | Messaging Brief</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap');
+
+  :root {
+    --uh-red: #C8102E;
+    --uh-red-dark: #960B22;
+    --bauer-teal: #2D6A5A;
+    --bauer-teal-light: #3D8B77;
+    --bauer-teal-dark: #1E4A3E;
+    --charcoal: #1A1A2E;
+    --off-white: #F8F6F3;
+    --warm-gray: #E8E4DF;
+    --gold-accent: #D4A843;
+    --slate: #4A5568;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--charcoal);
+    color: #fff;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ===== CUSTOM CURSOR TRAIL ===== */
+  .cursor-dot {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: var(--uh-red);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    mix-blend-mode: screen;
+    transition: transform 0.1s;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(200,16,46,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    transition: all 0.15s ease-out;
+  }
+
+  /* ===== LOADING SCREEN ===== */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--charcoal);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  #loader .loader-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--uh-red), var(--bauer-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse-text 1.5s ease-in-out infinite;
+  }
+  .loader-bar {
+    width: 200px; height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    margin-top: 2rem;
+    overflow: hidden;
+  }
+  .loader-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--uh-red), var(--bauer-teal));
+    width: 0%;
+    animation: load-fill 2s ease-out forwards;
+  }
+  @keyframes load-fill { to { width: 100%; } }
+  @keyframes pulse-text { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+  /* ===== HERO ===== */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  /* Animated grid background */
+  .hero-grid {
+    position: absolute;
+    inset: -60px;
+    background-image:
+      linear-gradient(rgba(200,16,46,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,16,46,0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: grid-drift 20s linear infinite;
+  }
+  @keyframes grid-drift {
+    from { transform: translate(0,0); }
+    to { transform: translate(60px,60px); }
+  }
+
+  /* Floating particles */
+  .particle-field {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    animation: float-up linear infinite;
+  }
+  @keyframes float-up {
+    0% { opacity: 0; transform: translateY(100vh) scale(0); }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+  }
+
+  /* Orbital rings */
+  .orbital-container {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .orbital-ring {
+    position: absolute;
+    border: 1px solid rgba(200,16,46,0.08);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: orbit-spin linear infinite;
+  }
+  .orbital-ring:nth-child(1) { width: 400px; height: 400px; animation-duration: 30s; }
+  .orbital-ring:nth-child(2) { width: 550px; height: 550px; animation-duration: 45s; animation-direction: reverse; border-color: rgba(45,106,90,0.08); }
+  .orbital-ring:nth-child(3) { width: 700px; height: 700px; animation-duration: 60s; }
+  .orbital-ring .dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--uh-red);
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px rgba(200,16,46,0.5);
+  }
+  .orbital-ring:nth-child(2) .dot { background: var(--bauer-teal); box-shadow: 0 0 15px rgba(45,106,90,0.5); }
+  @keyframes orbit-spin { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    background: rgba(200,16,46,0.1);
+    border: 1px solid rgba(200,16,46,0.3);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--uh-red);
+    margin-bottom: 2rem;
+    animation: fade-in-up 1s ease 0.3s both;
+  }
+  .hero-badge .dot-live {
+    width: 8px;
+    height: 8px;
+    background: var(--uh-red);
+    border-radius: 50%;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 0.95;
+    margin-bottom: 1.5rem;
+    animation: fade-in-up 1s ease 0.5s both;
+  }
+  .hero-title .line { display: block; }
+  .hero-title .highlight {
+    background: linear-gradient(135deg, var(--uh-red), #FF4D6A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-subtitle {
+    font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    max-width: 550px;
+    margin: 0 auto 0;
+    line-height: 1.7;
+    animation: fade-in-up 1s ease 0.7s both;
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fade-in-up 1s ease 1.2s both;
+  }
+  .scroll-indicator span {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--uh-red), transparent);
+    animation: scroll-pulse 2s ease infinite;
+  }
+  @keyframes scroll-pulse {
+    0%,100% { opacity: 0.3; transform: scaleY(0.5); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== SECTIONS GENERAL ===== */
+  section {
+    padding: 7rem 2rem;
+    position: relative;
+  }
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .section-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--uh-red);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    position: relative;
+    padding-left: 2rem;
+  }
+  .section-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 1.2rem;
+    height: 2px;
+    background: var(--uh-red);
+  }
+  .section-label.centered {
+    padding-left: 0;
+  }
+  .section-label.centered::before {
+    display: none;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 2rem;
+  }
+
+  /* ===== MARKET REALITY ===== */
+  #market {
+    background: linear-gradient(180deg, var(--charcoal) 0%, #0F0F1E 100%);
+  }
+  .market-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .market-header .section-title { max-width: 700px; margin-left: auto; margin-right: auto; }
+
+  .industry-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+  .industry-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  .industry-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .industry-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(200,16,46,0.3);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3), inset 0 0 60px rgba(200,16,46,0.03);
+  }
+  .industry-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--uh-red), var(--bauer-teal));
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .industry-card:hover::before { opacity: 1; }
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+  }
+  .card-icon.energy { background: rgba(200,16,46,0.1); }
+  .card-icon.health { background: rgba(45,106,90,0.15); }
+  .card-icon.logistics { background: rgba(212,168,67,0.12); }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .card-text {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.55);
+    font-weight: 300;
+  }
+
+  /* ===== THE GAP ===== */
+  #gap {
+    background: #0F0F1E;
+    overflow: hidden;
+  }
+  .gap-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+  .gap-visual {
+    position: relative;
+    min-height: 460px;
+  }
+  .judgment-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 460px;
+  }
+  .judgment-layer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    padding: 1.2rem 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+    cursor: default;
+  }
+  .judgment-layer.visible { opacity: 1; }
+  .judgment-layer:nth-child(1) {
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(200,16,46,0.15), rgba(200,16,46,0.05));
+    border: 1px solid rgba(200,16,46,0.2);
+    z-index: 4;
+  }
+  .judgment-layer:nth-child(2) {
+    bottom: 115px;
+    background: linear-gradient(135deg, rgba(200,16,46,0.12), rgba(200,16,46,0.04));
+    border: 1px solid rgba(200,16,46,0.15);
+    z-index: 3;
+  }
+  .judgment-layer:nth-child(3) {
+    bottom: 230px;
+    background: linear-gradient(135deg, rgba(45,106,90,0.15), rgba(45,106,90,0.05));
+    border: 1px solid rgba(45,106,90,0.2);
+    z-index: 2;
+  }
+  .judgment-layer:nth-child(4) {
+    bottom: 345px;
+    background: linear-gradient(135deg, rgba(45,106,90,0.12), rgba(45,106,90,0.04));
+    border: 1px solid rgba(45,106,90,0.15);
+    z-index: 1;
+  }
+  .judgment-layer .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--uh-red);
+  }
+  .judgment-layer:nth-child(3) .num,
+  .judgment-layer:nth-child(4) .num { color: var(--bauer-teal-light); }
+  .judgment-layer .label {
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+  }
+
+  .gap-text .pull-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.5;
+    margin: 2rem 0;
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--uh-red);
+    color: rgba(255,255,255,0.9);
+  }
+  .gap-text p {
+    color: rgba(255,255,255,0.55);
+    line-height: 1.9;
+    font-weight: 300;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  .gap-text .emphasis {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* ===== PHILOSOPHY ===== */
+  #philosophy {
+    background: var(--charcoal);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .philosophy-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(200,16,46,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .philosophy-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .manifesto {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 24px;
+    padding: 3.5rem 3rem;
+    margin: 3rem 0;
+    position: relative;
+  }
+  .manifesto::before {
+    content: '\201C';
+    position: absolute;
+    top: -20px;
+    left: 40px;
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    color: rgba(200,16,46,0.08);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .manifesto-line {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+    font-style: italic;
+    line-height: 1.9;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 0.3rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+  .manifesto-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .manifesto-line.strong {
+    color: #fff;
+    font-weight: 700;
+    font-style: normal;
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  }
+  .philosophy-footer-text {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    max-width: 750px;
+    margin: 2rem auto 0;
+    font-weight: 300;
+  }
+  .philosophy-tagline {
+    color: rgba(255,255,255,0.8);
+    font-size: 1.1rem;
+    line-height: 1.8;
+    max-width: 750px;
+    margin: 1.5rem auto 0;
+    font-weight: 600;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+  }
+
+  /* ===== VISION ===== */
+  #vision {
+    background: linear-gradient(180deg, var(--charcoal) 0%, #0F0F1E 100%);
+  }
+  .vision-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    margin-top: 3rem;
+  }
+  .vision-box {
+    padding: 2.5rem;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .vision-box.current {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .vision-box.proposed {
+    background: linear-gradient(135deg, rgba(200,16,46,0.08), rgba(45,106,90,0.08));
+    border: 1px solid rgba(200,16,46,0.2);
+  }
+  .vision-box.proposed::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--uh-red), var(--bauer-teal));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .vision-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  .vision-box.current .vision-label { color: rgba(255,255,255,0.3); }
+  .vision-box.proposed .vision-label { color: var(--uh-red); }
+  .vision-box blockquote {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.6);
+  }
+  .vision-box.current blockquote {
+    text-decoration: line-through;
+    text-decoration-color: rgba(255,255,255,0.15);
+  }
+  .vision-box.proposed blockquote {
+    color: rgba(255,255,255,0.9);
+    font-weight: 700;
+  }
+  .vision-test {
+    margin-top: 2.5rem;
+    padding: 1.5rem 2rem;
+    background: rgba(45,106,90,0.08);
+    border-left: 3px solid var(--bauer-teal);
+    border-radius: 0 12px 12px 0;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  /* ===== PITCH SEQUENCE ===== */
+  #pitch {
+    background: #0F0F1E;
+    padding-bottom: 6rem;
+  }
+  .pitch-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .pitch-steps {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding-left: 50px;
+  }
+  .pitch-timeline {
+    position: absolute;
+    left: 39px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--uh-red), var(--bauer-teal));
+    opacity: 0.15;
+  }
+  .pitch-step {
+    display: flex;
+    gap: 2.5rem;
+    margin-bottom: 3.5rem;
+    position: relative;
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: all 0.7s ease;
+  }
+  .pitch-step:last-child { margin-bottom: 0; }
+  .pitch-step.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .step-number {
+    flex-shrink: 0;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    position: relative;
+    z-index: 2;
+  }
+  .pitch-step:nth-child(odd) .step-number {
+    background: rgba(200,16,46,0.1);
+    border: 2px solid rgba(200,16,46,0.3);
+    color: var(--uh-red);
+  }
+  .pitch-step:nth-child(even) .step-number {
+    background: rgba(45,106,90,0.1);
+    border: 2px solid rgba(45,106,90,0.3);
+    color: var(--bauer-teal-light);
+  }
+  .step-content {
+    flex: 1;
+    padding-top: 0.3rem;
+  }
+  .step-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .step-content p {
+    color: rgba(255,255,255,0.5);
+    line-height: 1.8;
+    font-weight: 300;
+    font-size: 0.85rem;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    padding: 3.5rem 2rem;
+    text-align: center;
+    background: var(--charcoal);
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    margin-bottom: 0.75rem;
+  }
+  .footer-logo .red { color: var(--uh-red); }
+  .footer-meta {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.25rem;
+  }
+  .footer-link {
+    display: inline-block;
+    margin-top: 0.75rem;
+    color: rgba(255,255,255,0.35);
+    text-decoration: none;
+    font-size: 0.75rem;
+    transition: color 0.3s;
+  }
+  .footer-link:hover { color: var(--uh-red); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 900px) {
+    .industry-cards { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+    .gap-layout { grid-template-columns: 1fr; }
+    .gap-visual { min-height: 400px; order: 2; }
+    .vision-compare { grid-template-columns: 1fr; }
+    .manifesto { padding: 2.5rem 1.5rem; }
+    section { padding: 5rem 1.5rem; }
+  }
+
+  /* ===== GLITCH TEXT EFFECT ===== */
+  .glitch { position: relative; }
+  .glitch:hover { animation: glitch-text 0.3s ease; }
+  @keyframes glitch-text {
+    0% { text-shadow: 2px 0 var(--uh-red), -2px 0 var(--bauer-teal); }
+    25% { text-shadow: -2px 0 var(--uh-red), 2px 0 var(--bauer-teal); }
+    50% { text-shadow: 2px 2px var(--uh-red), -2px -2px var(--bauer-teal); }
+    75% { text-shadow: -2px -2px var(--uh-red), 2px 2px var(--bauer-teal); }
+    100% { text-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Loading Screen -->
+<div id="loader">
+  <div class="loader-text">BAUER EMBA</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- Hero Section -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="particle-field" id="particleField"></div>
+  <div class="orbital-container">
+    <div class="orbital-ring"><div class="dot"></div></div>
+    <div class="orbital-ring"><div class="dot"></div></div>
+    <div class="orbital-ring"><div class="dot"></div></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="dot-live"></div>
+      Messaging Brief &mdash; March 2026 &mdash; Confidential
+    </div>
+    <h1 class="hero-title">
+      <span class="line highlight glitch">Bauer EMBA</span>
+      <span class="line" style="font-size:0.4em; color:rgba(255,255,255,0.35); font-weight:300; margin-top:0.5rem; display:block; font-family:'Inter',sans-serif; letter-spacing:0.1em;">A messaging brief for the program redesign pitch</span>
+    </h1>
+    <p class="hero-subtitle">AI is not approaching Houston's core industries. It is already inside them.</p>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Market Reality -->
+<section id="market">
+  <div class="section-inner">
+    <div class="market-header">
+      <div class="section-label">The Market Reality</div>
+      <h2 class="section-title">These are not projections.</h2>
+    </div>
+    <div class="industry-cards">
+      <div class="industry-card" data-delay="0">
+        <div class="card-icon energy">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3 class="card-title">Energy</h3>
+        <p class="card-text">ConocoPhillips announced cuts of 20 to 25 percent of its global workforce in 2025 as AI is deployed across operations. Shell announced 20 percent reductions in oil and gas exploration roles, with Houston among the hardest-hit offices. The executives who remain are being asked to govern AI-driven cost, production, and risk decisions they were not prepared to evaluate.</p>
+      </div>
+      <div class="industry-card" data-delay="200">
+        <div class="card-icon health">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3D8B77" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <h3 class="card-title">Healthcare</h3>
+        <p class="card-text">UTHealth Houston partnered with OpenAI in 2024 to integrate AI across patient experience, research, and administration. Industry analysts project AI agents handling 50 to 60 percent of front-office and revenue cycle work at major health systems in 2025. The TMC AI Summit 2026 was convened to move AI from exploration to operational deployment across TMC institutions.</p>
+      </div>
+      <div class="industry-card" data-delay="400">
+        <div class="card-icon logistics">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <h3 class="card-title">Logistics</h3>
+        <p class="card-text">Port Houston leads its sector in AI-driven logistics planning and terminal optimization. Autonomous trucking pilots are active on the Houston to Dallas corridor. Foxconn and Nvidia are deploying humanoid robots at a new Houston facility manufacturing AI servers; the first of its kind anywhere.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The Gap -->
+<section id="gap">
+  <div class="section-inner">
+    <div class="gap-layout">
+      <div class="gap-text">
+        <div class="section-label">The Gap No Program Has Filled</div>
+        <h2 class="section-title">Not AI education.<br>AI <em>judgment.</em></h2>
+        <p>The executives navigating these realities are not asking for an AI education. They are asking for something more specific: <span class="emphasis">the judgment to lead inside an environment where AI is actively reshaping operations.</span></p>
+        <p>That judgment has four components, each dependent on the one before it.</p>
+        <p>That sequence cannot be built by adding AI literacy to a standard curriculum. It requires the reverse: <span class="emphasis">deep domain expertise first, with AI fluency built inside that domain.</span></p>
+        <div class="pull-quote">Not executives who know about AI, but domain-expert executives who are AI-fluent within their domain.</div>
+        <p>The distinction matters because one can be taught in a module and the other requires a program.</p>
+      </div>
+      <div class="gap-visual">
+        <div class="judgment-stack">
+          <div class="judgment-layer">
+            <span class="num">01</span>
+            <span class="label">Identify where AI creates genuine value</span>
+          </div>
+          <div class="judgment-layer">
+            <span class="num">02</span>
+            <span class="label">Direct its application with intention</span>
+          </div>
+          <div class="judgment-layer">
+            <span class="num">03</span>
+            <span class="label">Evaluate outputs with domain knowledge</span>
+          </div>
+          <div class="judgment-layer">
+            <span class="num">04</span>
+            <span class="label">Override when human judgment is required</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Philosophy -->
+<section id="philosophy">
+  <div class="philosophy-bg"></div>
+  <div class="section-inner philosophy-content">
+    <div class="section-label centered">The Differentiating Philosophy</div>
+    <h2 class="section-title">The program's reason for existing.</h2>
+    <div class="manifesto">
+      <div class="manifesto-line">This is not an AI program.</div>
+      <div class="manifesto-line">It is an executive program built for industries AI is actively restructuring,</div>
+      <div class="manifesto-line">where AI fluency is developed inside domain expertise; not layered on top of it.</div>
+      <div class="manifesto-line">The subject is energy, healthcare, and logistics leadership.</div>
+      <div class="manifesto-line">AI is the most consequential tool reshaping how that work gets done.</div>
+      <div class="manifesto-line strong">Every graduate leaves knowing where to apply it, how to direct it,</div>
+      <div class="manifesto-line strong">how to evaluate its outputs, and when to override it.</div>
+    </div>
+    <p class="philosophy-footer-text">The executive who can identify where AI creates genuine value in their organization, direct its application with intent, evaluate its outputs against deep domain knowledge, and exercise the judgment to override it when necessary is categorically more valuable than one who simply knows AI exists.</p>
+    <p class="philosophy-tagline">You cannot govern what you do not understand.</p>
+    <p class="philosophy-footer-text">The Industry Labs are where both layers get built simultaneously, inside the actual industries, on actual decisions. That is not a curriculum feature. It is the program's reason for existing.</p>
+  </div>
+</section>
+
+<!-- Vision -->
+<section id="vision">
+  <div class="section-inner">
+    <div style="text-align:center; margin-bottom:2rem;">
+      <div class="section-label centered">The Vision Statement</div>
+      <h2 class="section-title">From generic to definitive.</h2>
+    </div>
+    <div class="vision-compare">
+      <div class="vision-box current">
+        <div class="vision-label">Current</div>
+        <blockquote>&ldquo;To develop executives capable of leading intelligent, sustainable, and resilient enterprises in a complex global economy.&rdquo;</blockquote>
+      </div>
+      <div class="vision-box proposed">
+        <div class="vision-label">Proposed</div>
+        <blockquote>&ldquo;To develop executives who combine deep domain mastery with the judgment to direct AI; producing leaders that energy, healthcare, and logistics organizations cannot afford to be without.&rdquo;</blockquote>
+      </div>
+    </div>
+    <div class="vision-test">
+      <strong>The test:</strong> Can any program that does not build AI fluency inside a specific industry domain claim this statement? If not, it is doing its job.
+    </div>
+  </div>
+</section>
+
+<!-- Pitch Sequence -->
+<section id="pitch">
+  <div class="section-inner">
+    <div class="pitch-header">
+      <div class="section-label centered">Recommended Pitch Sequence</div>
+      <h2 class="section-title">The pitch opens with the market problem.<br>The curriculum is the answer, not the starting point.</h2>
+    </div>
+    <div class="pitch-steps">
+      <div class="pitch-timeline"></div>
+      <div class="pitch-step">
+        <div class="step-number">01</div>
+        <div class="step-content">
+          <h3>State the Operating Reality</h3>
+          <p>Houston's most consequential industries are being restructured by AI now. ConocoPhillips, TMC automation, Port Houston. These are not forecasts; they are what the executives this program wants to recruit are navigating this week.</p>
+        </div>
+      </div>
+      <div class="pitch-step">
+        <div class="step-number">02</div>
+        <div class="step-content">
+          <h3>Name the Specific Gap</h3>
+          <p>The market is not short on executives who have heard of AI. It is short on executives who understand their industry deeply enough to direct AI within it, challenge its outputs, and govern its risks. That combination requires a program, not a module.</p>
+        </div>
+      </div>
+      <div class="pitch-step">
+        <div class="step-number">03</div>
+        <div class="step-content">
+          <h3>Articulate the Philosophy</h3>
+          <p>AI fluency built inside domain expertise, not on top of it. The subject is energy, healthcare, and logistics leadership. AI is the tool reshaping how that work gets done. Every graduate leaves knowing how to direct it within their field.</p>
+        </div>
+      </div>
+      <div class="pitch-step">
+        <div class="step-number">04</div>
+        <div class="step-content">
+          <h3>Name What Makes It Possible</h3>
+          <p>The Industry Laboratory model builds AI fluency inside live industry environments, on real decisions, with real consequences. That is not replicable by adding a course. It is a structural commitment to a different kind of executive development.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo"><span class="red">Bauer</span> EMBA</div>
+  <div class="footer-meta">Messaging Brief &bull; March 2026 &bull; Confidential</div>
+  <a href="https://harisrahi.ai" class="footer-link" target="_blank">harisrahi.ai</a>
+</footer>
+
+<script>
+// Loader
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 2200);
+});
+
+// Custom cursor
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  dot.style.left = mouseX - 4 + 'px';
+  dot.style.top = mouseY - 4 + 'px';
+});
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.12;
+  ringY += (mouseY - ringY) * 0.12;
+  ring.style.left = ringX - 20 + 'px';
+  ring.style.top = ringY - 20 + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// Particles
+const field = document.getElementById('particleField');
+for (let i = 0; i < 25; i++) {
+  const p = document.createElement('div');
+  p.classList.add('particle');
+  const size = Math.random() * 4 + 2;
+  const colors = ['rgba(200,16,46,0.5)', 'rgba(45,106,90,0.5)', 'rgba(212,168,67,0.3)'];
+  p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${Math.random()*15+10}s;animation-delay:${Math.random()*10}s;`;
+  field.appendChild(p);
+}
+
+// Scroll reveal
+const obsOpts = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+
+// Cards
+const cardObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), entry.target.dataset.delay || 0);
+    }
+  });
+}, obsOpts);
+document.querySelectorAll('.industry-card').forEach(c => cardObs.observe(c));
+
+// Judgment layers
+const layerObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.judgment-layer').forEach((l, i) => {
+        setTimeout(() => l.classList.add('visible'), i * 250);
+      });
+    }
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll('.judgment-stack').forEach(s => layerObs.observe(s));
+
+// Manifesto lines
+const manifObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.manifesto-line').forEach((l, i) => {
+        setTimeout(() => l.classList.add('visible'), i * 200);
+      });
+    }
+  });
+}, { threshold: 0.2 });
+document.querySelectorAll('.manifesto').forEach(m => manifObs.observe(m));
+
+// Pitch steps
+const stepObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.2, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.pitch-step').forEach(s => stepObs.observe(s));
+
+// Parallax hero
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  if (scrollY < window.innerHeight) {
+    const content = document.querySelector('#hero .hero-content');
+    content.style.transform = `translateY(${scrollY * 0.3}px)`;
+    content.style.opacity = 1 - (scrollY / (window.innerHeight * 0.8));
+    const orbitals = document.querySelector('.orbital-container');
+    orbitals.style.transform = `translate(-50%,-50%) scale(${1 + scrollY * 0.0003})`;
+    orbitals.style.opacity = 1 - (scrollY / (window.innerHeight * 0.6));
+  }
+});
+
+// Card tilt
+document.querySelectorAll('.industry-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const rx = (y - r.height/2) / 25, ry = (r.width/2 - x) / 25;
+    card.style.transform = `translateY(-10px) perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});
+</script>
+</body>
+</html>
