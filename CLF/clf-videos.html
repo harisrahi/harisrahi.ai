@@ -506,10 +506,10 @@
 <canvas id="trailCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:9998;"></canvas>
 
 <script>
-  /* ── OPEN WATCH TAB (reuse same named window) ── */
+  /* ── NAVIGATE TO WATCH PAGE (same tab) ── */
   function openWatch(e, version) {
     e.preventDefault();
-    window.open('watch.html?v=' + version, 'clf_watch');
+    window.location.href = 'watch.html?v=' + version;
   }
 
   /* ── LETTER RAIN ── */
