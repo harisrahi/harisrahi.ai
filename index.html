@@ -3,606 +3,1113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Haris Rahi :: AI Capability, Built in Context</title>
+<title>Haris Rahi | AI Solutions Architect</title>
+<meta name="description" content="I design AI solutions, ship them, and teach the people who use them to build their own. Three years across multiple enterprise domains.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  :root {
-    --bg: #0e0e0e;
-    --bg-lift: #161616;
-    --bg-card: #1a1a1a;
-    --bg-card-hover: #1f1f1f;
-    --white: #f0eeeb;
-    --white-soft: #c8c5bf;
-    --dim: #6b6860;
-    --muted: #3a3835;
-    --accent: #d45a1a;
-    --accent-soft: rgba(212, 90, 26, 0.15);
-    --accent-glow: rgba(212, 90, 26, 0.06);
-    --serif: 'Instrument Serif', Georgia, serif;
-    --sans: 'DM Sans', system-ui, sans-serif;
-    --mono: 'JetBrains Mono', monospace;
-  }
+:root {
+  --black: #050508;
+  --dark: #0a0a0f;
+  --dark-2: #0e0e14;
+  --gray-900: #131318;
+  --gray-800: #1a1a22;
+  --gray-700: #2a2a35;
+  --gray-500: #6b6b7b;
+  --gray-400: #8a8a9a;
+  --gray-300: #a8a8b8;
+  --gray-200: #c8c8d4;
+  --white: #f0f0f5;
+  --cyan: #00e5cc;
+  --cyan-dim: #00b8a3;
+  --cyan-glow: rgba(0, 229, 204, 0.15);
+  --cyan-glow-strong: rgba(0, 229, 204, 0.3);
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Inter', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
 
-  html {
-    scroll-behavior: smooth;
-    background: var(--bg);
-    color: var(--white);
-    font-family: var(--sans);
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+html { scroll-behavior: smooth; }
 
-  body { overflow-x: hidden; background: var(--bg); }
+body {
+  font-family: var(--sans);
+  background: var(--black);
+  color: var(--white);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  /* === NOISE === */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.025;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 256px;
-  }
+/* ==================== HERO ==================== */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 
-  /* === SCROLL PROGRESS === */
-  .scroll-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 2px;
-    background: var(--accent);
-    z-index: 10000;
-    width: 0%;
-    transition: width 0.05s linear;
-  }
+#hero-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
 
-  /* === REVEAL === */
-  .reveal {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
-  .reveal-delay-1 { transition-delay: 0.1s; }
-  .reveal-delay-2 { transition-delay: 0.2s; }
-  .reveal-delay-3 { transition-delay: 0.3s; }
-  .reveal-delay-4 { transition-delay: 0.4s; }
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 0%, rgba(5,5,8,0.4) 60%, rgba(5,5,8,0.85) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
 
-  /* === LAYOUT === */
-  .container {
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 900px;
+  padding: 2rem;
+}
 
-  section {
-    padding: 100px 0;
-    position: relative;
-  }
+.hero-label {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.8s ease forwards 0.3s;
+}
 
-  @media (max-width: 640px) {
-    section { padding: 72px 0; }
-  }
+.hero-h1 {
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  font-weight: 400;
+  line-height: 1.08;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 1s ease forwards 0.5s;
+}
 
-  /* === NAV DOTS === */
-  .nav-dots {
-    position: fixed;
-    right: 28px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    z-index: 100;
-  }
+.hero-lead {
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.7;
+  color: var(--gray-300);
+  max-width: 680px;
+  margin: 0 auto 3rem;
+  font-weight: 300;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 1s ease forwards 0.7s;
+}
 
-  .nav-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--muted);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: none;
-    padding: 0;
-  }
+.stats-ribbon {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 1s ease forwards 0.9s;
+}
 
-  .nav-dot.active {
-    background: var(--accent);
-    box-shadow: 0 0 12px var(--accent-soft);
-  }
+.stat {
+  text-align: center;
+}
 
-  @media (max-width: 900px) {
-    .nav-dots { display: none; }
-  }
+.stat-number {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  color: var(--cyan);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
 
-  /* ============================================
-     HERO
-     ============================================ */
-  .hero {
-    min-height: 100vh;
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    padding: 120px 0 100px;
-  }
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+  letter-spacing: 0.05em;
+  font-weight: 400;
+}
 
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
-    pointer-events: none;
-    opacity: 0.8;
-  }
+.stat-label a {
+  color: var(--gray-400);
+  text-decoration: none;
+  border-bottom: 1px solid var(--gray-700);
+  transition: all 0.3s ease;
+}
 
-  .hero-eyebrow {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 32px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+.stat-label a:hover {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
 
-  .hero-eyebrow::before {
-    content: '';
-    width: 24px;
-    height: 1px;
-    background: var(--accent);
-  }
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 1.3s;
+}
 
-  .hero h1 {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: clamp(2.4rem, 5.5vw, 3.8rem);
-    line-height: 1.12;
-    color: var(--white);
-    margin-bottom: 36px;
-    max-width: 720px;
-  }
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--cyan), transparent);
+  margin: 0 auto;
+  animation: scrollPulse 2s ease-in-out infinite;
+}
 
-  .hero h1 em {
-    font-style: italic;
-    color: var(--accent);
-  }
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.2); }
+}
 
-  .hero-body {
-    font-size: 1.1rem;
-    line-height: 1.75;
-    color: var(--white-soft);
-    max-width: 600px;
-  }
+/* ==================== SECTIONS ==================== */
+section {
+  padding: clamp(4rem, 10vw, 8rem) clamp(1.5rem, 5vw, 3rem);
+}
 
-  .hero-body strong {
-    color: var(--white);
-    font-weight: 500;
-  }
+.section-inner {
+  max-width: 780px;
+  margin: 0 auto;
+}
 
-  .hero-stat-bar {
-    display: flex;
-    gap: 1px;
-    margin-top: 56px;
-    background: var(--muted);
-    border-radius: 6px;
-    overflow: hidden;
-    max-width: 600px;
-  }
+.section-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--cyan-dim);
+  margin-bottom: 1.2rem;
+}
 
-  .stat-cell {
-    flex: 1;
-    background: var(--bg-lift);
-    padding: 28px 24px;
-    text-align: center;
-  }
+.section-h2 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
 
-  .stat-number {
-    font-family: var(--serif);
-    font-size: 2.2rem;
-    color: var(--white);
-    line-height: 1;
-    margin-bottom: 6px;
-  }
+.section-body {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--gray-300);
+  font-weight: 300;
+}
 
-  .stat-label {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
+/* Reveal animation - base */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), filter 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-  /* === SECTION DIVIDER === */
-  .section-divider {
-    width: 100%;
-    height: 1px;
-    background: var(--muted);
-  }
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  /* === CONTENT SECTIONS === */
-  .section-eyebrow {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+/* Varied reveals per section */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-  .section-eyebrow::before {
-    content: '';
-    width: 16px;
-    height: 1px;
-    background: var(--accent);
-  }
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
 
-  .section-headline {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
-    line-height: 1.2;
-    color: var(--white);
-    margin-bottom: 32px;
-    max-width: 640px;
-  }
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-  .section-headline em {
-    font-style: italic;
-    color: var(--accent);
-  }
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
 
-  .section-body {
-    font-size: 1.05rem;
-    line-height: 1.8;
-    color: var(--white-soft);
-    max-width: 620px;
-  }
+.reveal-blur {
+  opacity: 0;
+  transform: translateY(20px);
+  filter: blur(8px);
+  transition: opacity 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1), filter 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-  .section-body strong {
-    color: var(--white);
-    font-weight: 500;
-  }
+.reveal-blur.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
 
-  /* === PULLQUOTE === */
-  .pullquote {
-    margin: 48px 0;
-    padding: 32px 0 32px 28px;
-    border-left: 2px solid var(--accent);
-    font-family: var(--serif);
-    font-size: clamp(1.3rem, 3vw, 1.6rem);
-    line-height: 1.45;
-    color: var(--white);
-    font-style: italic;
-    max-width: 580px;
-  }
+/* Parallax layers */
+.parallax-heading {
+  will-change: transform;
+}
 
-  /* === METRICS GRID === */
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1px;
-    margin: 48px 0;
-    background: var(--muted);
-    border-radius: 6px;
-    overflow: hidden;
-  }
+.parallax-body {
+  will-change: transform;
+}
 
-  .metric-card {
-    background: var(--bg-card);
-    padding: 36px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: background 0.3s ease;
-  }
+/* Hero-to-content transition bridge */
+.section-bridge {
+  height: 160px;
+  background: var(--black);
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
 
-  .metric-card:hover { background: var(--bg-card-hover); }
+.section-bridge::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 0%, var(--dark) 100%);
+  pointer-events: none;
+}
 
-  .metric-card .metric-value {
-    font-family: var(--serif);
-    font-size: 1.6rem;
-    color: var(--accent);
-    line-height: 1.1;
-  }
+/* Side dot nav */
+.side-nav {
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
 
-  .metric-card .metric-desc {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: var(--dim);
-  }
+.side-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-  @media (max-width: 520px) {
-    .metrics-grid { grid-template-columns: 1fr; }
-  }
+.side-nav a {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-700);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  cursor: pointer;
+}
 
-  /* ============================================
-     CTA
-     ============================================ */
-  .cta-section {
-    text-align: center;
-    padding: 120px 0 140px;
-  }
+.side-nav a:hover {
+  background: var(--cyan-dim);
+  transform: scale(1.4);
+}
 
-  .cta-section .section-headline {
-    max-width: 520px;
-    margin: 0 auto 24px;
-  }
+.side-nav a.active {
+  background: var(--cyan);
+  transform: scale(1.5);
+  box-shadow: 0 0 12px var(--cyan-glow-strong), 0 0 24px var(--cyan-glow);
+}
 
-  .cta-section .section-body {
-    max-width: 500px;
-    margin: 0 auto 44px;
-  }
+@media (max-width: 1100px) {
+  .side-nav { display: none; }
+}
 
-  .cta-row {
-    display: flex;
-    justify-content: center;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
+/* SECTION: What I Do */
+#what-i-do {
+  background: var(--dark);
+  border-top: none;
+}
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    text-decoration: none;
-    padding: 16px 32px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-  }
+/* SECTION: How I Think */
+#how-i-think {
+  background: var(--black);
+  border-top: 1px solid var(--gray-800);
+}
 
-  .btn svg {
-    width: 15px;
-    height: 15px;
-    transition: transform 0.3s ease;
-  }
+.pullquote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  line-height: 1.5;
+  color: var(--white);
+  border-left: 3px solid var(--cyan);
+  padding-left: 1.5rem;
+  margin: 2rem 0 2.5rem;
+}
 
-  .btn:hover svg { transform: translateX(3px); }
+.principles {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+}
 
-  .btn-primary {
-    background: var(--white);
-    color: var(--bg);
-  }
+.principle {
+  padding: 1.5rem;
+  background: var(--dark-2);
+  border-radius: 8px;
+  border: 1px solid var(--gray-800);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
 
-  .btn-primary:hover {
-    background: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(240, 238, 235, 0.08);
-  }
+.principle:hover {
+  border-color: var(--cyan-dim);
+  box-shadow: 0 0 30px var(--cyan-glow);
+}
 
-  .btn-outline {
-    background: transparent;
-    color: var(--white-soft);
-    border: 1px solid var(--muted);
-  }
+.principle strong {
+  color: var(--white);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+}
 
-  .btn-outline:hover {
-    border-color: var(--white-soft);
-    color: var(--white);
-    transform: translateY(-2px);
-  }
+.principle p {
+  color: var(--gray-300);
+  line-height: 1.7;
+  font-weight: 300;
+  font-size: 0.95rem;
+}
 
-  /* === FOOTER === */
-  footer {
-    padding: 40px 0;
-    text-align: center;
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    border-top: 1px solid var(--muted);
-  }
+/* SECTION: Where This Started */
+#origin {
+  background: var(--dark);
+  border-top: 1px solid var(--gray-800);
+}
 
-  /* === MOBILE === */
-  @media (max-width: 640px) {
-    .hero { min-height: auto; padding: 100px 0 72px; }
-    .hero h1 { margin-bottom: 28px; }
-    .hero-stat-bar { flex-direction: column; }
-    .pullquote { padding-left: 20px; margin: 36px 0; }
-    .metric-card { padding: 28px 20px; }
-    .cta-section { padding: 80px 0 100px; }
-  }
+.origin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  margin-top: 1rem;
+}
 
-  a { color: inherit; text-decoration: none; transition: color 0.2s; }
+.headshot-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.headshot-placeholder {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-700);
+  object-fit: cover;
+  object-position: center 0%;
+  position: relative;
+}
+
+@keyframes rotateBorder {
+  to { transform: rotate(360deg); }
+}
+
+.plot-twist {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-700);
+  border-left: 3px solid var(--cyan);
+  border-radius: 8px;
+  padding: 1.5rem 1.8rem;
+  margin-top: 2rem;
+}
+
+.plot-twist-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 0.8rem;
+}
+
+.plot-twist p {
+  color: var(--gray-300);
+  line-height: 1.75;
+  font-weight: 300;
+  font-size: 0.95rem;
+}
+
+/* ==================== CTA ==================== */
+#cta {
+  background: var(--black);
+  border-top: 1px solid var(--gray-800);
+  text-align: center;
+  padding: clamp(5rem, 12vw, 10rem) 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+#cta::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.cta-h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.cta-lead {
+  color: var(--gray-400);
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+  position: relative;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2rem;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--cyan);
+  color: var(--black);
+}
+
+.btn-primary:hover {
+  background: #00ffd5;
+  box-shadow: 0 0 30px var(--cyan-glow-strong), 0 0 60px var(--cyan-glow);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--gray-700);
+}
+
+.btn-secondary:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: translateY(-2px);
+}
+
+/* ==================== FOOTER ==================== */
+footer {
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  border-top: 1px solid var(--gray-800);
+  background: var(--black);
+}
+
+footer a {
+  color: var(--gray-400);
+  text-decoration: none;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .stats-ribbon { gap: 2rem; }
+  .stat-number { font-size: 2rem; }
+  .principle { padding: 1.2rem; }
+  .pullquote { font-size: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+  .stats-ribbon { flex-direction: column; gap: 1.5rem; }
+  .cta-buttons { flex-direction: column; align-items: center; }
+  .btn { width: 100%; max-width: 280px; justify-content: center; }
+}
+
+/* ==================== CUSTOM CURSOR GLOW ==================== */
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 229, 204, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform, opacity;
+  transform: translate3d(-150px, -150px, 0);
+  transition: opacity 0.3s ease;
+  mix-blend-mode: screen;
+}
 </style>
 </head>
 <body>
 
-<div class="scroll-progress" id="scrollProgress"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
 
-<nav class="nav-dots" id="navDots" aria-label="Section navigation">
-  <button class="nav-dot active" data-section="hero" aria-label="Hero"></button>
-  <button class="nav-dot" data-section="insight" aria-label="The Insight"></button>
-  <button class="nav-dot" data-section="numbers" aria-label="Numbers"></button>
-  <button class="nav-dot" data-section="connect" aria-label="Connect"></button>
+<!-- ==================== SIDE NAV ==================== -->
+<nav class="side-nav" id="sideNav">
+  <a href="#hero" data-section="hero"></a>
+  <a href="#what-i-do" data-section="what-i-do"></a>
+  <a href="#how-i-think" data-section="how-i-think"></a>
+  <a href="#origin" data-section="origin"></a>
+  <a href="#cta" data-section="cta"></a>
 </nav>
 
-<!-- ============ HERO ============ -->
-<section class="hero" id="hero">
-  <div class="container">
-    <div class="hero-eyebrow reveal">AI capability, built in context</div>
-    <h1 class="reveal reveal-delay-1">No engineering degree. No data science background. I built Accenture's flagship AI solution for sourcing and contracting <em>anyway.</em></h1>
-    <div class="hero-body reveal reveal-delay-2">
-      <p><strong>S2C IQ</strong> was the first purpose-built AI solution for source-to-contract at Accenture. I designed it, built it, and trained 300+ practitioners across 120+ enterprise clients to use it within a year. Cited by Everest Group in Accenture's <strong>#1 Leader and Star Performer</strong> <a href="https://www.linkedin.com/posts/harisrahi_everest-group-released-its-2025-procurement-share-7396297732929290240-ugPV" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: underline; text-underline-offset: 3px;">ranking for Procurement Outsourcing, 2025.</a></p>
+<!-- ==================== HERO ==================== -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-label">Haris Rahi</div>
+    <h1 class="hero-h1">Everything I know about AI,<br>I learned by building.</h1>
+    <p class="hero-lead">I design AI solutions, ship them, and teach the people who use them to build their own. Three years across multiple enterprise domains. Hands dirty, every day.</p>
+    <div class="stats-ribbon">
+      <div class="stat">
+        <div class="stat-number">300+</div>
+        <div class="stat-label">Practitioners Trained</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">120+</div>
+        <div class="stat-label">Enterprise Clients</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">#1</div>
+        <div class="stat-label"><a href="https://www.linkedin.com/posts/harisrahi_everest-group-released-its-2025-procurement-share-7396297732929290240-ugPV" target="_blank" rel="noopener">Everest Group Leader &amp; Star Performer</a></div>
+      </div>
     </div>
-    <div class="hero-stat-bar reveal reveal-delay-3">
-      <div class="stat-cell">
-        <span class="stat-number">300+</span>
-        <span class="stat-label">Practitioners Trained</span>
+  </div>
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ==================== BRIDGE ==================== -->
+<div class="section-bridge"></div>
+
+<!-- ==================== WHAT I DO ==================== -->
+<section id="what-i-do">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label">What I Do</div>
+      <h2 class="section-h2 parallax-heading">The domain changes.<br>The approach doesn't.</h2>
+      <p class="section-body parallax-body">Whatever the function, procurement, operations, legal, sales; the pattern is the same. I take a team's actual work, build AI solutions on it alongside them, and teach them to keep building after I'm gone. Not demos. Not decks. Working tools on real workflows, owned by the people who use them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== HOW I THINK ==================== -->
+<section id="how-i-think">
+  <div class="section-inner">
+    <div class="reveal-scale">
+      <div class="section-label">How I Think</div>
+      <h2 class="section-h2 parallax-heading">Principles earned through building,<br>not borrowed from theory.</h2>
+    </div>
+
+    <div class="reveal-left" style="transition-delay: 0.15s;">
+      <blockquote class="pullquote">AI must extend your thinking, not replace it. The effort to ensure that is what actually makes you sharper.</blockquote>
+    </div>
+
+    <div class="principles">
+      <div class="principle reveal-scale" style="transition-delay: 0.2s;">
+        <strong>Earn your way to agents.</strong>
+        <p>Most organizations skip straight to agentic without doing the reps. Augmentation teaches you how AI actually behaves. Automation teaches you to write tight instructions. Skip steps and you're automating broken processes faster.</p>
       </div>
-      <div class="stat-cell">
-        <span class="stat-number">120+</span>
-        <span class="stat-label">Enterprise Clients</span>
+      <div class="principle reveal-scale" style="transition-delay: 0.3s;">
+        <strong>Build in context.</strong>
+        <p>AI fluency only develops when the learning and the doing are the same activity. Separate them and the training evaporates.</p>
       </div>
-      <div class="stat-cell">
-        <span class="stat-number">41%</span>
-        <span class="stat-label">Avg. Time Saved</span>
+      <div class="principle reveal-scale" style="transition-delay: 0.4s;">
+        <strong>Retain agency.</strong>
+        <p>Reviewing AI's reasoning feels like thinking. It isn't. Once you see its output, you're anchored to its frame. Think first, then prompt.</p>
+      </div>
+      <div class="principle reveal-scale" style="transition-delay: 0.5s;">
+        <strong>No one is an AI expert.</strong>
+        <p>This technology arrived for everyone simultaneously. The gap isn't expertise; it's who's been building and who's been watching.</p>
       </div>
     </div>
   </div>
 </section>
 
-<div class="section-divider"></div>
-
-<!-- ============ THE INSIGHT ============ -->
-<section id="insight">
-  <div class="container">
-    <div class="section-eyebrow reveal">The Insight</div>
-    <h2 class="section-headline reveal reveal-delay-1">Most AI adoption programs <em>get the sequencing wrong.</em></h2>
-    <div class="section-body reveal reveal-delay-2">
-      <p>People complete a training. Return to their desks. Within weeks, revert to exactly how they worked before. It's not motivation. It's not talent. <strong>It's context.</strong></p>
+<!-- ==================== WHERE THIS STARTED ==================== -->
+<section id="origin">
+  <div class="section-inner">
+    <div class="reveal-blur">
+      <div class="headshot-container">
+        <img src="Haris_headshot_04.jpg" alt="Haris Rahi" class="headshot-placeholder">
+      </div>
     </div>
-    <blockquote class="pullquote reveal reveal-delay-3">
-      AI fluency only develops when the learning and the doing are the same activity. Separate them, and the training evaporates.
-    </blockquote>
-    <div class="section-body reveal reveal-delay-4">
-      <p>The platform changes. <strong>This principle persists.</strong></p>
+    <div class="reveal-blur" style="transition-delay: 0.1s;">
+      <div class="section-label">Where This Started</div>
+      <h2 class="section-h2 parallax-heading">The proof point.</h2>
+      <p class="section-body">S2C IQ was the first purpose-built AI solution for source-to-contract at Accenture. I designed it, built it, and trained 300+ practitioners across 120+ enterprise clients to use it within a year. Day 2 usage. 30–79% task-level speed gains. Behavioral change that sustained. Cited by Everest Group in Accenture's <a href="https://www.linkedin.com/posts/harisrahi_everest-group-released-its-2025-procurement-share-7396297732929290240-ugPV" target="_blank" rel="noopener" style="color: var(--cyan-dim); text-decoration: none; border-bottom: 1px solid var(--gray-700); transition: all 0.3s ease;">#1 Leader and Star Performer ranking</a> for Procurement Outsourcing, 2025.</p>
     </div>
-  </div>
-</section>
 
-<div class="section-divider"></div>
-
-<!-- ============ RESULTS ============ -->
-<section id="numbers">
-  <div class="container">
-    <div class="section-eyebrow reveal">Results</div>
-    <h2 class="section-headline reveal reveal-delay-1">What this looks like <em>at scale.</em></h2>
-    <div class="metrics-grid reveal reveal-delay-2">
-      <div class="metric-card">
-        <span class="metric-value">Day 2 Usage</span>
-        <span class="metric-desc">Real work the next morning. Not "eventual adoption."</span>
-      </div>
-      <div class="metric-card">
-        <span class="metric-value">30–79%</span>
-        <span class="metric-desc">Task-level speed gains across sourcing, contracting, supplier management.</span>
-      </div>
-      <div class="metric-card">
-        <span class="metric-value">Quality Uplift</span>
-        <span class="metric-desc">Stronger strategies. Tighter terms. Better intelligence.</span>
-      </div>
-      <div class="metric-card">
-        <span class="metric-value">Behavioral Change</span>
-        <span class="metric-desc">Sustained transformation. Not completion certificates.</span>
+    <div class="reveal-left" style="transition-delay: 0.2s;">
+      <div class="plot-twist">
+        <div class="plot-twist-label">Plot Twist</div>
+        <p>No engineering degree. No data science background. I built all of this through relentless curiosity, hands-on experimentation, and the same methodology I teach others. That's the point. AI fluency doesn't require technical pedigree. It requires methodology, real-world application, and reps.</p>
       </div>
     </div>
   </div>
 </section>
 
-<div class="section-divider"></div>
-
-<!-- ============ CONNECT ============ -->
-<section class="cta-section" id="connect">
-  <div class="container">
-    <div class="section-eyebrow reveal" style="justify-content: center;">Let's Talk</div>
-    <h2 class="section-headline reveal reveal-delay-1" style="text-align:center;">If this resonates, <em>I'd like to hear from you.</em></h2>
-    <p class="section-body reveal reveal-delay-2" style="text-align:center;">I write about what works, what doesn't, and what I'm still figuring out through constant building and teaching others.</p>
-    <div class="cta-row reveal reveal-delay-3">
-      <a href="https://www.linkedin.com/in/harisrahi" target="_blank" class="btn btn-primary">
-        Connect on LinkedIn
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-      </a>
-      <a href="mailto:haris@harisrahi.ai" class="btn btn-outline">
-        Email Me
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-      </a>
+<!-- ==================== CTA ==================== -->
+<section id="cta">
+  <div class="section-inner">
+    <div class="reveal">
+      <h2 class="cta-h2">I write about what works, what doesn't,<br>and what I'm still figuring out.</h2>
+      <p class="cta-lead">If this resonates, I'd like to hear from you.</p>
+      <div class="cta-buttons">
+        <a href="https://www.linkedin.com/in/harisrahi" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          Connect on LinkedIn
+        </a>
+        <a href="mailto:haris@harisrahi.ai" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Email Me
+        </a>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ==================== FOOTER ==================== -->
 <footer>
-  <div class="container">&copy; 2025 Haris Rahi</div>
+  &copy; 2026 Haris Rahi. All rights reserved.
 </footer>
 
+<!-- ==================== SCRIPTS ==================== -->
 <script>
-  function updateScrollProgress() {
-    const s = window.scrollY;
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    document.getElementById('scrollProgress').style.width = (h > 0 ? (s / h) * 100 : 0) + '%';
+// ===== DARK FLUID / SMOKE SIMULATION =====
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+
+  let w, h, mouse = { x: 0.5, y: 0.5 }, mouseVel = { x: 0, y: 0 }, prevMouse = { x: 0.5, y: 0.5 };
+  let time = 0;
+  let heroVisible = true;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio, 1.25); // Cap DPR for shader perf
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
   }
 
-  const revealElements = document.querySelectorAll('.reveal');
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) entry.target.classList.add('visible');
-    });
-  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-  revealElements.forEach(el => revealObserver.observe(el));
+  resize();
+  window.addEventListener('resize', resize);
 
-  const sections = document.querySelectorAll('section[id]');
-  const navDots = document.querySelectorAll('.nav-dot');
+  // Pause shader when hero is off-screen
+  const heroObserver = new IntersectionObserver((entries) => {
+    heroVisible = entries[0].isIntersecting;
+  }, { threshold: 0 });
+  heroObserver.observe(canvas.parentElement);
 
-  function updateNavDots() {
-    let current = '';
-    sections.forEach(section => {
-      const rect = section.getBoundingClientRect();
-      if (rect.top <= window.innerHeight / 2) current = section.getAttribute('id');
-    });
-    navDots.forEach(dot => dot.classList.toggle('active', dot.dataset.section === current));
-  }
-
-  navDots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      const target = document.getElementById(dot.dataset.section);
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
-    });
+  // Track mouse
+  document.addEventListener('mousemove', (e) => {
+    prevMouse.x = mouse.x;
+    prevMouse.y = mouse.y;
+    mouse.x = e.clientX / window.innerWidth;
+    mouse.y = 1.0 - e.clientY / window.innerHeight;
+    mouseVel.x = mouse.x - prevMouse.x;
+    mouseVel.y = mouse.y - prevMouse.y;
   });
 
-  function countUp(el, target, suffix) {
-    const dur = 1200, start = performance.now();
-    function tick(now) {
-      const p = Math.min((now - start) / dur, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.floor(ease * target) + suffix;
-      if (p < 1) requestAnimationFrame(tick);
+  // Touch support
+  document.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    prevMouse.x = mouse.x;
+    prevMouse.y = mouse.y;
+    mouse.x = t.clientX / window.innerWidth;
+    mouse.y = 1.0 - t.clientY / window.innerHeight;
+    mouseVel.x = mouse.x - prevMouse.x;
+    mouseVel.y = mouse.y - prevMouse.y;
+  }, { passive: true });
+
+  // Vertex shader
+  const vsSource = `
+    attribute vec2 a_position;
+    void main() {
+      gl_Position = vec4(a_position, 0.0, 1.0);
     }
-    requestAnimationFrame(tick);
+  `;
+
+  // Fragment shader - dark fluid/smoke with cyan highlights
+  const fsSource = `
+    precision highp float;
+    uniform float u_time;
+    uniform vec2 u_resolution;
+    uniform vec2 u_mouse;
+    uniform vec2 u_mouseVel;
+
+    // Simplex-style noise
+    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+    float snoise(vec3 v) {
+      const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+      const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+      vec3 i  = floor(v + dot(v, C.yyy));
+      vec3 x0 = v - i + dot(i, C.xxx);
+      vec3 g = step(x0.yzx, x0.xyz);
+      vec3 l = 1.0 - g;
+      vec3 i1 = min(g.xyz, l.zxy);
+      vec3 i2 = max(g.xyz, l.zxy);
+      vec3 x1 = x0 - i1 + C.xxx;
+      vec3 x2 = x0 - i2 + C.yyy;
+      vec3 x3 = x0 - D.yyy;
+      i = mod289(i);
+      vec4 p = permute(permute(permute(
+        i.z + vec4(0.0, i1.z, i2.z, 1.0))
+        + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+        + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+      float n_ = 0.142857142857;
+      vec3 ns = n_ * D.wyz - D.xzx;
+      vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+      vec4 x_ = floor(j * ns.z);
+      vec4 y_ = floor(j - 7.0 * x_);
+      vec4 x = x_ * ns.x + ns.yyyy;
+      vec4 y = y_ * ns.x + ns.yyyy;
+      vec4 h = 1.0 - abs(x) - abs(y);
+      vec4 b0 = vec4(x.xy, y.xy);
+      vec4 b1 = vec4(x.zw, y.zw);
+      vec4 s0 = floor(b0)*2.0 + 1.0;
+      vec4 s1 = floor(b1)*2.0 + 1.0;
+      vec4 sh = -step(h, vec4(0.0));
+      vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+      vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+      vec3 p0 = vec3(a0.xy, h.x);
+      vec3 p1 = vec3(a0.zw, h.y);
+      vec3 p2 = vec3(a1.xy, h.z);
+      vec3 p3 = vec3(a1.zw, h.w);
+      vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+      p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+      vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+      m = m * m;
+      return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+    }
+
+    // FBM (Fractal Brownian Motion) — 4 octaves for performance
+    float fbm(vec3 p) {
+      float value = 0.0;
+      float amplitude = 0.5;
+      float frequency = 1.0;
+      for(int i = 0; i < 4; i++) {
+        value += amplitude * snoise(p * frequency);
+        frequency *= 2.0;
+        amplitude *= 0.5;
+      }
+      return value;
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / u_resolution;
+      vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
+
+      float t = u_time * 0.15;
+
+      // Mouse influence - creates a distortion field
+      vec2 mousePos = u_mouse - 0.5;
+      float mouseDist = length(p - mousePos);
+      float mouseInfluence = smoothstep(0.6, 0.0, mouseDist);
+
+      // Velocity influence for reactive trails
+      float velMag = length(u_mouseVel) * 8.0;
+
+      // Layer 1: Deep background smoke (double-nested FBM — rich but not crushing)
+      vec3 q = vec3(p * 1.5, t * 0.5);
+      q.xy += mousePos * mouseInfluence * 0.3;
+      float smoke1 = fbm(q + fbm(q));
+
+      // Layer 2: Mid-layer turbulence (single FBM offset)
+      vec3 r = vec3(p * 2.5 + 1.7, t * 0.8);
+      r.xy += mousePos * mouseInfluence * 0.5;
+      r.z += velMag * 0.2;
+      float smoke2 = fbm(r + vec3(smoke1 * 0.4));
+
+      // Composite the smoke layers (2 layers instead of 3)
+      float smoke = smoke1 * 0.65 + smoke2 * 0.35;
+      smoke = smoke * 0.5 + 0.5; // Remap to 0-1
+
+      // Color mapping
+      vec3 deepBlack = vec3(0.02, 0.02, 0.03);
+      vec3 darkBlue = vec3(0.03, 0.04, 0.08);
+      vec3 cyan = vec3(0.0, 0.9, 0.8);
+      vec3 teal = vec3(0.0, 0.6, 0.55);
+
+      // Base: very dark with slight blue tone
+      vec3 col = mix(deepBlack, darkBlue, smoke * 0.6);
+
+      // Cyan highlights on smoke ridges
+      float ridges = smoothstep(0.48, 0.55, smoke) * smoothstep(0.62, 0.55, smoke);
+      col += cyan * ridges * 0.15;
+
+      // Brighter glow near mouse
+      float glow = smoothstep(0.5, 0.0, mouseDist) * 0.12;
+      col += teal * glow * (1.0 + velMag * 2.0);
+
+      // Edge glow - subtle energy at smoke boundaries
+      float edges = abs(smoke - 0.5);
+      edges = smoothstep(0.15, 0.0, edges);
+      col += cyan * edges * 0.04;
+
+      // Reactive burst on fast mouse movement
+      float burst = smoothstep(0.4, 0.0, mouseDist) * velMag * 0.3;
+      col += cyan * burst;
+
+      // Vignette
+      float vig = 1.0 - smoothstep(0.4, 1.4, length(p));
+      col *= vig;
+
+      // Very subtle film grain
+      float grain = (fract(sin(dot(uv * u_time, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * 0.015;
+      col += grain;
+
+      // Ensure we stay dark and moody
+      col = clamp(col, 0.0, 1.0);
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function createShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
   }
 
-  const statNumbers = document.querySelectorAll('.stat-number');
-  const statObserver = new IntersectionObserver((entries) => {
+  const vs = createShader(gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error(gl.getProgramInfoLog(program));
+    return;
+  }
+
+  gl.useProgram(program);
+
+  // Full-screen quad
+  const verts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+  const posLoc = gl.getAttribLocation(program, 'a_position');
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+  // Uniforms
+  const uTime = gl.getUniformLocation(program, 'u_time');
+  const uRes = gl.getUniformLocation(program, 'u_resolution');
+  const uMouse = gl.getUniformLocation(program, 'u_mouse');
+  const uMouseVel = gl.getUniformLocation(program, 'u_mouseVel');
+
+  // Smooth velocity
+  let smoothVel = { x: 0, y: 0 };
+
+  function render(now) {
+    requestAnimationFrame(render);
+
+    // Skip GPU work when hero is scrolled out of view
+    if (!heroVisible) return;
+
+    time = now * 0.001;
+
+    // Smooth mouse velocity with decay
+    smoothVel.x += (mouseVel.x - smoothVel.x) * 0.1;
+    smoothVel.y += (mouseVel.y - smoothVel.y) * 0.1;
+    mouseVel.x *= 0.95;
+    mouseVel.y *= 0.95;
+
+    gl.uniform1f(uTime, time);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.uniform2f(uMouseVel, smoothVel.x, smoothVel.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  requestAnimationFrame(render);
+})();
+
+// ===== SCROLL REVEAL (all reveal variants) =====
+(function() {
+  const reveals = document.querySelectorAll('.reveal, .reveal-scale, .reveal-left, .reveal-blur');
+  const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting && !entry.target.dataset.animated) {
-        entry.target.dataset.animated = 'true';
-        const text = entry.target.textContent.trim();
-        if (text === '300+') countUp(entry.target, 300, '+');
-        else if (text === '140+') countUp(entry.target, 140, '+');
-        else if (text === '41%') countUp(entry.target, 41, '%');
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
       }
     });
-  }, { threshold: 0.5 });
-  statNumbers.forEach(el => statObserver.observe(el));
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+})();
+
+// ===== SIDE DOT NAV =====
+(function() {
+  const sideNav = document.getElementById('sideNav');
+  const dots = sideNav.querySelectorAll('a');
+  const sectionIds = Array.from(dots).map(d => d.dataset.section);
+  const sections = sectionIds.map(id => document.getElementById(id));
+  const hero = document.getElementById('hero');
+
+  // Show/hide nav based on hero visibility
+  const heroObs = new IntersectionObserver((entries) => {
+    const heroVisible = entries[0].isIntersecting && entries[0].intersectionRatio > 0.5;
+    sideNav.classList.toggle('visible', !heroVisible);
+  }, { threshold: [0, 0.5] });
+  heroObs.observe(hero);
+
+  // Track active section
+  const sectionObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        dots.forEach(d => d.classList.toggle('active', d.dataset.section === id));
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-10% 0px -10% 0px' });
+
+  sections.forEach(s => { if (s) sectionObs.observe(s); });
+})();
+
+// ===== SECTION PARALLAX DEPTH =====
+(function() {
+  const headings = document.querySelectorAll('.parallax-heading');
+  const bodies = document.querySelectorAll('.parallax-body');
+  let ticking = false;
 
   window.addEventListener('scroll', () => {
-    updateScrollProgress();
-    updateNavDots();
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollY = window.pageYOffset;
+        headings.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          const viewH = window.innerHeight;
+          const offset = (center - viewH / 2) / viewH;
+          el.style.transform = `translateY(${offset * -12}px)`;
+        });
+        bodies.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          const viewH = window.innerHeight;
+          const offset = (center - viewH / 2) / viewH;
+          el.style.transform = `translateY(${offset * 8}px)`;
+        });
+        ticking = false;
+      });
+    }
   }, { passive: true });
-  updateScrollProgress();
-  updateNavDots();
+})();
+
+// ===== CURSOR GLOW (GPU-accelerated) =====
+(function() {
+  const glow = document.getElementById('cursorGlow');
+  let visible = false;
+  let cx = 0, cy = 0, rafId = 0;
+
+  function updateGlow() {
+    glow.style.transform = `translate3d(${cx - 150}px, ${cy - 150}px, 0)`;
+    rafId = 0;
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    if (!visible) { glow.style.opacity = '1'; visible = true; }
+    cx = e.clientX;
+    cy = e.clientY;
+    if (!rafId) rafId = requestAnimationFrame(updateGlow);
+  });
+
+  document.addEventListener('mouseleave', () => {
+    glow.style.opacity = '0';
+    visible = false;
+  });
+
+  if ('ontouchstart' in window) glow.style.display = 'none';
+})();
+
+// ===== SMOOTH PARALLAX (rAF-throttled) =====
+(function() {
+  const hero = document.getElementById('hero');
+  const content = document.querySelector('.hero-content');
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrolled = window.pageYOffset;
+        const heroH = hero.offsetHeight;
+        if (scrolled < heroH) {
+          const factor = scrolled / heroH;
+          content.style.transform = `translate3d(0, ${scrolled * 0.25}px, 0)`;
+          content.style.opacity = Math.max(0, 1 - factor * 1.2);
+        }
+        ticking = false;
+      });
+    }
+  }, { passive: true });
+})();
 </script>
 </body>
 </html>
