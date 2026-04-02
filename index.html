@@ -268,25 +268,7 @@ section {
   will-change: transform;
 }
 
-/* Hero-to-content transition bridge */
-.section-bridge {
-  height: 160px;
-  background: var(--black);
-  position: relative;
-  overflow: hidden;
-  border: none;
-}
 
-.section-bridge::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent 0%, var(--dark) 100%);
-  pointer-events: none;
-}
 
 /* Side dot nav */
 .side-nav {
@@ -337,7 +319,7 @@ section {
 /* SECTION: What I Do */
 #what-i-do {
   background: var(--dark);
-  border-top: none;
+  border-top: 1px solid var(--gray-800);
 }
 
 /* SECTION: How I Think */
@@ -626,9 +608,6 @@ footer a {
     <div class="scroll-line"></div>
   </div>
 </section>
-
-<!-- ==================== BRIDGE ==================== -->
-<div class="section-bridge"></div>
 
 <!-- ==================== WHAT I DO ==================== -->
 <section id="what-i-do">
