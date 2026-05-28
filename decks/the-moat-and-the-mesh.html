@@ -1,0 +1,3175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Moat & The Mesh — Headless 360, a year in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,600;1,9..144,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE MOAT & THE MESH — cinematic deck on Salesforce's Headless 360.
+
+   FONT SYSTEM (v2)
+   - Inter (400→900)                — primary face, headings, body, AND
+                                      slides 1 & 8 (Inter 800/900 non-italic
+                                      replaces previous italic serif per
+                                      user feedback)
+   - Fraunces italic                — kept for "A rebuild", "However.",
+                                      "SFDC's bet" — the in-line accents
+                                      that the user explicitly likes
+   - JetBrains Mono                 — labels, badges, chrome
+═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --black: #04050a;
+  --moat-deep: #060b24;
+  --moat-mid: #15287a;
+  --moat-bright: #2640b8;
+  --moat-glow: #4a6ff0;
+  --sfdc: #00a1e0;
+  --sfdc-soft: #4cc3ec;
+  --amber: #ffb147;
+  --amber-soft: #ffd27a;
+  --ext-warm: #ff8a4c;
+  --mesh-cyan: #45f2ff;
+  --mesh-green: #6bffb0;
+  --paper: #f0f1f5;
+  --paper-soft: #c6cad4;
+  --mute: #8089a0;
+  --rule: rgba(128,137,160,0.20);
+
+  --t-eyebrow:    14px;
+  --t-label:      15px;
+  --t-body-sm:    17px;
+  --t-body:       20px;
+  --t-body-lg:    24px;
+  --t-h3:         32px;
+  --t-h2:         44px;
+  --t-h1:         60px;
+
+  --tracking-eyebrow: 0.28em;
+  --hud-zone: 56px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; background: var(--black); color: var(--paper); overflow: hidden; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-weight: 400;
+  font-size: var(--t-body);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── Global cinematic overlays — film grain + vignette ────────────────── */
+.fx-grain, .fx-vignette {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 90;
+}
+.fx-grain {
+  background: repeating-linear-gradient(to bottom,
+    rgba(255,255,255,0.035) 0px,
+    rgba(255,255,255,0.035) 1px,
+    transparent 1px,
+    transparent 3px);
+  mix-blend-mode: overlay;
+}
+.fx-vignette {
+  background: radial-gradient(ellipse at center,
+    transparent 45%,
+    rgba(4,5,10,0.7) 100%);
+  z-index: 89;
+}
+
+.deck { position: fixed; inset: 0; overflow: hidden; }
+.beat {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6vh 6vw calc(6vh + var(--hud-zone));
+}
+.beat.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.beat-label {
+  position: absolute;
+  top: 26px;
+  left: 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--mute);
+  text-transform: uppercase;
+  z-index: 10;
+}
+.beat-label b { color: var(--amber); font-weight: 700; }
+
+/* HUD */
+.hud {
+  position: fixed;
+  bottom: 22px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--mute);
+  text-transform: uppercase;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.4s ease;
+}
+.hud:hover { opacity: 1; }
+.hud-dots { display: flex; gap: 6px; align-items: center; }
+.hud-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(128,137,160,0.32);
+  transition: all 0.4s ease;
+}
+.hud-dot.is-active {
+  background: var(--amber);
+  width: 22px;
+  border-radius: 3px;
+}
+.hud-hint { letter-spacing: 0.28em; }
+.hud-stage { color: var(--amber); font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WILD PUNCH ANIMATION — shared by slide 4 pillars and slide 9 forks
+   Each box enters from a different direction via CSS variables.
+═══════════════════════════════════════════════════════════════════════════ */
+@keyframes punchIn {
+  0% {
+    opacity: 0;
+    transform: translateX(var(--enter-x, 0))
+               translateY(var(--enter-y, 100%))
+               scale(0.3)
+               rotate(var(--enter-rot, -10deg));
+    filter: brightness(2.6) saturate(2);
+  }
+  30%  { opacity: 1; }
+  55%  {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1.14) rotate(3deg);
+    filter: brightness(2.0) saturate(1.6);
+  }
+  72%  {
+    transform: translateX(0) translateY(0) scale(0.94) rotate(-1.8deg);
+    filter: brightness(1.3) saturate(1.2);
+  }
+  85%  {
+    transform: translateX(0) translateY(0) scale(1.03) rotate(0.6deg);
+    filter: brightness(1.1) saturate(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1) rotate(0);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 1 — HOOK
+   Quote in Inter (non-italic, light weight). "ever" in Inter 800 SFDC cyan
+   with multi-layer glow + canvas particle assembly. Lead-in above the quote,
+   attribution beneath. Default-visible: static glowing "ever" reads even if
+   the canvas hasn't initialized.
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-hook {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 52%, rgba(0,161,224,0.13) 0%, rgba(0,161,224,0) 70%),
+    radial-gradient(ellipse at 50% 100%, rgba(0,161,224,0.05) 0%, transparent 60%),
+    #02030a;
+  text-align: center;
+}
+.hook-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.75;
+}
+/* Lead-in — short context line above the quote */
+.hook-leadin {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--paper-soft);
+  max-width: 760px;
+  margin: 0 auto 52px;
+  position: relative;
+  z-index: 2;
+  opacity: 0.85;
+}
+.hook-leadin::before {
+  content: "— ";
+  color: var(--paper-soft);
+  opacity: 0.85;
+  margin-right: 4px;
+}
+.hook-leadin b {
+  color: var(--amber-soft);
+  font-weight: 700;
+}
+/* Quote — Inter regular, large and quiet, lets "ever" pop */
+.hook-quote {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(54px, 7.2vw, 108px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  max-width: 1600px;
+  position: relative;
+  z-index: 2;
+  color: var(--paper);
+}
+.hook-quote em.hook-ever {
+  position: relative;
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 800;
+  color: var(--sfdc);
+  letter-spacing: -0.03em;
+  text-shadow:
+    0 0 24px rgba(0,161,224,0.55),
+    0 0 80px rgba(0,161,224,0.32),
+    0 0 160px rgba(0,161,224,0.15);
+}
+.hook-ever-canvas {
+  position: absolute;
+  inset: -20% -10%;
+  width: 120%;
+  height: 140%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hook-ever-canvas.is-ready { opacity: 1; }
+.beat-hook.is-active .hook-quote em.hook-ever {
+  animation: everPulse 4.6s ease-in-out 1.4s infinite;
+}
+@keyframes everPulse {
+  0%, 100% { text-shadow: 0 0 24px rgba(0,161,224,0.55), 0 0 80px rgba(0,161,224,0.32), 0 0 160px rgba(0,161,224,0.15); }
+  50%      { text-shadow: 0 0 36px rgba(0,161,224,0.85), 0 0 110px rgba(0,161,224,0.55), 0 0 200px rgba(0,161,224,0.3); }
+}
+/* Attribution — below the quote, mono caps, em-dash flanks */
+.hook-attrib {
+  margin-top: 64px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.36em;
+  color: var(--paper-soft);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+  opacity: 0.85;
+}
+.hook-attrib::before {
+  content: "— ";
+  color: var(--paper-soft);
+  opacity: 0.85;
+  margin-right: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 2 — STAKE (2 stages)
+   Stage 0: argument laid out. Stage 1: strike + "A rebuild." land together
+   as the punch — radial amber bloom blooms behind, surrounding context dims.
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-stake {
+  background: #02030a;
+  position: relative;
+  overflow: hidden;
+}
+/* warm radial wash that intensifies when the punch lands */
+.beat-stake::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 45% at 50% 58%,
+    rgba(255, 177, 71, 0) 0%,
+    rgba(255, 177, 71, 0) 100%);
+  pointer-events: none;
+  transition: background 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 0;
+}
+.beat-stake[data-stage="1"]::before {
+  background: radial-gradient(ellipse 60% 45% at 50% 58%,
+    rgba(255, 177, 71, 0.14) 0%,
+    rgba(255, 177, 71, 0.05) 40%,
+    rgba(255, 177, 71, 0) 80%);
+}
+
+.stake-block {
+  text-align: center;
+  max-width: 1500px;
+  position: relative;
+  z-index: 1;
+}
+.stake-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--amber);
+  margin-bottom: 44px;
+  text-transform: uppercase;
+}
+.stake-line {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: clamp(40px, 5.2vw, 76px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--paper-soft);
+  position: relative;
+  z-index: 0;
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* dim the setup line on stage 1 to focus the punchline */
+.beat-stake[data-stage="1"] .stake-line:first-of-type { opacity: 0.32; }
+
+/* radial bloom behind the punchline appears on stage 1 */
+.stake-line:last-of-type::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 120%;
+  height: 380%;
+  transform: translate(-50%, -50%) scale(0.4);
+  background: radial-gradient(ellipse at center,
+    rgba(255, 177, 71, 0.32) 0%,
+    rgba(255, 177, 71, 0.14) 30%,
+    rgba(255, 177, 71, 0.04) 55%,
+    transparent 80%);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity 900ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+}
+.beat-stake[data-stage="1"] .stake-line:last-of-type::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* strike — thick amber bar, glowing, sweeps in */
+.stake-line .strike { position: relative; display: inline-block; }
+.stake-line .strike::after {
+  content: '';
+  position: absolute;
+  left: -10px; right: -10px;
+  top: 52%;
+  height: 4px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--amber) 18%,
+    #ffffff 50%,
+    var(--amber) 82%,
+    transparent 100%);
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  transition: transform 700ms cubic-bezier(0.65, 0, 0.35, 1);
+  box-shadow:
+    0 0 12px rgba(255, 177, 71, 0.85),
+    0 0 36px rgba(255, 177, 71, 0.5),
+    0 0 80px rgba(255, 177, 71, 0.25);
+  border-radius: 2px;
+}
+.beat-stake[data-stage="1"] .stake-line .strike::after {
+  transform: translateY(-50%) scaleX(1);
+}
+
+/* rebuild — Inter 800 non-italic, amber, massive glow, blur-clear scale-in */
+.stake-line .rebuild {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 800;
+  color: var(--amber);
+  letter-spacing: -0.025em;
+  margin-left: 18px;
+  display: inline-block;
+  opacity: 0;
+  transform: scale(1.22);
+  filter: blur(10px);
+  text-shadow:
+    0 0 24px rgba(255, 177, 71, 0.85),
+    0 0 60px rgba(255, 177, 71, 0.55),
+    0 0 140px rgba(255, 177, 71, 0.3);
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+              filter 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.beat-stake[data-stage="1"] .stake-line .rebuild {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+
+.stake-footer {
+  margin-top: 72px;
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.beat-stake[data-stage="1"] .stake-footer { opacity: 0.42; }
+.legacy-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  color: var(--mute);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.legacy-tag::before, .legacy-tag::after {
+  content: '';
+  flex: 0 0 26px;
+  height: 1px;
+  background: var(--mute);
+  opacity: 0.4;
+}
+.stake-footer-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.stake-footer-row span {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: var(--t-label);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border: 1px solid var(--rule);
+  color: var(--paper-soft);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 3 — MOAT
+   Fills the viewport: tall strata, atmospheric mote field, vertical light
+   beam down the spine, brighter glow at the live data floor. Default-visible:
+   every stratum is fully readable at snap; entrance is a glow flash only.
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-moat {
+  background: linear-gradient(180deg, #02030a 0%, #060b24 100%);
+  overflow: hidden;
+}
+/* vertical light beam — subtle blue column down the spine */
+.beat-moat::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 38%;
+  height: 100%;
+  background: linear-gradient(180deg,
+    rgba(74,111,240,0.10) 0%,
+    rgba(74,111,240,0.04) 50%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* bottom floor glow — the live data layer is alive */
+.beat-moat::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 35%;
+  background: radial-gradient(ellipse at 50% 100%,
+    rgba(38,64,184,0.25) 0%,
+    rgba(38,64,184,0.10) 40%,
+    transparent 75%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* full-bleed canvas — slow blue motes drifting upward like deep-water sediment */
+.moat-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.beat-moat > .beat-label { z-index: 2; }
+.beat-moat > .moat-title,
+.beat-moat > .moat-stack,
+.beat-moat > .moat-caption { position: relative; z-index: 1; }
+
+.moat-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: clamp(34px, 4.2vw, 56px);
+  text-align: center;
+  letter-spacing: -0.028em;
+  margin-bottom: clamp(18px, 3vh, 40px);
+  max-width: 1400px;
+  line-height: 1.2;
+  color: var(--paper);
+  padding-bottom: 4px;
+}
+.moat-title b { font-weight: 800; color: var(--amber-soft); }
+/* moat stack — NO boxes, NO row backgrounds, NO row dividers, NO slab gradient.
+   Pure typography on the void: huge amber numerals + huge light Inter labels.
+   A continuous amber scan beam descends through the stack, looping forever.
+   Numbers pulse on staggered phases. The bottom row (CRM Data) glows hottest
+   as the live floor — without any box. */
+.moat-stack {
+  display: flex;
+  flex-direction: column;
+  max-width: 1280px;
+  width: 100%;
+  position: relative;
+  gap: clamp(2px, 0.5vh, 8px);
+  padding: clamp(6px, 1vh, 14px) clamp(20px, 2vw, 40px);
+}
+.moat-row {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(28px, 3vw, 56px);
+  position: relative;
+  background: transparent;
+}
+
+/* HUGE anchor number */
+.moat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--amber);
+  font-size: clamp(52px, 5vw, 96px);
+  letter-spacing: -0.025em;
+  line-height: 0.92;
+  flex: 0 0 auto;
+  min-width: clamp(80px, 6.4vw, 132px);
+  text-shadow: 0 0 24px rgba(255, 177, 71, 0.4);
+  opacity: 0.96;
+  animation: moat-num-pulse 5.2s ease-in-out infinite;
+}
+@keyframes moat-num-pulse {
+  0%, 100% { text-shadow: 0 0 18px rgba(255, 177, 71, 0.28); }
+  50%      { text-shadow: 0 0 44px rgba(255, 177, 71, 0.75); }
+}
+.moat-row:nth-of-type(1) .moat-num { animation-delay: -0.4s; }
+.moat-row:nth-of-type(2) .moat-num { animation-delay: -1.2s; }
+.moat-row:nth-of-type(3) .moat-num { animation-delay: -2.0s; }
+.moat-row:nth-of-type(4) .moat-num { animation-delay: -2.8s; }
+.moat-row:nth-of-type(5) .moat-num { animation-delay: -3.6s; }
+.moat-row:nth-of-type(6) .moat-num { animation-delay: -4.4s; }
+
+/* HUGE light label — Inter weight 200, big and quiet */
+.moat-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: clamp(24px, 2.6vw, 46px);
+  letter-spacing: -0.022em;
+  line-height: 1.05;
+  color: var(--paper);
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+
+/* hide the old dot stream span — typography only */
+.moat-stream { display: none; }
+
+/* bottom row (CRM Data) — hotter glow on both number and label,
+   no box needed, just radiance */
+.moat-row:last-child .moat-num {
+  color: var(--mesh-cyan);
+  text-shadow: 0 0 28px rgba(69, 242, 255, 0.6);
+  animation: moat-num-pulse-floor 4.6s ease-in-out infinite;
+}
+.moat-row:last-child .moat-label {
+  color: var(--mesh-cyan);
+  text-shadow: 0 0 18px rgba(69, 242, 255, 0.35);
+}
+@keyframes moat-num-pulse-floor {
+  0%, 100% { text-shadow: 0 0 20px rgba(69, 242, 255, 0.5); }
+  50%      { text-shadow: 0 0 52px rgba(69, 242, 255, 0.95); }
+}
+
+/* THE looping animation — an amber scan beam continuously descends
+   through the stack while the slide is active. */
+.moat-stack::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 177, 71, 0.35) 15%,
+    var(--amber) 50%,
+    rgba(255, 177, 71, 0.35) 85%,
+    transparent 100%);
+  box-shadow:
+    0 0 24px rgba(255, 177, 71, 0.7),
+    0 0 64px rgba(255, 177, 71, 0.35);
+  pointer-events: none;
+  z-index: 3;
+  animation: moat-scan 7s linear infinite;
+}
+@keyframes moat-scan {
+  0%   { top: -2%;  opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { top: 102%; opacity: 0; }
+}
+
+.moat-caption {
+  max-width: 1280px;
+  width: 100%;
+  margin-top: clamp(18px, 2.8vh, 36px);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: clamp(11px, 0.85vw, 14px);
+  letter-spacing: 0.32em;
+  color: var(--paper-soft);
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.92;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.moat-caption::before, .moat-caption::after {
+  content: "";
+  flex: 0 0 60px;
+  height: 1px;
+  background: var(--paper-soft);
+  opacity: 0.35;
+}
+.moat-caption b { color: var(--amber); font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 4 — ANNOUNCEMENT  (4 stages, WILD punch entrance per pillar)
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-announce {
+  background: linear-gradient(180deg, #02030a 0%, #06091a 75%, #0a1438 100%);
+  justify-content: flex-start;
+  padding-top: clamp(64px, 7vh, 86px);
+}
+.announce-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.announce-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: clamp(36px, 4.2vw, 56px);
+  text-align: center;
+  letter-spacing: -0.02em;
+  margin-bottom: 56px;
+  color: var(--paper);
+  line-height: 1.15;
+  max-width: 1400px;
+}
+.announce-title b { font-weight: 800; color: var(--amber); }
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  max-width: 1340px;
+  width: 100%;
+  perspective: 1800px;
+  perspective-origin: center 30%;
+}
+.pillar {
+  position: relative;
+  background: linear-gradient(180deg, rgba(38,64,184,0.05) 0%, rgba(38,64,184,0.18) 100%);
+  border: 1px solid rgba(74,111,240,0.25);
+  border-top: 2px solid var(--amber);
+  padding: 36px 28px 30px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform-origin: center;
+  overflow: visible;
+}
+.pillar:nth-child(1) { transform-origin: left center; }
+.pillar:nth-child(3) { transform-origin: right center; }
+
+/* Shockwave ring + light sweep — fire AFTER the pillar lands */
+.pillar::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 38%;
+  aspect-ratio: 1;
+  border: 2px solid var(--amber);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.pillar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.50) 50%,
+    transparent 70%);
+  transform: translateX(-120%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+  mix-blend-mode: screen;
+}
+
+/* ── ENTRANCES — three distinct dramatic moves per pillar ── */
+
+/* Pillar 1 — DOOR SLAM: 3D rotate-Y swinging from off-screen left */
+@keyframes pillarOneDoor {
+  0%   { opacity: 0; transform: rotateY(-115deg) translateZ(-120px); filter: blur(10px) brightness(2.8) saturate(2) contrast(1.4); }
+  30%  { opacity: 1; filter: blur(0) brightness(2) saturate(1.7) contrast(1.2); }
+  52%  { transform: rotateY(16deg) translateZ(60px); filter: brightness(1.6) saturate(1.4) contrast(1.1); }
+  68%  { transform: rotateY(-7deg) translateZ(10px); }
+  84%  { transform: rotateY(3deg) translateZ(0); }
+  100% { opacity: 1; transform: rotateY(0) translateZ(0); filter: brightness(1) saturate(1) contrast(1); }
+}
+
+/* Pillar 2 — METEOR: plummets from above, impact, multi-bounce */
+@keyframes pillarTwoMeteor {
+  0%   { opacity: 0; transform: translateY(-320%) scale(0.35) rotate(8deg); filter: blur(12px) brightness(3) saturate(2.5) contrast(1.4); }
+  28%  { opacity: 1; filter: blur(0) brightness(2.2) saturate(1.8); }
+  50%  { transform: translateY(9%) scale(1.18) rotate(-2.5deg); filter: brightness(1.7) saturate(1.4); }
+  62%  { transform: translateY(-5%) scale(0.92) rotate(1.2deg); }
+  76%  { transform: translateY(1.5%) scale(1.04) rotate(-0.5deg); }
+  88%  { transform: translateY(-0.3%) scale(0.99) rotate(0.2deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: brightness(1) saturate(1); }
+}
+
+/* Pillar 3 — GLITCH REVEAL: chromatic jitter, multiple snap positions */
+@keyframes pillarThreeGlitch {
+  0%   { opacity: 0; transform: translateX(110%) scale(0.5); filter: blur(10px) brightness(2.5); }
+  10%  { opacity: 1; transform: translateX(-45%) translateY(-4%) scale(0.85); filter: hue-rotate(-60deg) saturate(2.4) brightness(2.2); }
+  18%  { transform: translateX(28%) translateY(5%) scale(1.10); filter: hue-rotate(50deg) saturate(2.2) brightness(2); }
+  26%  { transform: translateX(-14%) translateY(-1%) scale(0.94); filter: hue-rotate(-30deg) saturate(1.7) brightness(1.7); }
+  34%  { transform: translateX(7%) translateY(2%) scale(1.05); filter: hue-rotate(20deg) saturate(1.4) brightness(1.4); }
+  42%  { transform: translateX(-3%) translateY(-0.5%) scale(0.98); filter: hue-rotate(-8deg) saturate(1.15); }
+  55%  { transform: translateX(1%) translateY(0) scale(1.01); filter: hue-rotate(0) saturate(1); }
+  100% { opacity: 1; transform: translateX(0) translateY(0) scale(1); filter: brightness(1); }
+}
+
+/* Shockwave ring expanding outward after impact */
+@keyframes pillarShockwave {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); border-width: 3px; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(5); border-width: 0.4px; }
+}
+
+/* Light sweep across pillar surface, post-land */
+@keyframes pillarSweep {
+  0%   { opacity: 0; transform: translateX(-120%); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(160%); }
+}
+
+/* Stage gates — bind entrance + shockwave + sweep per pillar */
+.beat-announce[data-stage="1"] .pillar:nth-child(1),
+.beat-announce[data-stage="2"] .pillar:nth-child(1),
+.beat-announce[data-stage="3"] .pillar:nth-child(1) {
+  animation: pillarOneDoor 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.beat-announce[data-stage="2"] .pillar:nth-child(2),
+.beat-announce[data-stage="3"] .pillar:nth-child(2) {
+  animation: pillarTwoMeteor 1.45s cubic-bezier(0.18, 1.4, 0.45, 1) both;
+}
+.beat-announce[data-stage="3"] .pillar:nth-child(3) {
+  animation: pillarThreeGlitch 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.beat-announce[data-stage="1"] .pillar:nth-child(1)::before,
+.beat-announce[data-stage="2"] .pillar:nth-child(1)::before,
+.beat-announce[data-stage="3"] .pillar:nth-child(1)::before,
+.beat-announce[data-stage="2"] .pillar:nth-child(2)::before,
+.beat-announce[data-stage="3"] .pillar:nth-child(2)::before,
+.beat-announce[data-stage="3"] .pillar:nth-child(3)::before {
+  animation: pillarShockwave 1.2s 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.beat-announce[data-stage="1"] .pillar:nth-child(1)::after,
+.beat-announce[data-stage="2"] .pillar:nth-child(1)::after,
+.beat-announce[data-stage="3"] .pillar:nth-child(1)::after,
+.beat-announce[data-stage="2"] .pillar:nth-child(2)::after,
+.beat-announce[data-stage="3"] .pillar:nth-child(2)::after,
+.beat-announce[data-stage="3"] .pillar:nth-child(3)::after {
+  animation: pillarSweep 0.85s 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pillar-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--amber);
+  margin-bottom: 22px;
+  text-transform: uppercase;
+}
+.pillar-big {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: clamp(60px, 6vw, 86px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--paper);
+  margin-bottom: 8px;
+}
+.pillar-big sup {
+  font-size: 0.32em;
+  vertical-align: top;
+  color: var(--amber);
+  font-weight: 600;
+  letter-spacing: 0;
+  margin-left: 6px;
+  position: relative;
+  top: 16px;
+}
+.pillar-bigsub {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  color: var(--paper-soft);
+  text-transform: uppercase;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 18px;
+  line-height: 1.5;
+}
+.pillar-headline {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 23px;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+  margin-bottom: 14px;
+}
+.pillar-body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--paper-soft);
+  margin-top: auto;
+}
+.pillar-body b { color: var(--amber-soft); font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 5 — USE CASE  (4 stages; caption MOVED to stage 3 per user feedback)
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-usecase { background: linear-gradient(180deg, #02030a 0%, #050a1c 100%); }
+.usecase-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: clamp(30px, 3.4vw, 44px);
+  text-align: center;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: var(--paper);
+  max-width: 1300px;
+  line-height: 1.2;
+}
+.usecase-title b { font-weight: 700; color: var(--amber); }
+.usecase-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--paper-soft);
+  margin-bottom: 28px;
+  text-transform: uppercase;
+}
+.usecase-svg-wrap { width: 100%; max-width: 1640px; }
+.usecase-svg { display: block; width: 100%; height: auto; }
+
+.usecase-svg .group-crm,
+.usecase-svg .group-external,
+.usecase-svg .group-output,
+.usecase-svg .group-output-caption { opacity: 0; transition: opacity 0.6s ease; }
+.beat-usecase[data-stage="1"] .group-crm,
+.beat-usecase[data-stage="2"] .group-crm,
+.beat-usecase[data-stage="3"] .group-crm { opacity: 1; }
+.beat-usecase[data-stage="2"] .group-external,
+.beat-usecase[data-stage="3"] .group-external { opacity: 1; }
+.beat-usecase[data-stage="3"] .group-output { opacity: 1; }
+/* Caption appears with outputs at stage 3, slight delay to feel like a payoff */
+.beat-usecase[data-stage="3"] .group-output-caption { opacity: 1; transition-delay: 0.7s; }
+
+.usecase-svg .stream { stroke-dasharray: 600; stroke-dashoffset: 600; transition: stroke-dashoffset 1.0s ease 0.15s; }
+.beat-usecase[data-stage="1"] .group-crm .stream,
+.beat-usecase[data-stage="2"] .group-crm .stream,
+.beat-usecase[data-stage="3"] .group-crm .stream { stroke-dashoffset: 0; }
+.beat-usecase[data-stage="2"] .group-external .stream,
+.beat-usecase[data-stage="3"] .group-external .stream { stroke-dashoffset: 0; }
+
+.usecase-svg .agent-node {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: agentPulse 3.2s ease-in-out infinite;
+}
+@keyframes agentPulse {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(255,177,71,0.45)); }
+  50%      { filter: drop-shadow(0 0 28px rgba(255,177,71,0.85)); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 6 — THE TURN  (visible, dramatic emphasis per user feedback)
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-turn { background: #02030a; padding: 0; }
+.turn-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.turn-strata {
+  position: absolute;
+  left: 0; right: 0;
+  background:
+    repeating-linear-gradient(180deg,
+      #0a1438 0px, #0a1438 22px,
+      #112063 22px, #112063 44px,
+      #15287a 44px, #15287a 66px,
+      #1d3496 66px, #1d3496 88px,
+      #2640b8 88px, #2640b8 110px,
+      #1d3496 110px, #1d3496 132px,
+      #15287a 132px, #15287a 154px);
+}
+.turn-strata-top { top: 0; height: 50%; }
+.turn-strata-bot { bottom: 0; height: 50%; }
+.beat-turn.is-active .turn-strata-top { animation: shearUp 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
+.beat-turn.is-active .turn-strata-bot { animation: shearDown 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
+@keyframes shearUp   { 0% { transform: translateY(0); } 100% { transform: translateY(-3vh); } }
+@keyframes shearDown { 0% { transform: translateY(0); } 100% { transform: translateY(3vh); } }
+
+/* Halo behind the tear — BIG visible pulse */
+.turn-tear-band {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 280px;
+  background: radial-gradient(ellipse at center, rgba(255,210,122,0.25) 0%, rgba(255,210,122,0.06) 40%, rgba(0,0,0,0) 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.1s;
+}
+.beat-turn.is-active .turn-tear-band {
+  opacity: 1;
+  animation: bandBreathe 3.4s ease-in-out 1.4s infinite;
+}
+@keyframes bandBreathe {
+  0%, 100% { opacity: 0.55; transform: translateY(-50%) scale(1, 1); }
+  50%      { opacity: 1.0;  transform: translateY(-50%) scale(1.25, 1.45); }
+}
+
+/* Tear itself — moving shimmer + box-shadow pulse for unmistakable emphasis */
+.turn-tear {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: center;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,210,122,0.45) 10%,
+    #ffd27a 30%, #ffffff 50%, #ffd27a 70%,
+    rgba(255,210,122,0.45) 90%,
+    transparent 100%);
+  background-size: 220% 100%;
+  background-position: 0% 0;
+  box-shadow:
+    0 0 24px 2px rgba(255,210,122,0.85),
+    0 0 80px 10px rgba(255,180,71,0.45),
+    0 0 200px 30px rgba(255,180,71,0.18);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+}
+.beat-turn.is-active .turn-tear {
+  transform: translateY(-50%) scaleX(1);
+  animation:
+    tearShimmer 4s linear 1.1s infinite,
+    tearPulse   2.6s ease-in-out 1.1s infinite;
+}
+@keyframes tearShimmer {
+  0%   { background-position: -110% 0; }
+  100% { background-position: 110% 0; }
+}
+@keyframes tearPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 24px 2px rgba(255,210,122,0.85),
+      0 0 80px 10px rgba(255,180,71,0.45),
+      0 0 200px 30px rgba(255,180,71,0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 56px 6px rgba(255,210,122,1.0),
+      0 0 180px 22px rgba(255,180,71,0.75),
+      0 0 380px 70px rgba(255,180,71,0.40);
+  }
+}
+
+/* "However." — visible scale pulse + glow */
+.turn-word {
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-style: normal;
+  font-size: clamp(88px, 12.5vw, 188px);
+  color: var(--paper);
+  letter-spacing: -0.045em;
+  z-index: 3;
+  mix-blend-mode: screen;
+  text-shadow: 0 0 60px rgba(255,255,255,0.45);
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.beat-turn.is-active .turn-word {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition-delay: 0.3s;
+  animation: howeverBreathe 3.2s ease-in-out 1.3s infinite;
+}
+@keyframes howeverBreathe {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    text-shadow: 0 0 60px rgba(255,255,255,0.45);
+  }
+  50% {
+    transform: translateY(0) scale(1.055);
+    text-shadow:
+      0 0 120px rgba(255,255,255,0.95),
+      0 0 220px rgba(255,210,122,0.55),
+      0 0 40px  rgba(255,210,122,0.45);
+  }
+}
+
+.turn-foot {
+  position: absolute;
+  bottom: calc(var(--hud-zone) + 24px);
+  left: 0; right: 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: var(--t-label);
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--amber-soft);
+  text-transform: uppercase;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.6s ease 1.0s;
+}
+.beat-turn.is-active .turn-foot { opacity: 0.95; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 7 — WORKSHOPS
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-workshops {
+  background: radial-gradient(ellipse at center, #050a14 0%, #02030a 80%);
+  justify-content: flex-start;
+  padding-top: clamp(64px, 6vh, 76px);
+}
+.workshops-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: clamp(32px, 3.8vw, 52px);
+  text-align: center;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 12px;
+  line-height: 1.15;
+  max-width: 1300px;
+}
+.workshops-title b { font-weight: 700; color: var(--mesh-cyan); }
+.workshops-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--paper-soft);
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.workshops-svg-wrap { width: 100%; max-width: 1340px; max-height: 58vh; }
+.workshops-svg { display: block; width: 100%; height: auto; max-height: 58vh; }
+
+/* Stage gates:
+     stage 0 = legacy mainframe only (alone, with the moat ring fading in second-half)
+     stage 1 = workshops swarm in, foot appears, ring becomes prominent */
+
+/* Workshop card — punchy entrance on stage 1 */
+.workshops-svg .workshop { opacity: 0; transition: opacity 0.45s ease; }
+.beat-workshops[data-stage="1"] .workshops-svg .workshop { opacity: 1; }
+.beat-workshops[data-stage="1"] .workshops-svg .ws-1 { transition-delay: 0.05s; }
+.beat-workshops[data-stage="1"] .workshops-svg .ws-2 { transition-delay: 0.13s; }
+.beat-workshops[data-stage="1"] .workshops-svg .ws-3 { transition-delay: 0.21s; }
+.beat-workshops[data-stage="1"] .workshops-svg .ws-4 { transition-delay: 0.29s; }
+
+/* Boundary "moat" ring — wraps just the legacy platform, makes "around" literal.
+   Faintly visible at stage 0, prominent at stage 1 when workshops appear outside it. */
+.workshops-svg .moat-ring {
+  opacity: 0;
+  transition: opacity 0.7s ease, stroke 0.7s ease;
+}
+.beat-workshops.is-active .workshops-svg .moat-ring { opacity: 0.55; transition-delay: 0.6s; }
+.beat-workshops[data-stage="1"] .workshops-svg .moat-ring {
+  opacity: 0.95;
+  stroke: rgba(255,177,71,0.55);
+  animation: moat-ring-pulse 5.6s ease-in-out infinite;
+}
+@keyframes moat-ring-pulse {
+  0%, 100% { stroke: rgba(255,177,71,0.45); }
+  50%      { stroke: rgba(255,177,71,0.75); }
+}
+
+/* Legacy platform (mainframe) — visible from stage 0 as the featured element,
+   dims a notch on stage 1 when the workshops take centre stage. */
+.workshops-svg .platform { opacity: 0.92; transition: opacity 0.8s ease; }
+.beat-workshops[data-stage="1"] .workshops-svg .platform { opacity: 0.55; }
+
+/* Mainframe internal life — runs from stage 0, continuously */
+.workshops-svg .reel-cw {
+  animation: reel-cw 28s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.workshops-svg .reel-ccw {
+  animation: reel-ccw 28s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes reel-cw  { to { transform: rotate(360deg); } }
+@keyframes reel-ccw { to { transform: rotate(-360deg); } }
+
+.workshops-svg .led {
+  animation: led-flicker 4.2s steps(1, end) infinite;
+}
+@keyframes led-flicker {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+.workshops-svg .led:nth-of-type(7n+1) { animation-delay: -0.1s; }
+.workshops-svg .led:nth-of-type(7n+2) { animation-delay: -0.7s; }
+.workshops-svg .led:nth-of-type(7n+3) { animation-delay: -1.3s; }
+.workshops-svg .led:nth-of-type(7n+4) { animation-delay: -1.9s; }
+.workshops-svg .led:nth-of-type(7n+5) { animation-delay: -2.5s; }
+.workshops-svg .led:nth-of-type(7n+6) { animation-delay: -3.1s; }
+.workshops-svg .led:nth-of-type(7n+7) { animation-delay: -3.7s; }
+
+.workshops-svg .crt-cursor {
+  animation: crt-cursor-blink 1.1s steps(1, end) infinite;
+}
+@keyframes crt-cursor-blink {
+  0%, 50%  { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Workshop TIME labels (3 HOURS, A WEEKEND, ONE DAY, AN AFTERNOON) — huge,
+   glow-pulsing, staggered. The hero of each card. */
+.workshops-svg .ws-time {
+  filter: drop-shadow(0 0 6px rgba(107,255,176,0.5));
+  animation: ws-time-pulse 3s ease-in-out infinite;
+}
+@keyframes ws-time-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(107,255,176,0.5)); }
+  50%      { filter: drop-shadow(0 0 22px rgba(107,255,176,0.95)); }
+}
+.workshops-svg .ws-1 .ws-time { animation-delay: 0s; }
+.workshops-svg .ws-2 .ws-time { animation-delay: -0.75s; }
+.workshops-svg .ws-3 .ws-time { animation-delay: -1.5s; }
+.workshops-svg .ws-4 .ws-time { animation-delay: -2.25s; }
+
+/* Swarm — background mesh-green dots representing the many unseen builds
+   happening around the platform. Stagger via nth-of-type cycle. */
+.workshops-svg .swarm-dot {
+  fill: #6bffb0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.beat-workshops[data-stage="1"] .workshops-svg .swarm-dot {
+  animation: swarm-pulse 3.6s ease-in-out infinite;
+}
+@keyframes swarm-pulse {
+  0%, 100% { opacity: 0.08; }
+  45%      { opacity: 0.75; }
+  60%      { opacity: 0.75; }
+}
+.workshops-svg .swarm-dot:nth-of-type(8n+1) { animation-delay: -0.1s; }
+.workshops-svg .swarm-dot:nth-of-type(8n+2) { animation-delay: -0.5s; }
+.workshops-svg .swarm-dot:nth-of-type(8n+3) { animation-delay: -1.0s; }
+.workshops-svg .swarm-dot:nth-of-type(8n+4) { animation-delay: -1.5s; }
+.workshops-svg .swarm-dot:nth-of-type(8n+5) { animation-delay: -2.0s; }
+.workshops-svg .swarm-dot:nth-of-type(8n+6) { animation-delay: -2.5s; }
+.workshops-svg .swarm-dot:nth-of-type(8n+7) { animation-delay: -3.0s; }
+.workshops-svg .swarm-dot:nth-of-type(8n+8) { animation-delay: -3.4s; }
+
+.workshops-foot {
+  width: 100%;
+  max-width: 1340px;
+  margin-top: 16px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: var(--t-body-sm);
+  color: var(--paper-soft);
+  opacity: 0;
+  transition: opacity 0.6s ease 0.9s;
+}
+.beat-workshops[data-stage="1"] .workshops-foot { opacity: 1; }
+.workshops-foot b {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  color: var(--mesh-green);
+}
+.workshops-foot .outliers {
+  display: inline-block;
+  margin-left: 14px;
+  padding: 4px 12px;
+  border: 1px solid rgba(107,255,176,0.55);
+  color: var(--mesh-green);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: calc(var(--t-body-sm) - 2px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  vertical-align: 2px;
+  animation: outliers-pulse 2.6s ease-in-out infinite;
+}
+@keyframes outliers-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(107,255,176,0.25); border-color: rgba(107,255,176,0.50); }
+  50%      { box-shadow: 0 0 28px rgba(107,255,176,0.7);  border-color: rgba(107,255,176,0.95); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 8 — BOTH TRUE
+   3 stages: title alone (0) → moat side (1) → mesh side + closing line (2).
+   Left uses Beat 3 typography. Right uses Beat 7 mesh polish. Center divider
+   breathes; bottom closing line gets an amber→mesh-green underline fusing
+   the two sides.
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-both { background: #02030a; padding: 0; }
+.both-frame { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1px 1fr; position: relative; }
+
+.both-divider {
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, var(--amber) 25%, var(--amber) 75%, transparent 100%);
+  opacity: 0.6;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0s;
+}
+.beat-both.is-active .both-divider {
+  transform: scaleY(1);
+  animation: divider-breath 6s ease-in-out infinite;
+}
+@keyframes divider-breath {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.92; }
+}
+
+.both-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 18vh 4vw calc(14vh + var(--hud-zone));
+  position: relative;
+  overflow: hidden;
+}
+.both-side.left  { background: linear-gradient(135deg, #050a1c 0%, #060b24 70%, #0a1438 100%); }
+.both-side.right { background: radial-gradient(ellipse at center, #061018 0%, #02060c 80%); }
+
+/* LEFT canvas — slow blue motes drifting upward (slide-3 atmosphere) */
+.both-left-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.beat-both[data-stage="1"] .both-left-canvas,
+.beat-both[data-stage="2"] .both-left-canvas { opacity: 1; }
+
+/* RIGHT swarm — small mesh-green dots (slide-7 swarm, scaled to side-panel) */
+.both-right-swarm {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.r-dot {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: clamp(3px, 0.3vw, 5px);
+  height: clamp(3px, 0.3vw, 5px);
+  background: var(--mesh-green);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+.beat-both[data-stage="2"] .r-dot {
+  animation: r-dot-pulse 3.6s ease-in-out infinite;
+}
+@keyframes r-dot-pulse {
+  0%, 100% { opacity: 0.08; }
+  45%      { opacity: 0.75; }
+  60%      { opacity: 0.75; }
+}
+.r-dot:nth-of-type(7n+1) { animation-delay: -0.1s; }
+.r-dot:nth-of-type(7n+2) { animation-delay: -0.7s; }
+.r-dot:nth-of-type(7n+3) { animation-delay: -1.3s; }
+.r-dot:nth-of-type(7n+4) { animation-delay: -1.9s; }
+.r-dot:nth-of-type(7n+5) { animation-delay: -2.5s; }
+.r-dot:nth-of-type(7n+6) { animation-delay: -3.1s; }
+.r-dot:nth-of-type(7n+7) { animation-delay: -3.6s; }
+
+/* ── LEFT: moat stack — typography on void (slide-3 architecture, half-width) ── */
+.both-mini-stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2px, 0.4vh, 6px);
+  width: 100%;
+  max-width: 460px;
+  margin-bottom: clamp(18px, 2.2vh, 32px);
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  position: relative;
+  z-index: 1;
+}
+.beat-both[data-stage="1"] .both-mini-stack,
+.beat-both[data-stage="2"] .both-mini-stack {
+  opacity: 1; transform: translateX(0); transition-delay: 0.1s;
+}
+.mini-strat {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(12px, 1.2vw, 22px);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  height: auto;
+  text-transform: none;
+  font-size: inherit;
+  letter-spacing: normal;
+  color: var(--paper);
+}
+.mini-strat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--amber);
+  font-size: clamp(28px, 2.4vw, 42px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  flex: 0 0 auto;
+  min-width: clamp(42px, 3.2vw, 60px);
+  text-shadow: 0 0 14px rgba(255,177,71,0.3);
+  opacity: 0.95;
+  margin: 0;
+}
+.beat-both[data-stage="1"] .mini-strat-num,
+.beat-both[data-stage="2"] .mini-strat-num {
+  animation: mini-strat-pulse 5.2s ease-in-out infinite;
+}
+@keyframes mini-strat-pulse {
+  0%, 100% { text-shadow: 0 0 10px rgba(255,177,71,0.25); }
+  50%      { text-shadow: 0 0 26px rgba(255,177,71,0.75); }
+}
+.mini-strat:nth-child(1) .mini-strat-num { animation-delay: -0.4s; }
+.mini-strat:nth-child(2) .mini-strat-num { animation-delay: -1.2s; }
+.mini-strat:nth-child(3) .mini-strat-num { animation-delay: -2.0s; }
+.mini-strat:nth-child(4) .mini-strat-num { animation-delay: -2.8s; }
+.mini-strat:nth-child(5) .mini-strat-num { animation-delay: -3.6s; }
+.mini-strat:nth-child(6) .mini-strat-num { animation-delay: -4.4s; }
+.mini-strat-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: clamp(14px, 1.15vw, 20px);
+  color: var(--paper);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+/* CRM Data row — the live floor in mesh-cyan */
+.mini-strat:nth-child(6) .mini-strat-num { color: var(--mesh-cyan); }
+.beat-both[data-stage="1"] .mini-strat:nth-child(6) .mini-strat-num,
+.beat-both[data-stage="2"] .mini-strat:nth-child(6) .mini-strat-num {
+  animation: mini-strat-pulse-floor 4.6s ease-in-out infinite;
+}
+@keyframes mini-strat-pulse-floor {
+  0%, 100% { text-shadow: 0 0 14px rgba(69,242,255,0.45); }
+  50%      { text-shadow: 0 0 38px rgba(69,242,255,0.95); }
+}
+.mini-strat:nth-child(6) .mini-strat-label { color: var(--mesh-cyan); }
+
+/* ── RIGHT: mesh workshops ── */
+.both-mini-workshops {
+  width: 86%;
+  max-width: 420px;
+  margin-bottom: clamp(18px, 2.2vh, 32px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  opacity: 0;
+  transform: translateX(12px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  position: relative;
+  z-index: 1;
+}
+.beat-both[data-stage="2"] .both-mini-workshops {
+  opacity: 1; transform: translateX(0); transition-delay: 0.1s;
+}
+.mini-ws {
+  background: rgba(69,242,255,0.04);
+  border: 1px solid rgba(69,242,255,0.22);
+  border-top: 2px solid var(--mesh-green);
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+}
+.mini-ws-name {
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--mesh-cyan);
+  margin-bottom: 8px;
+}
+.mini-ws-time {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: clamp(13px, 1vw, 17px);
+  letter-spacing: -0.01em;
+  color: var(--mesh-green);
+  text-transform: none;
+}
+.beat-both[data-stage="2"] .mini-ws-time {
+  filter: drop-shadow(0 0 5px rgba(107,255,176,0.45));
+  animation: mini-ws-time-glow 3s ease-in-out infinite;
+}
+@keyframes mini-ws-time-glow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(107,255,176,0.45)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(107,255,176,0.95)); }
+}
+.mini-ws:nth-child(1) .mini-ws-time { animation-delay: 0s; }
+.mini-ws:nth-child(2) .mini-ws-time { animation-delay: -0.75s; }
+.mini-ws:nth-child(3) .mini-ws-time { animation-delay: -1.5s; }
+.mini-ws:nth-child(4) .mini-ws-time { animation-delay: -2.25s; }
+.mini-ws-svg { width: 100%; height: 36px; display: block; margin: 6px 0 8px; }
+
+/* ── Side labels & headlines — stage-gated per side ── */
+.both-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: var(--t-label);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.3s;
+  position: relative;
+  z-index: 1;
+}
+.beat-both[data-stage="1"] .both-side.left .both-label,
+.beat-both[data-stage="2"] .both-side.left .both-label { opacity: 1; }
+.beat-both[data-stage="2"] .both-side.right .both-label { opacity: 1; }
+.both-side.left .both-label  { color: var(--amber); }
+.both-side.right .both-label { color: var(--mesh-cyan); }
+
+.both-headline {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  text-align: center;
+  max-width: 92%;
+  color: var(--paper);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  position: relative;
+  z-index: 1;
+}
+.beat-both[data-stage="1"] .both-side.left .both-headline,
+.beat-both[data-stage="2"] .both-side.left .both-headline {
+  opacity: 1; transform: translateY(0); transition-delay: 0.45s;
+}
+.beat-both[data-stage="2"] .both-side.right .both-headline {
+  opacity: 1; transform: translateY(0); transition-delay: 0.45s;
+}
+.both-headline b { font-weight: 700; }
+.both-side.left  .both-headline b { color: var(--amber-soft); }
+.both-side.right .both-headline b { color: var(--mesh-green); }
+
+/* Promoted top center — "Both things are true" (visible at all stages) */
+.both-center {
+  position: absolute;
+  left: 0; right: 0;
+  top: 4vh;
+  text-align: center;
+  z-index: 10;
+  padding: 0 4vw;
+}
+.both-center-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--mute);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.both-center-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: clamp(36px, 4.4vw, 60px);
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  line-height: 1.1;
+}
+.both-center-title b { color: var(--amber); }
+
+/* Closing line — appears at stage 2; gradient underline fuses both sides */
+.both-bottom {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: calc(var(--hud-zone) + 18px);
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: clamp(20px, 2.2vw, 28px);
+  letter-spacing: -0.01em;
+  color: var(--paper-soft);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.8s;
+  padding: 0 4vw 22px;
+}
+.beat-both[data-stage="2"] .both-bottom { opacity: 1; }
+.both-bottom b {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  text-transform: uppercase;
+  color: var(--amber);
+  letter-spacing: 0.005em;
+  font-size: 1.06em;
+  margin-left: 10px;
+}
+.both-bottom::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: clamp(180px, 18vw, 320px);
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, var(--amber) 30%, var(--mesh-green) 70%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.8s ease 1.4s;
+}
+.beat-both[data-stage="2"] .both-bottom::after { opacity: 0.92; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 9 — THE BET  (4 stages, WILD punch entrance per fork)
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-bet { background: linear-gradient(180deg, #02030a 0%, #060b24 100%); }
+.bet-display {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: clamp(56px, 7vw, 104px);
+  letter-spacing: -0.035em;
+  color: var(--paper);
+  text-align: center;
+  line-height: 1.0;
+  margin-bottom: 18px;
+}
+.bet-display b {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  color: var(--amber);
+}
+.bet-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: clamp(20px, 2.4vw, 30px);
+  text-align: center;
+  letter-spacing: -0.01em;
+  margin-bottom: 56px;
+  color: var(--paper-soft);
+  line-height: 1.35;
+  max-width: 1300px;
+}
+.bet-subtitle b { color: var(--paper); font-weight: 700; }
+
+.forks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  max-width: 1240px;
+  width: 100%;
+  margin-bottom: 48px;
+  perspective: 2200px;
+  perspective-origin: center 40%;
+  transform-style: preserve-3d;
+}
+.fork {
+  position: relative;
+  text-align: center;
+  padding: 26px 20px 26px;
+  border-top: 2px solid;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+  opacity: 0;
+  transform-origin: center;
+  overflow: visible;
+}
+
+/* Shockwave + sweep pseudo-elements — fire after each fork lands */
+.fork::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 44%;
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.fork::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+  transform: translateX(-130%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+  mix-blend-mode: screen;
+}
+
+.fork-1 { color: var(--mesh-green); }
+.fork-2 { color: var(--amber); }
+.fork-3 { color: var(--sfdc); }
+
+/* ── ENTRANCES — three RIDICULOUS moves; each more bombastic than slide 4 ── */
+
+/* Fork 1 — TORNADO SPIRAL: 3 full rotations from far bottom-left, multi-bounce */
+@keyframes forkOneTornado {
+  0%   { opacity: 0; transform: translate(-220%, 140%) rotate(-1080deg) scale(0.08); filter: blur(14px) brightness(3.2) saturate(2.6) contrast(1.5); }
+  22%  { opacity: 1; filter: blur(0) brightness(2.3) saturate(1.8); }
+  55%  { transform: translate(10%, -6%) rotate(20deg) scale(1.22); filter: brightness(1.7) saturate(1.4); }
+  70%  { transform: translate(-4%, 3%) rotate(-6deg) scale(0.90); }
+  82%  { transform: translate(2%, -1%) rotate(3deg) scale(1.05); }
+  92%  { transform: translate(-0.5%, 0) rotate(-1deg) scale(0.99); }
+  100% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); filter: brightness(1) saturate(1); }
+}
+
+/* Fork 2 — METEOR EXPLOSION: plummets from way above, smashes with massive overshoot */
+@keyframes forkTwoMeteor {
+  0%   { opacity: 0; transform: translateY(-420%) scale(0.20) rotate(14deg); filter: blur(16px) brightness(3.5) saturate(2.8) contrast(1.5); }
+  28%  { opacity: 1; filter: blur(0) brightness(2.4) saturate(1.9); }
+  50%  { transform: translateY(16%) scale(1.28) rotate(-5deg); filter: brightness(1.8) saturate(1.5); }
+  62%  { transform: translateY(-9%) scale(0.84) rotate(2.4deg); }
+  74%  { transform: translateY(3.5%) scale(1.07) rotate(-1.2deg); }
+  86%  { transform: translateY(-1%) scale(0.98) rotate(0.4deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: brightness(1); }
+}
+
+/* Fork 3 — DIMENSIONAL FLIP: 3D rotateY + rotateX with chromatic ghost */
+@keyframes forkThreeFlip {
+  0%   { opacity: 0; transform: rotateY(-200deg) rotateX(60deg) translateZ(-400px) scale(0.5); filter: blur(12px) brightness(3.2) hue-rotate(-120deg) saturate(2.5); }
+  18%  { opacity: 1; filter: blur(0) brightness(2.4) hue-rotate(-60deg); }
+  38%  { transform: rotateY(75deg) rotateX(-28deg) translateZ(60px) scale(1.16); filter: hue-rotate(50deg) saturate(2.2) brightness(2); }
+  56%  { transform: rotateY(-32deg) rotateX(10deg) translateZ(10px) scale(0.93); filter: hue-rotate(-20deg) saturate(1.6) brightness(1.6); }
+  72%  { transform: rotateY(12deg) rotateX(-3deg) translateZ(0) scale(1.06); filter: hue-rotate(8deg) saturate(1.2) brightness(1.2); }
+  86%  { transform: rotateY(-3deg) rotateX(1deg) translateZ(0) scale(0.99); filter: hue-rotate(0) saturate(1); }
+  100% { opacity: 1; transform: rotateY(0) rotateX(0) translateZ(0) scale(1); filter: brightness(1); }
+}
+
+/* Shockwave + sweep keyframes */
+@keyframes forkShockwave {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); border-width: 4px; }
+  18%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(6); border-width: 0.5px; }
+}
+@keyframes forkSweep {
+  0%   { opacity: 0; transform: translateX(-130%); }
+  22%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(170%); }
+}
+
+/* Stage gates — bind dramatic entrance + shockwave + sweep per fork */
+.beat-bet[data-stage="1"] .fork:nth-child(1),
+.beat-bet[data-stage="2"] .fork:nth-child(1),
+.beat-bet[data-stage="3"] .fork:nth-child(1) {
+  animation: forkOneTornado 1.55s cubic-bezier(0.18, 1.2, 0.45, 1) both;
+  transform-origin: bottom left;
+}
+.beat-bet[data-stage="2"] .fork:nth-child(2),
+.beat-bet[data-stage="3"] .fork:nth-child(2) {
+  animation: forkTwoMeteor 1.55s cubic-bezier(0.18, 1.4, 0.45, 1) both;
+}
+.beat-bet[data-stage="3"] .fork:nth-child(3) {
+  animation: forkThreeFlip 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.beat-bet[data-stage="1"] .fork:nth-child(1)::before,
+.beat-bet[data-stage="2"] .fork:nth-child(1)::before,
+.beat-bet[data-stage="3"] .fork:nth-child(1)::before,
+.beat-bet[data-stage="2"] .fork:nth-child(2)::before,
+.beat-bet[data-stage="3"] .fork:nth-child(2)::before,
+.beat-bet[data-stage="3"] .fork:nth-child(3)::before {
+  animation: forkShockwave 1.4s 1.0s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.beat-bet[data-stage="1"] .fork:nth-child(1)::after,
+.beat-bet[data-stage="2"] .fork:nth-child(1)::after,
+.beat-bet[data-stage="3"] .fork:nth-child(1)::after,
+.beat-bet[data-stage="2"] .fork:nth-child(2)::after,
+.beat-bet[data-stage="3"] .fork:nth-child(2)::after,
+.beat-bet[data-stage="3"] .fork:nth-child(3)::after {
+  animation: forkSweep 0.95s 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.fork-1 { border-top-color: var(--mesh-green); }
+.fork-2 { border-top-color: var(--amber); }
+.fork-3 { border-top-color: var(--sfdc); }
+.fork-prob {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.fork-1 .fork-prob { color: var(--mesh-green); }
+.fork-2 .fork-prob { color: var(--amber); }
+.fork-3 .fork-prob { color: var(--sfdc-soft); }
+.fork-headline {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--paper);
+  margin-bottom: 14px;
+  letter-spacing: -0.015em;
+}
+.fork-body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--paper-soft);
+}
+.bet-undisputed {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: clamp(22px, 2.2vw, 30px);
+  color: var(--paper);
+  text-align: center;
+  letter-spacing: -0.015em;
+  border-top: 1px solid var(--rule);
+  padding-top: 28px;
+  opacity: 0;
+  transition: opacity 0.7s ease 0.3s;
+  max-width: 1240px;
+}
+.beat-bet[data-stage="3"] .bet-undisputed { opacity: 1; }
+.bet-undisputed b {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 800;
+  color: var(--amber);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEAT 10 — THE QUESTION
+   The closer. 2 stages:
+     stage 0 — interface layer intact (faint UI mock), lead-in + question visible
+     stage 1 — BANG: interface SHATTERS away, empire BENEATH revealed; massive
+               amber shockwave + screen flash + question pulse; word "empire"
+               ignites with amber glow on a continuous breath.
+═══════════════════════════════════════════════════════════════════════════ */
+.beat-question {
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(255,177,71,0.05) 0%, rgba(255,177,71,0) 65%),
+    radial-gradient(ellipse at 50% 30%, rgba(0,161,224,0.04) 0%, transparent 70%),
+    #02030a;
+  text-align: center;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* ── EMPIRE: vast architectural depth, revealed at stage 1 ── */
+.q-empire {
+  position: absolute;
+  inset: 50% 0 0 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1.1s ease 0.5s;
+}
+.beat-question[data-stage="1"] .q-empire { opacity: 1; }
+.empire-layer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--n) * 3.6%);
+  width: calc(98% - var(--n) * 6.2%);
+  height: 13%;
+  border-top: 1px solid rgba(255,177,71, calc(0.60 - var(--n) * 0.05));
+  background: linear-gradient(180deg,
+    rgba(255,177,71, calc(0.14 - var(--n) * 0.012)) 0%,
+    rgba(255,177,71, calc(0.04 - var(--n) * 0.004)) 60%,
+    transparent 100%);
+}
+.empire-layer::after {
+  /* faint side pillars on each layer — empire architecture cue */
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100%;
+  background:
+    linear-gradient(90deg, rgba(255,177,71, calc(0.32 - var(--n) * 0.025)) 0%, transparent 4%),
+    linear-gradient(270deg, rgba(255,177,71, calc(0.32 - var(--n) * 0.025)) 0%, transparent 4%);
+}
+.beat-question[data-stage="1"] .empire-layer {
+  animation: empire-breathe 8s ease-in-out infinite;
+}
+@keyframes empire-breathe {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-1.4%); }
+}
+.empire-layer:nth-of-type(1) { animation-delay: -0.4s; }
+.empire-layer:nth-of-type(2) { animation-delay: -1.0s; }
+.empire-layer:nth-of-type(3) { animation-delay: -1.6s; }
+.empire-layer:nth-of-type(4) { animation-delay: -2.2s; }
+.empire-layer:nth-of-type(5) { animation-delay: -2.8s; }
+.empire-layer:nth-of-type(6) { animation-delay: -3.4s; }
+.empire-layer:nth-of-type(7) { animation-delay: -4.0s; }
+.empire-layer:nth-of-type(8) { animation-delay: -4.6s; }
+.empire-layer:nth-of-type(9) { animation-delay: -5.2s; }
+.empire-layer:nth-of-type(10) { animation-delay: -5.8s; }
+
+.q-empire-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── INTERFACE: generic UI mock in upper half; shatters away at stage 1 ── */
+.q-interface {
+  position: absolute;
+  inset: 0 0 50% 0;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.beat-question[data-stage="1"] .q-interface { opacity: 0; transition-delay: 0.7s; }
+.ui-tile {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: var(--h);
+  background: rgba(200, 210, 230, 0.05);
+  border: 1px solid rgba(200, 210, 230, 0.20);
+  transform: translate(0, 0) rotate(0) scale(1);
+  opacity: 0.7;
+  transition:
+    transform 1.0s cubic-bezier(0.55, -0.2, 0.65, 0.4),
+    opacity 0.7s ease;
+}
+.beat-question[data-stage="1"] .ui-tile {
+  transform: translate(var(--dx), var(--dy)) rotate(var(--dr)) scale(0.05);
+  opacity: 0;
+}
+
+/* ── SEAM: the fault between surface and depth ── */
+.q-seam {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,177,71,0.35) 50%, transparent 100%);
+  z-index: 3;
+  transform: scaleX(0.5);
+  transition: transform 0.7s ease, height 0.5s ease, background 0.5s ease, box-shadow 0.5s ease;
+}
+.beat-question.is-active .q-seam { transform: scaleX(1); transition-delay: 0.3s; }
+.beat-question[data-stage="1"] .q-seam {
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,177,71,0.6) 12%,
+    var(--amber) 38%,
+    #ffffff 50%,
+    var(--amber) 62%,
+    rgba(255,177,71,0.6) 88%,
+    transparent 100%);
+  box-shadow:
+    0 0 24px var(--amber),
+    0 0 80px rgba(255,177,71,0.55),
+    0 0 200px rgba(255,177,71,0.25);
+  animation: q-seam-breathe 4.5s ease-in-out infinite;
+  transition-delay: 0.4s;
+}
+@keyframes q-seam-breathe {
+  0%, 100% { box-shadow: 0 0 24px var(--amber), 0 0 80px rgba(255,177,71,0.45), 0 0 200px rgba(255,177,71,0.18); }
+  50%      { box-shadow: 0 0 48px var(--amber), 0 0 140px rgba(255,177,71,0.75), 0 0 320px rgba(255,177,71,0.4); }
+}
+
+/* ── TEXT ── */
+.q-block {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 6vw calc(var(--hud-zone) + 40px);
+  z-index: 6;
+  pointer-events: none;
+}
+.q-leadin {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: clamp(16px, 1.5vw, 22px);
+  color: var(--paper-soft);
+  letter-spacing: 0.01em;
+  margin-bottom: clamp(28px, 3.5vh, 56px);
+  opacity: 0.85;
+  transition: opacity 0.7s ease;
+  max-width: 900px;
+}
+.beat-question[data-stage="1"] .q-leadin { opacity: 0.45; transition-delay: 1.0s; }
+
+.q-question {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: clamp(34px, 4.5vw, 84px);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: var(--paper);
+  max-width: 1700px;
+  opacity: 1;
+}
+.beat-question[data-stage="1"] .q-question {
+  animation: q-question-bang 1.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both,
+             q-question-breath 6s ease-in-out 2.6s infinite;
+}
+@keyframes q-question-bang {
+  0%   { transform: translateY(0) scale(1); filter: brightness(1); letter-spacing: -0.035em; }
+  15%  { transform: translateY(0) scale(1.06); filter: brightness(2.2); letter-spacing: -0.045em; }
+  100% { transform: translateY(0) scale(1); filter: brightness(1); letter-spacing: -0.035em; }
+}
+@keyframes q-question-breath {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50%      { text-shadow: 0 0 38px rgba(255,177,71,0.22); }
+}
+.q-empire-word {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  color: var(--amber);
+  letter-spacing: -0.045em;
+  text-shadow: 0 0 18px rgba(255,177,71,0.35);
+}
+.beat-question[data-stage="1"] .q-empire-word {
+  animation: q-empire-ignite 4.4s ease-in-out infinite;
+}
+@keyframes q-empire-ignite {
+  0%, 100% { text-shadow: 0 0 30px rgba(255,177,71,0.55), 0 0 80px rgba(255,177,71,0.30); }
+  50%      { text-shadow: 0 0 58px rgba(255,177,71,0.95), 0 0 160px rgba(255,177,71,0.65), 0 0 320px rgba(255,177,71,0.3); }
+}
+.q-interface-word {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  color: var(--paper-soft);
+}
+.beat-question[data-stage="1"] .q-interface-word {
+  color: rgba(200, 210, 230, 0.55);
+  text-decoration: line-through;
+  text-decoration-color: rgba(200, 210, 230, 0.35);
+  text-decoration-thickness: 1px;
+  transition: color 0.6s ease 1.4s, text-decoration-color 0.6s ease 1.4s;
+}
+
+/* ── SHOCKWAVE ring — fires at stage 1, expands to 40× ── */
+.q-shockwave {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 100px; height: 100px;
+  margin: -50px 0 0 -50px;
+  border-radius: 50%;
+  border: 4px solid var(--amber);
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.beat-question[data-stage="1"] .q-shockwave {
+  animation: q-shockwave-burst 1.9s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes q-shockwave-burst {
+  0%   { opacity: 0; transform: scale(0); border-width: 5px; }
+  12%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(40); border-width: 0.3px; }
+}
+
+/* ── FLASH — full-stage amber pulse on impact ── */
+.q-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(255,177,71,0.32) 0%,
+    rgba(255,177,71,0.10) 35%,
+    transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  mix-blend-mode: screen;
+}
+.beat-question[data-stage="1"] .q-flash {
+  animation: q-flash-burst 1.0s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes q-flash-burst {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.q-foot {
+  position: absolute;
+  bottom: calc(var(--hud-zone) + 18px);
+  left: 0; right: 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  color: var(--mute);
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.8s ease 2.2s;
+  z-index: 7;
+}
+.beat-question.is-active .q-foot { opacity: 0.7; }
+.q-foot b { color: var(--amber); }
+
+/* Responsive */
+@media (max-width: 980px) {
+  .pillars { grid-template-columns: 1fr; gap: 14px; }
+  .pillar { min-height: auto; padding: 22px; }
+  .pillar-big { font-size: 56px; }
+  .forks { grid-template-columns: 1fr; gap: 20px; }
+  .both-frame { grid-template-columns: 1fr; grid-template-rows: 1fr 1px 1fr; }
+  .both-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--amber), transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="fx-grain" aria-hidden="true"></div>
+<div class="fx-vignette" aria-hidden="true"></div>
+
+<div class="deck" id="deck">
+
+  <!-- BEAT 1 — HOOK -->
+  <section class="beat beat-hook is-active" data-beat="1">
+    <div class="beat-label">Beat 01 · <b>Hook</b></div>
+    <canvas class="hook-canvas" id="hookCanvas"></canvas>
+    <p class="hook-leadin">A co-founder asks the key question <b>every legacy product team must ask</b></p>
+    <p class="hook-quote">"Why should you <em class="hook-ever">ever<canvas class="hook-ever-canvas"></canvas></em> log into Salesforce again?"</p>
+    <div class="hook-attrib">Parker Harris · Co-Founder, Salesforce</div>
+  </section>
+
+  <!-- BEAT 2 — STAKE (3 stages) -->
+  <section class="beat beat-stake" data-beat="2" data-stages="2" data-stage="0">
+    <div class="beat-label">Beat 02 · <b>The Stake</b></div>
+    <div class="stake-block">
+      <div class="stake-eyebrow">Every Legacy SaaS is Facing This</div>
+      <p class="stake-line">
+        The product that got them here<br>
+        won't be the product<br>
+        that takes them forward.
+      </p>
+      <p class="stake-line" style="margin-top:52px">
+        Not a <span class="strike">rethink</span>. <span class="rebuild">A rebuild.</span>
+      </p>
+      <div class="stake-footer">
+        <div class="legacy-tag">Legacy Platforms</div>
+        <div class="stake-footer-row">
+          <span>CRM</span><span>HR</span><span>ITSM</span><span>Procurement</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEAT 3 — MOAT -->
+  <section class="beat beat-moat" data-beat="3">
+    <canvas class="moat-canvas" id="moatCanvas"></canvas>
+    <div class="beat-label">Beat 03 · <b>The Moat</b></div>
+    <h2 class="moat-title">The moat isn't software. It's <b>years of accumulated context.</b></h2>
+    <div class="moat-stack">
+      <div class="moat-row"><span class="moat-num">06</span><span class="moat-label">Institutional Memory</span><span class="moat-stream"></span></div>
+      <div class="moat-row"><span class="moat-num">05</span><span class="moat-label">Business Logic</span><span class="moat-stream"></span></div>
+      <div class="moat-row"><span class="moat-num">04</span><span class="moat-label">Workflows built around CRM data</span><span class="moat-stream"></span></div>
+      <div class="moat-row"><span class="moat-num">03</span><span class="moat-label">Org-Specific Context</span><span class="moat-stream"></span></div>
+      <div class="moat-row"><span class="moat-num">02</span><span class="moat-label">Metadata</span><span class="moat-stream"></span></div>
+      <div class="moat-row"><span class="moat-num">01</span><span class="moat-label">CRM Data</span><span class="moat-stream"></span></div>
+    </div>
+    <p class="moat-caption">Same shape applies to <b>HR, ITSM, Procurement</b></p>
+  </section>
+
+  <!-- BEAT 4 — ANNOUNCEMENT (4 stages, wild box entrance) -->
+  <section class="beat beat-announce" data-beat="4" data-stages="4" data-stage="0">
+    <div class="beat-label">Beat 04 · <b>The Announcement</b></div>
+    <h2 class="announce-title">3 Things From The Announcement That Stand Out For Me</h2>
+    <div class="pillars">
+
+      <article class="pillar">
+        <div class="pillar-num">01 · Scaffolding</div>
+        <div class="pillar-big">60<sup>+30</sup></div>
+        <div class="pillar-bigsub">MCP Tools and Skills · Out of the box</div>
+        <h3 class="pillar-headline">Access for your coding agent of choice.</h3>
+        <p class="pillar-body">Direct line into <b>the platform's data, workflows, and business logic</b>. Not "here's an API, good luck"; instead, scaffolding that <b>shortens the time to build something powerful.</b></p>
+      </article>
+
+      <article class="pillar">
+        <div class="pillar-num">02 · Reliability</div>
+        <div class="pillar-big">Evals</div>
+        <div class="pillar-bigsub">+ Observability · Reliability before production</div>
+        <h3 class="pillar-headline">Recognizing that agents are probabilistic.</h3>
+        <p class="pillar-body">Built-in evals and observability for <b>reliability before production</b>. Agent evals are challenging to design, so making them first-class and built-in is <b>brilliant.</b></p>
+      </article>
+
+      <article class="pillar">
+        <div class="pillar-num">03 · The Sandbox Effect</div>
+        <div class="pillar-big">Sandbox</div>
+        <div class="pillar-bigsub">Unmarketed · But effective</div>
+        <h3 class="pillar-headline">Inside an environment IT already trusts.</h3>
+        <p class="pillar-body">Evals plus observability inside SFDC works like a sandbox. SFDC doesn't market it that way. <b>The practical effect is one anyway.</b></p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- BEAT 5 — USE CASE (4 stages, caption moved to stage 3) -->
+  <section class="beat beat-usecase" data-beat="5" data-stages="4" data-stage="0">
+    <div class="beat-label">Beat 05 · <b>The Use Case</b></div>
+    <h2 class="usecase-title">An insurance underwriter, every quarter, renews <b>hundreds of policies.</b></h2>
+    <div class="usecase-sub">An agent synthesizes, then filters the ones that need human judgment</div>
+
+    <div class="usecase-svg-wrap">
+      <svg class="usecase-svg" viewBox="0 0 1380 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="streamGradCrm" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#4cc3ec" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#4cc3ec" stop-opacity="0.95"/>
+          </linearGradient>
+          <linearGradient id="streamGradExt" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#ff8a4c" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#ff8a4c" stop-opacity="0.95"/>
+          </linearGradient>
+          <radialGradient id="agentGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#ffb147" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#ffb147" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Agent (always visible) — bigger center sphere, "+ FILTER" removed -->
+        <g transform="translate(740, 240)">
+          <circle r="138" fill="url(#agentGlow)"/>
+          <circle class="agent-node" r="96" fill="#0a1438" stroke="#ffb147" stroke-width="1.8"/>
+          <text y="-12" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="15" fill="#ffd27a" letter-spacing="3.5">AGENT</text>
+          <text y="26" text-anchor="middle" font-family="Fraunces, serif" font-style="italic" font-weight="600" font-size="32" fill="#f0f1f5">synthesis</text>
+        </g>
+
+        <!-- CRM GROUP — streams stop at the left edge of the (now larger) agent circle -->
+        <g class="group-crm">
+          <path d="M 92,40 L 80,40 L 80,250 L 92,250" fill="none" stroke="#4cc3ec" stroke-width="1.2" opacity="0.55"/>
+          <text x="62" y="148" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" fill="#4cc3ec" letter-spacing="2.8" transform="rotate(-90 62 148)">FROM SALESFORCE</text>
+          <g fill="none" stroke="url(#streamGradCrm)" stroke-width="1.8">
+            <path class="stream" d="M 290,70  C 430,70  540,170 644,168"/>
+            <path class="stream" d="M 290,150 C 430,150 540,210 642,224"/>
+            <path class="stream" d="M 290,230 C 430,230 540,238 644,256"/>
+          </g>
+          <g font-family="Inter, sans-serif" font-size="19" font-weight="500" fill="#c6cad4">
+            <text x="278" y="76"  text-anchor="end">Claims history</text>
+            <text x="278" y="156" text-anchor="end">Policy terms</text>
+            <text x="278" y="236" text-anchor="end">Broker notes</text>
+          </g>
+          <g fill="#4cc3ec">
+            <circle cx="290" cy="70"  r="5"/>
+            <circle cx="290" cy="150" r="5"/>
+            <circle cx="290" cy="230" r="5"/>
+          </g>
+        </g>
+
+        <!-- EXTERNAL GROUP -->
+        <g class="group-external">
+          <path d="M 92,290 L 80,290 L 80,420 L 92,420" fill="none" stroke="#ff8a4c" stroke-width="1.2" opacity="0.55"/>
+          <text x="62" y="358" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" fill="#ff8a4c" letter-spacing="2.8" transform="rotate(-90 62 358)">REAL-TIME · EXTERNAL</text>
+          <g fill="none" stroke="url(#streamGradExt)" stroke-width="1.8">
+            <path class="stream" d="M 290,310 C 430,310 540,270 644,288"/>
+            <path class="stream" d="M 290,400 C 430,400 540,330 644,316"/>
+          </g>
+          <g font-family="Inter, sans-serif" font-size="19" font-weight="500" fill="#c6cad4">
+            <text x="278" y="316" text-anchor="end">Climate forecasts</text>
+            <text x="278" y="406" text-anchor="end">Industry incidents</text>
+          </g>
+          <g fill="#ff8a4c">
+            <circle cx="290" cy="310" r="5"/>
+            <circle cx="290" cy="400" r="5"/>
+          </g>
+        </g>
+
+        <!-- OUTPUTS — bigger right spheres; lines end AT the sphere edge -->
+        <g class="group-output">
+          <g>
+            <path d="M 836,222 C 970,190 1070,140 1108,110" fill="none" stroke="#ffb147" stroke-width="2.2"/>
+            <circle cx="1176" cy="100" r="68" fill="#1a1408" stroke="#ffb147" stroke-width="2"/>
+            <text x="1176" y="86"  text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" fill="#ffd27a" letter-spacing="2.5">NEEDS</text>
+            <text x="1176" y="118" text-anchor="middle" font-family="Fraunces, serif" font-style="italic" font-weight="500" font-size="26" fill="#ffd27a">judgment</text>
+            <text x="1290" y="100" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="20" fill="#ffb147" letter-spacing="1">~30%</text>
+          </g>
+          <g opacity="0.55">
+            <path d="M 836,258 C 970,300 1070,350 1108,372" fill="none" stroke="#8089a0" stroke-width="1.6" stroke-dasharray="4 6"/>
+            <circle cx="1176" cy="380" r="68" fill="#08090f" stroke="#8089a0" stroke-width="1.6"/>
+            <text x="1176" y="366" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="500" font-size="13" fill="#8089a0" letter-spacing="2.5">AUTO</text>
+            <text x="1176" y="396" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="24" fill="#c6cad4">renew</text>
+            <text x="1290" y="380" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="20" fill="#8089a0" letter-spacing="1">~70%</text>
+          </g>
+        </g>
+
+        <!-- Caption — now stage-3 only, appears with the outputs as a payoff -->
+        <g class="group-output-caption">
+          <text x="700" y="465" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="17" fill="#c6cad4" letter-spacing="0.5">
+            The underwriter spends hours only where hours are earned.
+          </text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- BEAT 6 — TURN -->
+  <section class="beat beat-turn" data-beat="6">
+    <div class="beat-label">Beat 06 · <b>The Turn</b></div>
+    <div class="turn-frame">
+      <div class="turn-strata turn-strata-top"></div>
+      <div class="turn-strata turn-strata-bot"></div>
+      <div class="turn-tear-band"></div>
+      <div class="turn-tear"></div>
+      <div class="turn-word">However.</div>
+      <div class="turn-foot">There's another side that's equally true</div>
+    </div>
+  </section>
+
+  <!-- BEAT 7 — WORKSHOPS (2 stages: platform alone → workshops swarm around it) -->
+  <section class="beat beat-workshops" data-beat="7" data-stages="2" data-stage="0">
+    <div class="beat-label">Beat 07 · <b>Build Around It</b></div>
+    <h2 class="workshops-title">Domain teams don't need the platform <b>to build the tool.</b></h2>
+    <div class="workshops-sub">Their own builds, their own pace, outside the moat</div>
+
+    <div class="workshops-svg-wrap">
+      <svg class="workshops-svg" viewBox="0 0 1340 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="stratumGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0a1438"/><stop offset="100%" stop-color="#2640b8"/>
+          </linearGradient>
+        </defs>
+
+        <!-- ── BACKGROUND SWARM — abstract dots representing the many other unseen builds ── -->
+        <g class="swarm">
+          <circle class="swarm-dot" cx="60"   cy="14"  r="2.2"/>
+          <circle class="swarm-dot" cx="180"  cy="22"  r="2.6"/>
+          <circle class="swarm-dot" cx="380"  cy="10"  r="2"/>
+          <circle class="swarm-dot" cx="540"  cy="24"  r="3"/>
+          <circle class="swarm-dot" cx="710"  cy="12"  r="2.4"/>
+          <circle class="swarm-dot" cx="900"  cy="22"  r="2"/>
+          <circle class="swarm-dot" cx="1080" cy="10"  r="2.6"/>
+          <circle class="swarm-dot" cx="1260" cy="20"  r="2"/>
+          <circle class="swarm-dot" cx="100"  cy="240" r="2.4"/>
+          <circle class="swarm-dot" cx="240"  cy="120" r="2"/>
+          <circle class="swarm-dot" cx="380"  cy="190" r="3"/>
+          <circle class="swarm-dot" cx="450"  cy="250" r="2"/>
+          <circle class="swarm-dot" cx="430"  cy="80"  r="2.2"/>
+          <circle class="swarm-dot" cx="920"  cy="80"  r="2.6"/>
+          <circle class="swarm-dot" cx="900"  cy="190" r="2.4"/>
+          <circle class="swarm-dot" cx="870"  cy="240" r="2"/>
+          <circle class="swarm-dot" cx="1080" cy="120" r="2"/>
+          <circle class="swarm-dot" cx="240"  cy="370" r="2"/>
+          <circle class="swarm-dot" cx="1080" cy="370" r="2.2"/>
+          <circle class="swarm-dot" cx="1240" cy="240" r="2.6"/>
+          <circle class="swarm-dot" cx="60"   cy="466" r="2"/>
+          <circle class="swarm-dot" cx="220"  cy="455" r="2.4"/>
+          <circle class="swarm-dot" cx="400"  cy="470" r="2"/>
+          <circle class="swarm-dot" cx="560"  cy="460" r="3"/>
+          <circle class="swarm-dot" cx="720"  cy="470" r="2.4"/>
+          <circle class="swarm-dot" cx="900"  cy="455" r="2"/>
+          <circle class="swarm-dot" cx="1100" cy="470" r="2.6"/>
+          <circle class="swarm-dot" cx="1280" cy="460" r="2"/>
+        </g>
+
+        <!-- ── BOUNDARY RING — "the moat" — wraps just the legacy platform; workshops sit clearly outside ── -->
+        <ellipse class="moat-ring" cx="670" cy="220" rx="210" ry="225"
+                 fill="none" stroke="rgba(255,177,71,0.32)" stroke-width="1.4"
+                 stroke-dasharray="6 8"/>
+
+        <!-- ── LEGACY MAINFRAME — antiquated cabinet with tape reels, status lights,
+             CRT readout and control panel. Cabinet at (560, 60), 220×320. ── -->
+        <g class="platform" transform="translate(560, 60)">
+          <!-- outer cabinet -->
+          <rect x="0" y="0" width="220" height="320" fill="#0a0e18" stroke="#3a4060" stroke-width="2.5"/>
+          <rect x="6" y="6" width="208" height="308" fill="none" stroke="#1f253a" stroke-width="1"/>
+
+          <!-- tape-drive panel -->
+          <rect x="12" y="14" width="196" height="80" fill="#060912" stroke="#2a3050" stroke-width="1"/>
+          <!-- "tape" lines bridging the two reels -->
+          <path d="M 70,30 Q 110,22 150,30" stroke="#6b7180" stroke-width="1.1" fill="none" opacity="0.55"/>
+          <path d="M 70,78 Q 110,86 150,78" stroke="#6b7180" stroke-width="1.1" fill="none" opacity="0.55"/>
+          <!-- left reel (translates into position; inner g rotates) -->
+          <g transform="translate(70, 54)">
+            <g class="reel reel-cw">
+              <circle r="26" fill="#0a0e18" stroke="#5a6080" stroke-width="1.5"/>
+              <circle r="8"  fill="#2a3050" stroke="#5a6080" stroke-width="0.8"/>
+              <g stroke="#5a6080" stroke-width="1">
+                <line x1="0"   y1="-24" x2="0"   y2="-10"/>
+                <line x1="0"   y1="10"  x2="0"   y2="24"/>
+                <line x1="-24" y1="0"   x2="-10" y2="0"/>
+                <line x1="10"  y1="0"   x2="24"  y2="0"/>
+                <line x1="-17" y1="-17" x2="-7"  y2="-7"/>
+                <line x1="17"  y1="17"  x2="7"   y2="7"/>
+              </g>
+            </g>
+          </g>
+          <!-- right reel (counter-rotation) -->
+          <g transform="translate(150, 54)">
+            <g class="reel reel-ccw">
+              <circle r="26" fill="#0a0e18" stroke="#5a6080" stroke-width="1.5"/>
+              <circle r="8"  fill="#2a3050" stroke="#5a6080" stroke-width="0.8"/>
+              <g stroke="#5a6080" stroke-width="1">
+                <line x1="0"   y1="-24" x2="0"   y2="-10"/>
+                <line x1="0"   y1="10"  x2="0"   y2="24"/>
+                <line x1="-24" y1="0"   x2="-10" y2="0"/>
+                <line x1="10"  y1="0"   x2="24"  y2="0"/>
+                <line x1="-17" y1="17"  x2="-7"  y2="7"/>
+                <line x1="17"  y1="-17" x2="7"   y2="-7"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- status-light panel -->
+          <rect x="12" y="100" width="196" height="50" fill="#030611" stroke="#2a3050" stroke-width="1"/>
+          <g class="led-grid" transform="translate(22, 109)">
+            <!-- row 1 -->
+            <rect class="led" x="0"   y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="15"  y="0"  width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="30"  y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="45"  y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="60"  y="0"  width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="75"  y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="90"  y="0"  width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="105" y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="120" y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="135" y="0"  width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="150" y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="165" y="0"  width="11" height="5" fill="#ff8a4c"/>
+            <!-- row 2 -->
+            <rect class="led" x="0"   y="14" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="15"  y="14" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="30"  y="14" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="45"  y="14" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="60"  y="14" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="75"  y="14" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="90"  y="14" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="105" y="14" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="120" y="14" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="135" y="14" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="150" y="14" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="165" y="14" width="11" height="5" fill="#ff8a4c"/>
+            <!-- row 3 -->
+            <rect class="led" x="0"   y="28" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="15"  y="28" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="30"  y="28" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="45"  y="28" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="60"  y="28" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="75"  y="28" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="90"  y="28" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="105" y="28" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="120" y="28" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="135" y="28" width="11" height="5" fill="#3a2415"/>
+            <rect class="led" x="150" y="28" width="11" height="5" fill="#ff8a4c"/>
+            <rect class="led" x="165" y="28" width="11" height="5" fill="#ff8a4c"/>
+          </g>
+
+          <!-- CRT readout -->
+          <rect x="12" y="156" width="196" height="80" fill="#020410" stroke="#2a3050" stroke-width="1"/>
+          <g font-family="JetBrains Mono, monospace" font-size="8.5" fill="#6bff7a">
+            <text x="22" y="174">&gt; SYS_READY</text>
+            <text x="22" y="187" opacity="0.7">&gt; ROADMAP_Q3.2027</text>
+            <text x="22" y="200" opacity="0.5">&gt; QUEUE: 47 PENDING</text>
+            <text x="22" y="213" opacity="0.4">&gt; WAITING_FOR_REVIEW</text>
+            <text x="22" y="226">&gt; <tspan class="crt-cursor" fill="#6bff7a">_</tspan></text>
+          </g>
+
+          <!-- control panel -->
+          <rect x="12" y="242" width="196" height="66" fill="#0a0e18" stroke="#2a3050" stroke-width="1"/>
+          <g transform="translate(32, 275)">
+            <circle cx="0"  cy="0" r="11" fill="#1a1e2f" stroke="#5a6080" stroke-width="1.2"/>
+            <line   x1="0"  y1="-11" x2="0"  y2="-4" stroke="#aaa" stroke-width="1.3"/>
+            <circle cx="38" cy="0" r="11" fill="#1a1e2f" stroke="#5a6080" stroke-width="1.2"/>
+            <line   x1="38" y1="-11" x2="42" y2="-4" stroke="#aaa" stroke-width="1.3"/>
+            <circle cx="76" cy="0" r="11" fill="#1a1e2f" stroke="#5a6080" stroke-width="1.2"/>
+            <line   x1="76" y1="-11" x2="72" y2="-4" stroke="#aaa" stroke-width="1.3"/>
+            <rect x="106" y="-12" width="56" height="24" fill="#1f2a14" stroke="#5a6080" stroke-width="1.2"/>
+            <text x="134" y="4" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="9" fill="#8a9a6a" letter-spacing="1">RUN</text>
+          </g>
+        </g>
+
+        <!-- platform label below the cabinet -->
+        <text x="670" y="404" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="14" letter-spacing="3" fill="#c6cad4">LEGACY SAAS PLATFORMS</text>
+        <text x="670" y="426" text-anchor="middle" font-family="Inter, sans-serif" font-style="italic" font-weight="400" font-size="13" fill="#8089a0">months or years to ship</text>
+
+        <g class="workshop ws-1" transform="translate(40, 30)">
+          <rect width="280" height="170" fill="rgba(69,242,255,0.05)" stroke="rgba(69,242,255,0.30)" stroke-width="1"/>
+          <rect width="280" height="2" fill="#6bffb0"/>
+          <text x="20" y="30" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" letter-spacing="2.5" fill="#6bffb0">SENTIMENT ANALYSIS</text>
+          <text x="20" y="48" font-family="Inter, sans-serif" font-weight="500" font-size="11" fill="#8089a0">customer feedback scorer</text>
+          <g transform="translate(30, 65)">
+            <g fill="#45f2ff">
+              <circle cx="0" cy="8"  r="2.5"/>
+              <circle cx="0" cy="22" r="2.5"/>
+              <circle cx="0" cy="36" r="2.5"/>
+              <circle cx="0" cy="50" r="2.5"/>
+            </g>
+            <g fill="none" stroke="#45f2ff" stroke-width="0.9" opacity="0.7">
+              <path d="M 0,8  C 40,8  60,29 90,29"/>
+              <path d="M 0,22 C 40,22 60,29 90,29"/>
+              <path d="M 0,36 C 40,36 60,29 90,29"/>
+              <path d="M 0,50 C 40,50 60,29 90,29"/>
+            </g>
+            <circle cx="90" cy="29" r="8" fill="#02030a" stroke="#ffb147" stroke-width="1.4"/>
+            <rect x="135" y="6"  width="40" height="8" fill="#6bffb0"/>
+            <rect x="135" y="22" width="22" height="8" fill="#8089a0" opacity="0.6"/>
+            <rect x="135" y="38" width="14" height="8" fill="#ff8a4c"/>
+            <line x1="125" y1="6"  x2="125" y2="46" stroke="#8089a0" stroke-width="0.5" opacity="0.5"/>
+            <g font-family="JetBrains Mono, monospace" font-weight="700" font-size="7" letter-spacing="1" fill="#c6cad4">
+              <text x="180" y="13">POS</text>
+              <text x="180" y="29">NEU</text>
+              <text x="180" y="45">NEG</text>
+            </g>
+          </g>
+          <text x="20" y="158" font-family="JetBrains Mono, monospace" font-weight="500" font-size="10" letter-spacing="2" fill="#c6cad4">SHIPPED IN</text>
+          <text class="ws-time" x="270" y="158" text-anchor="end" font-family="Inter, sans-serif" font-weight="800" font-size="24" letter-spacing="-0.5" fill="#6bffb0">3 HOURS</text>
+        </g>
+
+        <g class="workshop ws-2" transform="translate(1020, 30)">
+          <rect width="280" height="170" fill="rgba(69,242,255,0.05)" stroke="rgba(69,242,255,0.30)" stroke-width="1"/>
+          <rect width="280" height="2" fill="#6bffb0"/>
+          <text x="20" y="30" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" letter-spacing="2.5" fill="#6bffb0">SALES OPS</text>
+          <text x="20" y="48" font-family="Inter, sans-serif" font-weight="500" font-size="11" fill="#8089a0">pipeline forecast helper</text>
+          <g transform="translate(40, 65)">
+            <line x1="0" y1="55" x2="200" y2="55" stroke="#8089a0" stroke-width="0.5" opacity="0.4"/>
+            <path d="M 0,38 L 50,30 L 100,18 L 150,10 L 200,3 L 200,28 L 150,38 L 100,46 L 50,52 L 0,58 Z" fill="#45f2ff" opacity="0.15"/>
+            <path d="M 0,48 L 50,40 L 100,30 L 150,20 L 200,10" stroke="#45f2ff" stroke-width="1.5" fill="none"/>
+            <g fill="#45f2ff">
+              <circle cx="0"   cy="48" r="2.5"/>
+              <circle cx="50"  cy="40" r="2.5"/>
+              <circle cx="100" cy="30" r="2.5"/>
+              <circle cx="150" cy="20" r="2.5"/>
+            </g>
+            <circle cx="200" cy="10" r="4" fill="#02030a" stroke="#6bffb0" stroke-width="1.5"/>
+            <text x="210" y="14" font-family="Inter, sans-serif" font-weight="700" font-size="9" fill="#6bffb0">+18%</text>
+          </g>
+          <text x="20" y="158" font-family="JetBrains Mono, monospace" font-weight="500" font-size="10" letter-spacing="2" fill="#c6cad4">SHIPPED IN</text>
+          <text class="ws-time" x="270" y="158" text-anchor="end" font-family="Inter, sans-serif" font-weight="800" font-size="24" letter-spacing="-0.5" fill="#6bffb0">A WEEKEND</text>
+        </g>
+
+        <g class="workshop ws-3" transform="translate(40, 280)">
+          <rect width="280" height="170" fill="rgba(69,242,255,0.05)" stroke="rgba(69,242,255,0.30)" stroke-width="1"/>
+          <rect width="280" height="2" fill="#6bffb0"/>
+          <text x="20" y="30" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" letter-spacing="2.5" fill="#6bffb0">CUSTOMER SUPPORT</text>
+          <text x="20" y="48" font-family="Inter, sans-serif" font-weight="500" font-size="11" fill="#8089a0">ticket triage and routing</text>
+          <g transform="translate(60, 65)">
+            <g stroke="#45f2ff" stroke-width="0.9" fill="none" opacity="0.7">
+              <path d="M 80,4 L 30,28"/>
+              <path d="M 80,4 L 130,28"/>
+              <path d="M 30,28 L 5,54"/>
+              <path d="M 30,28 L 55,54"/>
+              <path d="M 130,28 L 105,54"/>
+              <path d="M 130,28 L 155,54"/>
+            </g>
+            <circle cx="80" cy="4" r="5" fill="#02030a" stroke="#ffb147" stroke-width="1.5"/>
+            <g fill="#02030a" stroke="#45f2ff" stroke-width="1.2">
+              <circle cx="30"  cy="28" r="4"/>
+              <circle cx="130" cy="28" r="4"/>
+            </g>
+            <g fill="#6bffb0">
+              <circle cx="5"   cy="54" r="3"/>
+              <circle cx="55"  cy="54" r="3"/>
+              <circle cx="105" cy="54" r="3"/>
+              <circle cx="155" cy="54" r="3"/>
+            </g>
+          </g>
+          <text x="20" y="158" font-family="JetBrains Mono, monospace" font-weight="500" font-size="10" letter-spacing="2" fill="#c6cad4">SHIPPED IN</text>
+          <text class="ws-time" x="270" y="158" text-anchor="end" font-family="Inter, sans-serif" font-weight="800" font-size="24" letter-spacing="-0.5" fill="#6bffb0">ONE DAY</text>
+        </g>
+
+        <g class="workshop ws-4" transform="translate(1020, 280)">
+          <rect width="280" height="170" fill="rgba(69,242,255,0.05)" stroke="rgba(69,242,255,0.30)" stroke-width="1"/>
+          <rect width="280" height="2" fill="#6bffb0"/>
+          <text x="20" y="30" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" letter-spacing="2.5" fill="#6bffb0">FINANCE OPS</text>
+          <text x="20" y="48" font-family="Inter, sans-serif" font-weight="500" font-size="11" fill="#8089a0">month-end reconciler</text>
+          <g transform="translate(40, 65)">
+            <g stroke="#45f2ff" stroke-width="1.2" fill="none" opacity="0.8">
+              <path d="M 0,8  L 80,8  L 130,28"/>
+              <path d="M 0,22 L 80,22 L 130,28"/>
+              <path d="M 0,36 L 80,36 L 130,28"/>
+              <path d="M 0,50 L 80,50 L 130,28"/>
+            </g>
+            <g fill="#45f2ff">
+              <circle cx="0" cy="8"  r="2.5"/>
+              <circle cx="0" cy="22" r="2.5"/>
+              <circle cx="0" cy="36" r="2.5"/>
+              <circle cx="0" cy="50" r="2.5"/>
+            </g>
+            <rect x="135" y="20" width="60" height="16" fill="#02030a" stroke="#6bffb0" stroke-width="1.5"/>
+            <text x="165" y="32" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="9" fill="#6bffb0" letter-spacing="1">RECONCILED</text>
+          </g>
+          <text x="20" y="158" font-family="JetBrains Mono, monospace" font-weight="500" font-size="10" letter-spacing="2" fill="#c6cad4">SHIPPED IN</text>
+          <text class="ws-time" x="270" y="158" text-anchor="end" font-family="Inter, sans-serif" font-weight="800" font-size="24" letter-spacing="-0.5" fill="#6bffb0">AN AFTERNOON</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <p class="workshops-foot">Months of platform roadmap, collapsed into <b>hours of domain-team work.</b> <span class="outliers">These aren't outliers</span></p>
+  </section>
+
+  <!-- BEAT 8 — BOTH TRUE (3 stages: title → moat → mesh) -->
+  <section class="beat beat-both" data-beat="8" data-stages="3" data-stage="0">
+    <div class="beat-label">Beat 08 · <b>Both True</b></div>
+    <div class="both-frame">
+      <div class="both-center">
+        <div class="both-center-eyebrow">At the same time</div>
+        <div class="both-center-title">Both things are <b>true.</b></div>
+      </div>
+
+      <aside class="both-side left">
+        <canvas class="both-left-canvas" id="bothLeftCanvas"></canvas>
+        <div class="both-mini-stack">
+          <div class="mini-strat"><span class="mini-strat-num">06</span><span class="mini-strat-label">Institutional Memory</span></div>
+          <div class="mini-strat"><span class="mini-strat-num">05</span><span class="mini-strat-label">Business Logic</span></div>
+          <div class="mini-strat"><span class="mini-strat-num">04</span><span class="mini-strat-label">Workflows</span></div>
+          <div class="mini-strat"><span class="mini-strat-num">03</span><span class="mini-strat-label">Org-Specific Context</span></div>
+          <div class="mini-strat"><span class="mini-strat-num">02</span><span class="mini-strat-label">Metadata</span></div>
+          <div class="mini-strat"><span class="mini-strat-num">01</span><span class="mini-strat-label">CRM Data</span></div>
+        </div>
+        <div class="both-label">The Moat</div>
+        <p class="both-headline">The data moat is <b>real.</b><br>SFDC is making it <b>more useful to agents.</b></p>
+      </aside>
+
+      <div class="both-divider"></div>
+
+      <aside class="both-side right">
+        <div class="both-right-swarm">
+          <span class="r-dot" style="--x:8%;--y:14%"></span>
+          <span class="r-dot" style="--x:22%;--y:8%"></span>
+          <span class="r-dot" style="--x:38%;--y:18%"></span>
+          <span class="r-dot" style="--x:56%;--y:10%"></span>
+          <span class="r-dot" style="--x:72%;--y:16%"></span>
+          <span class="r-dot" style="--x:88%;--y:8%"></span>
+          <span class="r-dot" style="--x:6%;--y:48%"></span>
+          <span class="r-dot" style="--x:94%;--y:46%"></span>
+          <span class="r-dot" style="--x:14%;--y:78%"></span>
+          <span class="r-dot" style="--x:30%;--y:86%"></span>
+          <span class="r-dot" style="--x:48%;--y:80%"></span>
+          <span class="r-dot" style="--x:64%;--y:88%"></span>
+          <span class="r-dot" style="--x:82%;--y:82%"></span>
+          <span class="r-dot" style="--x:42%;--y:38%"></span>
+          <span class="r-dot" style="--x:62%;--y:36%"></span>
+          <span class="r-dot" style="--x:18%;--y:30%"></span>
+          <span class="r-dot" style="--x:78%;--y:32%"></span>
+          <span class="r-dot" style="--x:50%;--y:70%"></span>
+        </div>
+        <div class="both-mini-workshops">
+          <div class="mini-ws">
+            <div class="mini-ws-name">Sentiment</div>
+            <svg class="mini-ws-svg" viewBox="0 0 100 36" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#45f2ff"><circle cx="6" cy="8" r="1.6"/><circle cx="6" cy="18" r="1.6"/><circle cx="6" cy="28" r="1.6"/></g>
+              <g stroke="#45f2ff" stroke-width="0.7" fill="none" opacity="0.7">
+                <path d="M 6,8  C 30,8  40,18 55,18"/>
+                <path d="M 6,18 C 30,18 40,18 55,18"/>
+                <path d="M 6,28 C 30,28 40,18 55,18"/>
+              </g>
+              <circle cx="55" cy="18" r="4" fill="#02030a" stroke="#ffb147" stroke-width="1"/>
+              <rect x="68" y="10" width="22" height="4" fill="#6bffb0"/>
+              <rect x="68" y="16" width="14" height="4" fill="#8089a0" opacity="0.6"/>
+              <rect x="68" y="22" width="8"  height="4" fill="#ff8a4c"/>
+            </svg>
+            <div class="mini-ws-time">3 hours</div>
+          </div>
+          <div class="mini-ws">
+            <div class="mini-ws-name">Sales Ops</div>
+            <svg class="mini-ws-svg" viewBox="0 0 100 36" xmlns="http://www.w3.org/2000/svg">
+              <line x1="0" y1="30" x2="100" y2="30" stroke="#8089a0" stroke-width="0.4" opacity="0.5"/>
+              <path d="M 0,26 L 25,22 L 50,16 L 75,10 L 100,5" stroke="#45f2ff" stroke-width="1.2" fill="none"/>
+              <g fill="#45f2ff"><circle cx="0" cy="26" r="1.6"/><circle cx="25" cy="22" r="1.6"/><circle cx="50" cy="16" r="1.6"/><circle cx="75" cy="10" r="1.6"/></g>
+              <circle cx="100" cy="5" r="2.5" fill="#02030a" stroke="#6bffb0" stroke-width="1.2"/>
+            </svg>
+            <div class="mini-ws-time">A weekend</div>
+          </div>
+          <div class="mini-ws">
+            <div class="mini-ws-name">Support</div>
+            <svg class="mini-ws-svg" viewBox="0 0 100 36" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#45f2ff" stroke-width="0.7" fill="none" opacity="0.7">
+                <path d="M 50,4 L 25,18"/><path d="M 50,4 L 75,18"/>
+                <path d="M 25,18 L 12,32"/><path d="M 25,18 L 38,32"/>
+                <path d="M 75,18 L 62,32"/><path d="M 75,18 L 88,32"/>
+              </g>
+              <circle cx="50" cy="4" r="3" fill="#02030a" stroke="#ffb147" stroke-width="1"/>
+              <g fill="#02030a" stroke="#45f2ff" stroke-width="0.9"><circle cx="25" cy="18" r="2.5"/><circle cx="75" cy="18" r="2.5"/></g>
+              <g fill="#6bffb0"><circle cx="12" cy="32" r="1.8"/><circle cx="38" cy="32" r="1.8"/><circle cx="62" cy="32" r="1.8"/><circle cx="88" cy="32" r="1.8"/></g>
+            </svg>
+            <div class="mini-ws-time">One day</div>
+          </div>
+          <div class="mini-ws">
+            <div class="mini-ws-name">Finance Ops</div>
+            <svg class="mini-ws-svg" viewBox="0 0 100 36" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#45f2ff" stroke-width="1" fill="none" opacity="0.8">
+                <path d="M 0,8  L 55,8  L 75,18"/>
+                <path d="M 0,18 L 55,18 L 75,18"/>
+                <path d="M 0,28 L 55,28 L 75,18"/>
+              </g>
+              <g fill="#45f2ff"><circle cx="0" cy="8" r="1.6"/><circle cx="0" cy="18" r="1.6"/><circle cx="0" cy="28" r="1.6"/></g>
+              <rect x="78" y="14" width="20" height="8" fill="#02030a" stroke="#6bffb0" stroke-width="1"/>
+            </svg>
+            <div class="mini-ws-time">An afternoon</div>
+          </div>
+        </div>
+        <div class="both-label">The Mesh</div>
+        <p class="both-headline">Building <b>around</b> the moat<br>is just as <b>real.</b></p>
+      </aside>
+
+      <div class="both-bottom">Neither erases the other. <b>The future has both.</b></div>
+    </div>
+  </section>
+
+  <!-- BEAT 9 — THE BET (4 stages, wild box entrance) -->
+  <section class="beat beat-bet" data-beat="9" data-stages="4" data-stage="0">
+    <div class="beat-label">Beat 09 · <b>The Bet</b></div>
+    <h1 class="bet-display"><b>SFDC's bet.</b></h1>
+    <p class="bet-subtitle">Customers build <b>on</b> the moat, not around it.</p>
+
+    <div class="forks">
+      <article class="fork fork-1">
+        <div class="fork-prob">Scenario A</div>
+        <p class="fork-headline">They may be right.</p>
+        <p class="fork-body">The moat compounds. Agents inside become the obvious place to build. Customers consolidate.</p>
+      </article>
+      <article class="fork fork-2">
+        <div class="fork-prob">Scenario B</div>
+        <p class="fork-headline">They may be partially right.</p>
+        <p class="fork-body">Some workloads stay on-platform; others slip out. SFDC keeps the deep ones, loses the long tail.</p>
+      </article>
+      <article class="fork fork-3">
+        <div class="fork-prob">Scenario C</div>
+        <p class="fork-headline">The moat may evaporate.</p>
+        <p class="fork-body">Faster than anyone expected, including SFDC. Agents access the data, then route around the workflows.</p>
+      </article>
+    </div>
+
+    <p class="bet-undisputed">What's not in dispute: <b>they see the shift, and they're moving on it.</b></p>
+  </section>
+
+  <!-- BEAT 10 — THE QUESTION (2 stages: interface intact → BANG, empire revealed) -->
+  <section class="beat beat-question" data-beat="10" data-stages="2" data-stage="0">
+    <div class="beat-label">Beat 10 · <b>The Question</b></div>
+
+    <!-- The EMPIRE beneath — vast architectural depth, revealed at stage 1 -->
+    <div class="q-empire" aria-hidden="true">
+      <div class="empire-layer" style="--n:1"></div>
+      <div class="empire-layer" style="--n:2"></div>
+      <div class="empire-layer" style="--n:3"></div>
+      <div class="empire-layer" style="--n:4"></div>
+      <div class="empire-layer" style="--n:5"></div>
+      <div class="empire-layer" style="--n:6"></div>
+      <div class="empire-layer" style="--n:7"></div>
+      <div class="empire-layer" style="--n:8"></div>
+      <div class="empire-layer" style="--n:9"></div>
+      <div class="empire-layer" style="--n:10"></div>
+      <canvas class="q-empire-canvas" id="empireCanvas"></canvas>
+    </div>
+
+    <!-- The INTERFACE layer above — generic UI mock; SHATTERS away at stage 1 -->
+    <div class="q-interface" aria-hidden="true">
+      <div class="ui-tile" style="--x:6%;--y:10%;--w:72px;--h:22px;--dx:-220%;--dy:-180%;--dr:-44deg"></div>
+      <div class="ui-tile" style="--x:18%;--y:22%;--w:120px;--h:48px;--dx:-180%;--dy:-220%;--dr:-22deg"></div>
+      <div class="ui-tile" style="--x:32%;--y:8%;--w:60px;--h:18px;--dx:-120%;--dy:-260%;--dr:-12deg"></div>
+      <div class="ui-tile" style="--x:46%;--y:18%;--w:160px;--h:34px;--dx:20%;--dy:-300%;--dr:8deg"></div>
+      <div class="ui-tile" style="--x:62%;--y:30%;--w:96px;--h:60px;--dx:160%;--dy:-200%;--dr:24deg"></div>
+      <div class="ui-tile" style="--x:78%;--y:12%;--w:80px;--h:22px;--dx:220%;--dy:-220%;--dr:36deg"></div>
+      <div class="ui-tile" style="--x:88%;--y:24%;--w:46px;--h:46px;--dx:260%;--dy:-160%;--dr:52deg"></div>
+      <div class="ui-tile" style="--x:12%;--y:34%;--w:140px;--h:30px;--dx:-220%;--dy:-80%;--dr:-30deg"></div>
+      <div class="ui-tile" style="--x:40%;--y:38%;--w:200px;--h:26px;--dx:0;--dy:-340%;--dr:-4deg"></div>
+      <div class="ui-tile" style="--x:70%;--y:42%;--w:110px;--h:36px;--dx:200%;--dy:-100%;--dr:28deg"></div>
+      <div class="ui-tile" style="--x:22%;--y:46%;--w:54px;--h:54px;--dx:-180%;--dy:-40%;--dr:-60deg"></div>
+      <div class="ui-tile" style="--x:54%;--y:46%;--w:90px;--h:18px;--dx:60%;--dy:-280%;--dr:14deg"></div>
+      <div class="ui-tile" style="--x:30%;--y:14%;--w:32px;--h:32px;--dx:-260%;--dy:-220%;--dr:-72deg"></div>
+      <div class="ui-tile" style="--x:84%;--y:38%;--w:120px;--h:24px;--dx:280%;--dy:-60%;--dr:42deg"></div>
+    </div>
+
+    <!-- The text -->
+    <div class="q-block">
+      <p class="q-leadin">Every legacy platform provider must ask itself:</p>
+      <h1 class="q-question">how strong is its <em class="q-empire-word">empire</em> beneath the <em class="q-interface-word">interface</em>?</h1>
+    </div>
+
+    <!-- BANG: shockwave + flash fire at stage 1 -->
+    <div class="q-shockwave" aria-hidden="true"></div>
+    <div class="q-flash" aria-hidden="true"></div>
+
+    <div class="q-foot">Press <b>R</b> to restart, <b>Esc</b> to exit</div>
+  </section>
+
+</div>
+
+<!-- HUD -->
+<nav class="hud" id="hud">
+  <span class="hud-hint">&larr; &rarr;</span>
+  <div class="hud-dots" id="hudDots"></div>
+  <span class="hud-hint"><span id="hudCounter">01 / 10</span><span id="hudStage" class="hud-stage"></span></span>
+</nav>
+
+<script>
+(function() {
+  const beats = Array.from(document.querySelectorAll('.beat'));
+  const total = beats.length;
+  const hudDots = document.getElementById('hudDots');
+  const hudCounter = document.getElementById('hudCounter');
+  const hudStage = document.getElementById('hudStage');
+  let current = 0;
+
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'hud-dot';
+    if (i === 0) dot.classList.add('is-active');
+    hudDots.appendChild(dot);
+  }
+  const dots = Array.from(hudDots.querySelectorAll('.hud-dot'));
+
+  if (!beats[0].classList.contains('is-active')) beats[0].classList.add('is-active');
+
+  function getStages(beat) { return parseInt(beat.dataset.stages || '1', 10); }
+  function getStage(beat)  { return parseInt(beat.dataset.stage  || '0', 10); }
+  function setStage(beat, s) {
+    beat.setAttribute('data-stage', String(s));
+    updateHudStage();
+  }
+  function updateHudStage() {
+    const beat = beats[current];
+    const stages = getStages(beat);
+    const stage = getStage(beat);
+    hudStage.textContent = stages > 1 ? ' · ' + (stage + 1) + '/' + stages : '';
+  }
+
+  function next() {
+    const beat = beats[current];
+    const stages = getStages(beat);
+    const stage = getStage(beat);
+    if (stage < stages - 1) { setStage(beat, stage + 1); return; }
+    goto(Math.min(current + 1, total - 1));
+  }
+  function prev() {
+    const beat = beats[current];
+    const stage = getStage(beat);
+    if (stage > 0) { setStage(beat, stage - 1); return; }
+    goto(Math.max(current - 1, 0));
+  }
+  function goto(idx) {
+    if (idx < 0 || idx >= total || idx === current) return;
+    beats[current].classList.remove('is-active');
+    current = idx;
+    const newBeat = beats[current];
+    newBeat.classList.add('is-active');
+    newBeat.setAttribute('data-stage', '0');
+    dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+    hudCounter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+    updateHudStage();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { e.preventDefault(); goto(0); }
+    else if (e.key === 'End')  { e.preventDefault(); goto(total - 1); }
+    else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); goto(0); }
+    else if (e.key === 'Escape') { document.exitFullscreen?.(); }
+    else if (/^[1-9]$/.test(e.key)) { e.preventDefault(); goto(parseInt(e.key, 10) - 1); }
+    else if (e.key === '0') { e.preventDefault(); goto(9); }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.hud')) return;
+    next();
+  });
+
+  const canvas = document.getElementById('hookCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    let W = 0, H = 0;
+    function resize() {
+      W = canvas.clientWidth = window.innerWidth;
+      H = canvas.clientHeight = window.innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    const N = 110;
+    const particles = Array.from({length: N}, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: -0.05 - Math.random() * 0.18,
+      r: 0.5 + Math.random() * 1.6,
+      a: 0.15 + Math.random() * 0.6,
+      hue: Math.random() < 0.7 ? 'rgba(0,161,224,' : 'rgba(76,195,236,'
+    }));
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      for (const p of particles) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+        if (p.x < -10) p.x = W + 10;
+        if (p.x > W + 10) p.x = -10;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.hue + p.a + ')';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = p.hue + (p.a * 0.12) + ')';
+        ctx.fill();
+      }
+      requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  // ─── beat 10 — auto-trigger the BANG ~700ms after the slide activates ──
+  const questionBeat = document.querySelector('.beat-question');
+  if (questionBeat) {
+    let autoTimer = null;
+    const obs = new MutationObserver(() => {
+      if (questionBeat.classList.contains('is-active')) {
+        if (autoTimer) clearTimeout(autoTimer);
+        questionBeat.setAttribute('data-stage', '0');
+        autoTimer = setTimeout(() => {
+          if (questionBeat.classList.contains('is-active')) {
+            questionBeat.setAttribute('data-stage', '1');
+          }
+        }, 700);
+      } else {
+        // reset when leaving the slide so re-entry replays the BANG
+        if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+        questionBeat.setAttribute('data-stage', '0');
+      }
+    });
+    obs.observe(questionBeat, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // ─── beat 10 (the question, the EMPIRE) — slow amber motes rising from depth ──
+  const empireCanvas = document.getElementById('empireCanvas');
+  if (empireCanvas) {
+    const ectx = empireCanvas.getContext('2d');
+    const edpr = Math.max(1, window.devicePixelRatio || 1);
+    let eW = 0, eH = 0;
+    function eResize() {
+      const r = empireCanvas.getBoundingClientRect();
+      eW = r.width; eH = r.height;
+      empireCanvas.width = Math.max(2, Math.floor(eW * edpr));
+      empireCanvas.height = Math.max(2, Math.floor(eH * edpr));
+      ectx.setTransform(edpr, 0, 0, edpr, 0, 0);
+    }
+    eResize();
+    window.addEventListener('resize', eResize);
+    const EM = 70;
+    const eMotes = Array.from({length: EM}, () => ({
+      x: Math.random() * eW,
+      y: Math.random() * eH,
+      vx: (Math.random() - 0.5) * 0.04,
+      vy: -0.025 - Math.random() * 0.09,
+      r: 0.5 + Math.random() * 1.6,
+      a: 0.06 + Math.random() * 0.42,
+    }));
+    function eTick() {
+      ectx.clearRect(0, 0, eW, eH);
+      for (const p of eMotes) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -10) { p.y = eH + 10; p.x = Math.random() * eW; }
+        if (p.x < -10) p.x = eW + 10;
+        if (p.x > eW + 10) p.x = -10;
+        ectx.beginPath();
+        ectx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ectx.fillStyle = `rgba(255,177,71,${p.a})`;
+        ectx.fill();
+        ectx.beginPath();
+        ectx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
+        ectx.fillStyle = `rgba(255,177,71,${p.a * 0.14})`;
+        ectx.fill();
+      }
+      requestAnimationFrame(eTick);
+    }
+    eTick();
+  }
+
+  // ─── beat 8 (both-true LEFT side) — slow blue motes, same idiom as beat 3 ──────
+  const bothLeftCanvas = document.getElementById('bothLeftCanvas');
+  if (bothLeftCanvas) {
+    const blctx = bothLeftCanvas.getContext('2d');
+    const bldpr = Math.max(1, window.devicePixelRatio || 1);
+    let blW = 0, blH = 0;
+    function blResize() {
+      const r = bothLeftCanvas.getBoundingClientRect();
+      blW = r.width;
+      blH = r.height;
+      bothLeftCanvas.width = Math.max(2, Math.floor(blW * bldpr));
+      bothLeftCanvas.height = Math.max(2, Math.floor(blH * bldpr));
+      blctx.setTransform(bldpr, 0, 0, bldpr, 0, 0);
+    }
+    blResize();
+    window.addEventListener('resize', blResize);
+    const BM = 55;
+    const blMotes = Array.from({length: BM}, () => ({
+      x: Math.random() * blW,
+      y: Math.random() * blH,
+      vx: (Math.random() - 0.5) * 0.05,
+      vy: -0.03 - Math.random() * 0.11,
+      r: 0.4 + Math.random() * 1.3,
+      a: 0.05 + Math.random() * 0.36,
+    }));
+    function blTick() {
+      blctx.clearRect(0, 0, blW, blH);
+      for (const p of blMotes) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -10) { p.y = blH + 10; p.x = Math.random() * blW; }
+        if (p.x < -10) p.x = blW + 10;
+        if (p.x > blW + 10) p.x = -10;
+        blctx.beginPath();
+        blctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        blctx.fillStyle = `rgba(74,111,240,${p.a})`;
+        blctx.fill();
+        blctx.beginPath();
+        blctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+        blctx.fillStyle = `rgba(74,111,240,${p.a * 0.14})`;
+        blctx.fill();
+      }
+      requestAnimationFrame(blTick);
+    }
+    blTick();
+  }
+
+  // ─── beat 3 moat — slow blue motes drifting upward like sediment ──────
+  const moatCanvas = document.getElementById('moatCanvas');
+  if (moatCanvas) {
+    const mctx = moatCanvas.getContext('2d');
+    const mdpr = Math.max(1, window.devicePixelRatio || 1);
+    let mW = 0, mH = 0;
+    function mResize() {
+      mW = moatCanvas.clientWidth = window.innerWidth;
+      mH = moatCanvas.clientHeight = window.innerHeight;
+      moatCanvas.width = mW * mdpr;
+      moatCanvas.height = mH * mdpr;
+      mctx.setTransform(mdpr, 0, 0, mdpr, 0, 0);
+    }
+    mResize();
+    window.addEventListener('resize', mResize);
+    const M = 90;
+    const motes = Array.from({length: M}, () => ({
+      x: Math.random() * mW,
+      y: Math.random() * mH,
+      vx: (Math.random() - 0.5) * 0.06,
+      vy: -0.04 - Math.random() * 0.14,
+      r: 0.4 + Math.random() * 1.5,
+      a: 0.06 + Math.random() * 0.42,
+    }));
+    function mTick() {
+      mctx.clearRect(0, 0, mW, mH);
+      for (const p of motes) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -10) { p.y = mH + 10; p.x = Math.random() * mW; }
+        if (p.x < -10) p.x = mW + 10;
+        if (p.x > mW + 10) p.x = -10;
+        mctx.beginPath();
+        mctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        mctx.fillStyle = `rgba(74,111,240,${p.a})`;
+        mctx.fill();
+        mctx.beginPath();
+        mctx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
+        mctx.fillStyle = `rgba(74,111,240,${p.a * 0.14})`;
+        mctx.fill();
+      }
+      requestAnimationFrame(mTick);
+    }
+    mTick();
+  }
+
+  // ─── per-word particle assembly inside the word "ever" ───────────────
+  // v4-style: cyan dots drift in from random positions and resolve into
+  // the shape of the word, shimmer subtly. Default-visible: the static
+  // glowing "ever" is already readable — this canvas is enhancement.
+  let everReady = false;
+  function startEverParticles() {
+    if (everReady) return;
+    const word = document.querySelector('.hook-ever');
+    const canvas = word && word.querySelector('.hook-ever-canvas');
+    if (!word || !canvas) return;
+    const ctx2 = canvas.getContext('2d');
+    if (!ctx2) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const fit = () => {
+      const r = canvas.getBoundingClientRect();
+      canvas.width = Math.max(2, Math.floor(r.width * dpr));
+      canvas.height = Math.max(2, Math.floor(r.height * dpr));
+      ctx2.setTransform(1, 0, 0, 1, 0, 0);
+      ctx2.scale(dpr, dpr);
+    };
+    fit();
+
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(2, Math.floor(rect.width));
+    const h = Math.max(2, Math.floor(rect.height));
+
+    const off = document.createElement('canvas');
+    off.width = w; off.height = h;
+    const octx = off.getContext('2d');
+    octx.fillStyle = '#fff';
+    octx.textBaseline = 'middle';
+    octx.textAlign = 'center';
+    const fs = Math.floor(h * 0.55);
+    octx.font = `800 ${fs}px Inter, sans-serif`;
+    octx.fillText('ever', w / 2, h / 2 + fs * 0.03);
+    const img = octx.getImageData(0, 0, w, h).data;
+
+    const targets = [];
+    const step = 4;
+    for (let y = 0; y < h; y += step) {
+      for (let x = 0; x < w; x += step) {
+        if (img[(y * w + x) * 4 + 3] > 128) targets.push({ x, y });
+      }
+    }
+    const MAX = 1100;
+    const sampled = targets.length > MAX
+      ? targets.filter((_, i) => i % Math.ceil(targets.length / MAX) === 0)
+      : targets;
+
+    const ps = sampled.map(t => ({
+      tx: t.x, ty: t.y,
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: 0, vy: 0,
+      a: 0.4 + Math.random() * 0.5,
+      size: 1 + Math.random() * 1.6,
+    }));
+
+    const t0 = performance.now();
+    function frame(now) {
+      const t = (now - t0) / 1000;
+      ctx2.clearRect(0, 0, w, h);
+      const breath = Math.sin(t * 1.1) * 0.6;
+      for (const p of ps) {
+        const dx = (p.tx + breath) - p.x;
+        const dy = p.ty - p.y;
+        p.vx = p.vx * 0.86 + dx * 0.04;
+        p.vy = p.vy * 0.86 + dy * 0.04;
+        p.x += p.vx; p.y += p.vy;
+        const shimmer = 0.55 + 0.45 * Math.sin(t * 2.4 + (p.tx + p.ty) * 0.04);
+        ctx2.fillStyle = `rgba(0,161,224,${p.a * shimmer})`;
+        ctx2.beginPath();
+        ctx2.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx2.fill();
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    canvas.classList.add('is-ready');
+    everReady = true;
+  }
+  // beat 1 is default-active; start immediately
+  if (document.querySelector('.beat-hook.is-active')) {
+    requestAnimationFrame(startEverParticles);
+  }
+
+  document.body.tabIndex = -1;
+  updateHudStage();
+})();
+</script>
+</body>
+</html>
