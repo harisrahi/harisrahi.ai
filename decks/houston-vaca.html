@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 HOUSTON MISSION · JULY 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka+One&family=Nunito:wght@400;600;700;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+
+/* ======================================
+   ROOT & RESET
+   ====================================== */
+:root {
+  /* ===== Palette (kid-bright on cosmic-black) ===== */
+  --space:    #06051a;
+  --space2:   #0c0b30;
+  --space3:   #120e3d;
+  --void:     #02010a;
+  --gold:     #ffd700;
+  --gold2:    #ffe95c;
+  --gold-soft:#ffe98a;
+  --teal:     #00e5ff;
+  --teal-deep:#0091ad;
+  --neon:     #00ff6a;
+  --pink:     #ff60c0;
+  --purple:   #b44fff;
+  --purple-deep:#5e1599;
+  --ice:      #cceeff;
+  --ice-deep: #6db8e3;
+  --coral:    #ff6b35;
+  --ocean:    #0047b3;
+  --deep-sea: #001a4d;
+
+  /* Per-kid accents */
+  --kid-wyatt:  var(--neon);
+  --kid-june:   #00d9f0;
+  --kid-haven:  var(--purple);
+  --kid-winter: var(--ice);
+
+  /* Per-section accents — used by sweep-cross and section rule lines */
+  --acc-hero:   var(--gold2);
+  --acc-crew:   var(--gold);
+  --acc-river:  var(--teal);
+  --acc-hotel:  var(--gold);
+  --acc-rooms:  rgba(255,255,255,0.6);
+  --acc-finale: var(--gold2);
+
+  /* ===== Easings — named cubic-beziers (the quality-floor rule).
+       Bare ease/linear/ease-in-out keywords are smells in this deck. ===== */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);          /* fast-in, slow-finish */
+  --ease-quick: cubic-bezier(0.4, 0, 0.2, 1);           /* general UI motion */
+  --ease-glide: cubic-bezier(0.65, 0, 0.35, 1);         /* slow ambient loops */
+  --ease-pop:   cubic-bezier(0.36, 0.07, 0.19, 0.97);   /* digit / button punch */
+  --ease-bloom: cubic-bezier(0.34, 1.56, 0.64, 1);      /* overshoot bloom */
+  --ease-drop:  cubic-bezier(0.175, 1.85, 0.32, 1);     /* theatrical letter-drop */
+
+  /* ===== Type scale (scroll-driven deck → clamp, not cqi) ===== */
+  --t-micro:   clamp(9px,  1.0vw, 11px);
+  --t-eyebrow: clamp(11px, 1.4vw, 14px);
+  --t-caption: clamp(12px, 1.6vw, 16px);
+  --t-body:    clamp(14px, 1.9vw, 18px);
+  --t-lede:    clamp(16px, 2.2vw, 22px);
+  --t-display: clamp(28px, 5vw,   60px);
+  --t-title:   clamp(42px, 7.5vw, 90px);
+  --t-cover:   clamp(56px, 12vw, 160px);
+
+  /* ===== Space scale ===== */
+  --space-xs: 6px;
+  --space-sm: 12px;
+  --space-md: 24px;
+  --space-lg: 48px;
+  --space-xl: 96px;
+
+  /* ===== Choreography timing ===== */
+  --reveal-dur:  720ms;
+  --punch-dur:   420ms;
+  --bloom-dur:   1100ms;
+  --sweep-dur:   1500ms;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+/* No scroll-behavior: smooth — this deck has no anchor navigation,
+   and smooth-scroll fights JS that polls scrollY. Native wheel only. */
+/* Disable Chrome's scroll-anchoring on the deck. Bisected via A/B/C variants
+   on 2026-06-16: anchoring was producing a "see-saw" feel near the hotel image
+   because IntersectionObserver-triggered .rv transforms shifted anchor candidates
+   above the viewport, and Chrome's anchoring algorithm fought the user's wheel.
+   Headless Chromium doesn't reproduce this — only real macOS Chrome does. */
+html, body { overflow-anchor: none; }
+
+body {
+  background: var(--space);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ======================================
+   STAR FIELD (fixed canvas behind all)
+   ====================================== */
+#starfield {
+  position: fixed; inset: 0;
+  z-index: 0; pointer-events: none;
+}
+
+/* z-index layer for all content */
+.layer { position: relative; z-index: 2; }
+
+/* ======================================
+   OPENING OVERLAY
+   ====================================== */
+#opening {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 0;
+  text-align: center; padding: 20px;
+  transition: opacity 900ms var(--ease-quick), transform 900ms var(--ease-quick);
+}
+#opening.out { opacity: 0; transform: scale(0.95); pointer-events: none; }
+
+.o-rocket {
+  font-size: clamp(60px, 12vw, 120px);
+  /* rocket bobs always; launches at BLAST! (4.9s) — synced to countdown */
+  animation: rocketLaunch 0.7s var(--ease-pop) forwards 4.9s, rocketFloat 1.5s var(--ease-glide) infinite;
+  display: block;
+}
+@keyframes rocketFloat {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  50%      { transform: translateY(-12px) rotate(5deg); }
+}
+@keyframes rocketLaunch {
+  to { transform: translateY(-100vh) rotate(-20deg); opacity: 0; }
+}
+
+.o-tag {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(10px, 2vw, 15px);
+  letter-spacing: 0.6em; color: var(--gold);
+  text-transform: uppercase;
+  opacity: 0; animation: intro-rise 0.6s var(--ease-out) forwards 0.3s;
+  margin-bottom: 10px;
+}
+.o-head {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(36px, 10vw, 100px);
+  line-height: 1; color: #fff;
+  opacity: 0; animation: intro-rise 0.7s var(--ease-out) forwards 0.7s;
+  margin-bottom: 6px;
+}
+.o-head span { color: var(--gold2); }
+
+.o-names {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(16px, 3.5vw, 28px);
+  color: rgba(255,255,255,0.65);
+  opacity: 0; animation: intro-rise 0.6s var(--ease-out) forwards 1.2s;
+  margin-bottom: 24px;
+}
+.o-names em { color: var(--teal); font-style: normal; }
+
+.o-dest {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(20px, 5vw, 52px);
+  color: var(--teal);
+  text-shadow: 0 0 40px rgba(0,229,255,0.5);
+  opacity: 0; animation: intro-rise 0.7s var(--ease-out) forwards 1.9s;
+  margin-bottom: 8px;
+}
+.o-date {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(12px, 2.2vw, 18px);
+  letter-spacing: 0.3em; color: rgba(255,255,255,0.5);
+  opacity: 0; animation: intro-rise 0.6s var(--ease-out) forwards 2.5s;
+}
+
+/* ──────────── OPENING T-MINUS COUNTDOWN ──────────── */
+.o-countdown {
+  margin-top: 18px;
+  text-align: center;
+  opacity: 0; animation: intro-rise 0.6s var(--ease-out) forwards 2.6s;
+  position: relative; z-index: 2;
+}
+.o-cd-label {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(9px, 1.4vw, 12px);
+  letter-spacing: 0.55em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  text-shadow: 0 0 16px rgba(255,215,0,0.5);
+}
+.o-cd-num {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(46px, 9vw, 92px);
+  line-height: 1;
+  color: var(--gold2);
+  text-shadow: 0 0 36px rgba(255,215,0,0.75),
+               0 0 70px rgba(255,164,53,0.45);
+  display: inline-block;
+  letter-spacing: -0.02em;
+}
+.o-cd-num.cd-pop {
+  animation: countdown-pop 0.62s var(--ease-bloom);
+}
+@keyframes countdown-pop {
+  0%   { transform: scale(1.55) rotate(-4deg); filter: drop-shadow(0 0 30px rgba(255,215,0,1)); }
+  60%  { transform: scale(0.96) rotate(2deg);  filter: drop-shadow(0 0 16px rgba(255,215,0,0.7)); }
+  100% { transform: scale(1)    rotate(0);     filter: drop-shadow(0 0 8px rgba(255,215,0,0.4)); }
+}
+/* BLAST! state — bigger, redder, more dramatic */
+.o-cd-num.is-blast {
+  color: var(--coral);
+  font-size: clamp(54px, 11vw, 110px);
+  text-shadow: 0 0 50px rgba(255,107,53,0.9),
+               0 0 100px rgba(255,215,0,0.5);
+  animation: blast-shake 0.7s var(--ease-pop);
+}
+@keyframes blast-shake {
+  0%   { transform: scale(2) rotate(-8deg); }
+  20%  { transform: scale(1.3) rotate(6deg); }
+  40%  { transform: scale(1.5) rotate(-4deg); }
+  60%  { transform: scale(1.2) rotate(3deg); }
+  100% { transform: scale(1)   rotate(0); }
+}
+
+.o-hint {
+  position: absolute; bottom: clamp(12px, 2vw, 22px);
+  left: 0; right: 0; text-align: center;
+  font-size: 10px; letter-spacing: 0.4em;
+  color: rgba(255,255,255,0.28);
+  font-family: 'Nunito', sans-serif;
+  text-transform: uppercase;
+  opacity: 0; animation: intro-glow 0.6s var(--ease-out) forwards 3.2s;
+  pointer-events: none;
+}
+
+@keyframes intro-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes intro-glow { to { opacity: 1; } }
+
+/* ======================================
+   HERO
+   ====================================== */
+#hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 80px 5% 60px;
+  position: relative; z-index: 2;
+  overflow: hidden;
+}
+
+/* Gradient glow behind countdown */
+.hero-orb {
+  position: absolute; width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+  left: 50%; top: 50%; transform: translate(-50%,-50%);
+  animation: orb-breathe 4s var(--ease-glide) infinite;
+  pointer-events: none;
+}
+@keyframes orb-breathe {
+  0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.6; }
+  50%      { transform: translate(-50%,-50%) scale(1.15); opacity: 1; }
+}
+
+.h-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(11px, 2vw, 15px);
+  letter-spacing: 0.7em; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 20px;
+  opacity: 0; animation: intro-rise 0.7s var(--ease-out) forwards 4.5s;
+}
+
+.h-title {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(56px, 16vw, 180px);
+  line-height: 0.85; margin-bottom: 16px;
+}
+.h-title .t1, .h-title .t2 { display: block; }
+.h-title .t1 { color: var(--gold2); text-shadow: 0 0 80px rgba(255,215,0,0.4); }
+.h-title .t2 { color: rgba(255,255,255,0.22); font-size: 0.45em; letter-spacing: 0.15em; }
+
+.h-date {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(13px, 2.5vw, 22px);
+  letter-spacing: 0.4em; color: var(--teal);
+  border-top: 1px solid rgba(0,229,255,0.25);
+  border-bottom: 1px solid rgba(0,229,255,0.25);
+  padding: 10px 36px; display: inline-block;
+  margin-bottom: 50px;
+  opacity: 0; animation: intro-rise 0.7s var(--ease-out) forwards 5.0s;
+}
+
+/* ── COUNTDOWN ── */
+.cd-wrap {
+  display: flex; align-items: flex-start; gap: clamp(8px, 3vw, 36px);
+  opacity: 0; animation: intro-rise 0.7s var(--ease-out) forwards 5.3s;
+}
+.cd-unit { text-align: center; }
+.cd-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 12px; padding: clamp(10px, 2vw, 20px) clamp(14px, 3vw, 30px);
+  position: relative; overflow: hidden;
+  transition: border-color 280ms var(--ease-quick);
+}
+.cd-box::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,229,255,0.04), transparent);
+  pointer-events: none;
+}
+.cd-box.pop { animation: digit-flip 0.35s cubic-bezier(.36,.07,.19,.97); }
+@keyframes digit-flip {
+  0%   { transform: scale(1); border-color: rgba(0,229,255,0.2); }
+  40%  { transform: scale(1.12); border-color: rgba(0,229,255,0.7); box-shadow: 0 0 25px rgba(0,229,255,0.35); }
+  100% { transform: scale(1); border-color: rgba(0,229,255,0.2); }
+}
+.cd-n {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(42px, 9vw, 105px);
+  font-weight: 700; color: #fff; line-height: 1;
+  display: block; letter-spacing: -0.02em;
+}
+.cd-l {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(9px, 1.3vw, 12px); letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.4); text-transform: uppercase;
+  display: block; margin-top: 8px;
+}
+.cd-sep {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(30px, 6vw, 70px); font-weight: 700;
+  color: rgba(0,229,255,0.35); padding-top: 8px; line-height: 1;
+}
+.cd-days-label {
+  margin-top: 25px; font-family: 'Fredoka One', cursive;
+  font-size: clamp(13px, 2.5vw, 20px); letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.35); text-transform: uppercase;
+}
+
+.scroll-arrow {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  opacity: 0; animation: intro-glow 1s var(--ease-out) forwards 6.2s;
+}
+.scroll-arrow span { font-size: 9px; letter-spacing: 0.4em; color: rgba(255,255,255,0.2); }
+.scroll-line {
+  width: 1px; height: 44px;
+  background: linear-gradient(to bottom, transparent, var(--gold));
+  animation: arrow-bob 2s var(--ease-glide) infinite;
+}
+@keyframes arrow-bob {
+  0%,100% { transform: scaleY(0.6); opacity: 0.3; transform-origin: top; }
+  50%      { transform: scaleY(1);   opacity: 1;   transform-origin: top; }
+}
+
+/* ======================================
+   SECTION HELPERS
+   ====================================== */
+.sec { position: relative; z-index: 2; }
+
+.rv {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity var(--reveal-dur) var(--ease-out),
+              transform var(--reveal-dur) var(--ease-out);
+}
+.rv.on { opacity: 1; transform: translateY(0); }
+.rv.d1 { transition-delay: 0.1s; }
+.rv.d2 { transition-delay: 0.2s; }
+.rv.d3 { transition-delay: 0.3s; }
+.rv.d4 { transition-delay: 0.4s; }
+.rv.d5 { transition-delay: 0.5s; }
+
+/* ======================================
+   CHOREOGRAPHED REVEAL VOCABULARY
+   Intent-named keyframes (not stock fadeIn) — the cinematic floor.
+   ====================================== */
+
+/* Per-letter drop on hero / finale titles. Use with --li (letter index) inline-styled. */
+@keyframes letter-drop {
+  0%   { opacity: 0; transform: translateY(-60px) rotate(8deg) scale(0.9); }
+  60%  { opacity: 1; transform: translateY(6px)   rotate(-2deg) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0)     rotate(0)    scale(1); }
+}
+.letter-drop .ld { display: inline-block; opacity: 0; }
+/* Default: fires at page-load with --ld-base delay (used on hero). */
+.letter-drop:not(.scroll-gated) .ld {
+  animation: letter-drop 900ms var(--ease-drop) calc(var(--ld-base, 0ms) + var(--li, 0) * 60ms) forwards;
+}
+/* Scroll-gated: only fires once .on is added (used on finale). */
+.letter-drop.scroll-gated.on .ld {
+  animation: letter-drop 900ms var(--ease-drop) calc(var(--li, 0) * 60ms) forwards;
+}
+
+/* Section-title bloom — used on every .sec h2.bloom. */
+@keyframes title-bloom {
+  0%   { opacity: 0; transform: translateY(28px) scale(0.96); letter-spacing: 0.06em; }
+  100% { opacity: 1; transform: translateY(0)    scale(1);    letter-spacing: normal; }
+}
+.sec h2.bloom { opacity: 0; }
+.sec h2.bloom.on { animation: title-bloom var(--bloom-dur) var(--ease-bloom) forwards; }
+
+/* Section-entry sweep — a thin gradient line crossing as a section becomes visible.
+   Triggered by JS adding .sec.swept on the section. */
+.sec { position: relative; z-index: 2; }
+.sec::before {
+  content: '';
+  position: absolute; left: 0; top: 0; height: 1px; width: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--sec-acc, rgba(255,255,255,0.5)) 50%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 4;
+  box-shadow: 0 0 24px var(--sec-acc, rgba(255,255,255,0.4));
+}
+.sec.swept::before { animation: sweep-cross var(--sweep-dur) var(--ease-out) forwards; }
+@keyframes sweep-cross {
+  0%   { width: 0;    opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+
+/* Hero shockwave — one-shot expanding ring behind the countdown.
+   Fires once on intro at ~5.6s, synced with the countdown reveal. */
+@keyframes shockwave {
+  0%   { transform: translate(-50%,-50%) scale(0.4); opacity: 0; border-width: 2px; }
+  15%  { opacity: 0.7; }
+  100% { transform: translate(-50%,-50%) scale(6);   opacity: 0; border-width: 0.5px; }
+}
+.hero-shock {
+  position: absolute; left: 50%; top: 50%;
+  width: 220px; height: 220px;
+  border: 2px solid rgba(255,233,92,0.55);
+  border-radius: 50%; pointer-events: none;
+  transform: translate(-50%,-50%) scale(0.4);
+  opacity: 0;
+  animation: shockwave 1900ms var(--ease-out) forwards 5.6s,
+             shockwave 2400ms var(--ease-out) forwards 11.2s;
+  z-index: 1;
+}
+
+/* Kid-card cascade entrance — replaces stock fadeUp with a hinged forward tilt. */
+@keyframes card-cascade {
+  0%   { opacity: 0; transform: translateY(60px) rotate3d(1,0,0,18deg) scale(0.95); transform-origin: bottom; }
+  100% { opacity: 1; transform: translateY(0)    rotate3d(1,0,0,0deg)   scale(1);    transform-origin: bottom; }
+}
+.kid-card.rv { transform: translateY(60px) rotate3d(1,0,0,18deg) scale(0.95); }
+.kid-card.rv.on { animation: card-cascade 900ms var(--ease-bloom) forwards; transform: none; }
+
+/* Hotel image: deliberately no entrance animation. A sustained transform on a 600px
+   image while the user scrolls past it reads as the page see-sawing. The Marriott
+   aerial carries the cinematic weight on its own. */
+
+/* Pill ripple — hotel feature pills cascade in with a touch of bloom. */
+@keyframes pill-ripple {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.94); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.h-pill.rv.on { animation: pill-ripple 620ms var(--ease-bloom) forwards; }
+
+/* Dividing rule grow — for under-headlines (template1 vocabulary). */
+@keyframes rule-grow {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+.rule { display: block; height: 1px; width: 120px; margin: 18px auto 22px;
+        background: linear-gradient(90deg, transparent, var(--sec-acc, var(--gold)), transparent);
+        transform: scaleX(0); transform-origin: center; opacity: 0; }
+.rule.on { animation: rule-grow 720ms var(--ease-out) forwards 120ms; }
+
+/* Rocket ignite — finale rocket gets a real ignition moment. */
+@keyframes flame-ignite {
+  0%   { opacity: 0;    transform: translateX(-50%) scaleY(0.15); }
+  100% { opacity: 0.92; transform: translateX(-50%) scaleY(1); }
+}
+@keyframes flame-flicker {
+  0%,100% { transform: translateX(-50%) scaleY(1)   scaleX(1);   opacity: 0.92; }
+  50%      { transform: translateX(-50%) scaleY(1.15) scaleX(0.85); opacity: 0.7; }
+}
+.fn-flame {
+  position: absolute; left: 50%; top: 78%;
+  width: 28%; height: 70%;
+  transform: translateX(-50%) scaleY(0.2);
+  transform-origin: top center;
+  background: radial-gradient(50% 60% at 50% 0%,
+    rgba(255,233,92,0.95) 0%,
+    rgba(255,164,53,0.7) 40%,
+    rgba(255,80,30,0.4) 70%,
+    transparent 88%);
+  filter: blur(2px);
+  pointer-events: none;
+  opacity: 0;
+}
+.fn-rocket.on .fn-flame {
+  animation: flame-ignite 420ms var(--ease-out) forwards,
+             flame-flicker 220ms var(--ease-glide) infinite 420ms;
+}
+
+/* ======================================
+   THE CREW
+   ====================================== */
+#crew {
+  --sec-acc: var(--acc-crew);
+  padding: 100px 5%;
+  background: linear-gradient(180deg, var(--space) 0%, var(--space2) 50%, var(--space) 100%);
+}
+#crew .sec-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px; letter-spacing: 0.7em; color: var(--gold);
+  text-transform: uppercase; text-align: center; display: block;
+  margin-bottom: 14px;
+}
+#crew h2 {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(42px, 8vw, 90px);
+  text-align: center; line-height: 0.9;
+  margin-bottom: 16px; color: #fff;
+}
+#crew h2 em { color: var(--gold2); font-style: normal; }
+#crew .intro {
+  text-align: center; font-size: clamp(14px, 2vw, 17px);
+  color: rgba(255,255,255,0.5); max-width: 500px;
+  margin: 0 auto 70px; line-height: 1.7;
+}
+
+/* ── KID CARDS grid ── */
+.kids-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px; max-width: 960px; margin: 0 auto 30px;
+}
+@media(max-width:600px) { .kids-grid { grid-template-columns: 1fr; } }
+
+/* ── CREW ROW (parents + grace) ── */
+.crew-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px; max-width: 960px; margin: 0 auto;
+}
+
+/* ── BASE KID CARD ── */
+.kid-card {
+  position: relative; overflow: hidden;
+  border-radius: 16px; padding: 36px 28px 28px;
+  min-height: 320px;
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 380ms var(--ease-bloom), box-shadow 380ms var(--ease-out);
+  cursor: default;
+}
+.kid-card:hover { transform: translateY(-8px) scale(1.01); }
+
+.kid-card .card-bg {
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: 16px; overflow: hidden;
+}
+.kid-card .card-content { position: relative; z-index: 3; }
+
+.kc-emoji {
+  font-size: 60px; display: block;
+  margin-bottom: 12px;
+  animation: emoji-float 3s var(--ease-glide) infinite;
+}
+@keyframes emoji-float {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-12px) rotate(4deg); }
+}
+.kid-card:nth-child(2) .kc-emoji { animation-delay: 0.6s; }
+.kid-card:nth-child(3) .kc-emoji { animation-delay: 1.2s; }
+.kid-card:nth-child(4) .kc-emoji { animation-delay: 1.8s; }
+
+.kc-name {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(36px, 5vw, 54px);
+  line-height: 1; margin-bottom: 4px;
+}
+.kc-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(13px, 2vw, 17px);
+  opacity: 0.7; margin-bottom: 10px; letter-spacing: 0.05em;
+}
+.kc-msg {
+  font-size: clamp(12px, 1.6vw, 14px);
+  color: rgba(255,255,255,0.65); line-height: 1.6;
+  font-style: italic;
+}
+
+/* ── WYATT — Lego + Soccer ── */
+.wyatt-card { background: linear-gradient(145deg, #001800, #003300); }
+.wyatt-card:hover { box-shadow: 0 20px 60px rgba(0,255,106,0.2); }
+.wyatt-card .kc-name { color: var(--neon); text-shadow: 0 0 30px rgba(0,255,106,0.5); }
+
+/* Lego bricks falling */
+.lego-field {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none; overflow: hidden;
+}
+.lego-brick {
+  position: absolute;
+  width: 20px; height: 13px;
+  border-radius: 2px;
+  opacity: 0.35;
+}
+.lego-brick::before {
+  content: '';
+  position: absolute;
+  width: 10px; height: 6px;
+  border-radius: 50% 50% 0 0;
+  top: -5px; left: 50%; transform: translateX(-50%);
+  background: inherit;
+}
+
+/* Soccer ball */
+.soccer-ball {
+  position: absolute; font-size: 36px; z-index: 2;
+  top: 22px; right: 24px;
+  animation: soccerBounce 1.4s cubic-bezier(.36,.07,.19,.97) infinite;
+}
+@keyframes soccerBounce {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  30%      { transform: translateY(-28px) rotate(120deg); }
+  60%      { transform: translateY(-8px) rotate(200deg); }
+}
+
+/* CR7 badge */
+.cr7-badge {
+  position: absolute; top: 18px; left: 18px; z-index: 3;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  color: var(--neon); border: 1.5px solid rgba(0,255,106,0.4);
+  padding: 3px 8px; letter-spacing: 0.1em;
+  background: rgba(0,255,106,0.07);
+}
+
+/* ── JUNE — Ocean + Turtle ── */
+.june-card { background: linear-gradient(165deg, #000d30, #001f5c, #003366); }
+.june-card:hover { box-shadow: 0 20px 60px rgba(0,229,255,0.25); }
+.june-card .kc-name { color: var(--teal); text-shadow: 0 0 30px rgba(0,229,255,0.5); }
+
+/* Ocean waves at bottom */
+.ocean-waves {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 70px; z-index: 1;
+  overflow: hidden;
+}
+.wave { position: absolute; bottom: 0; left: -60%; width: 220%; height: 100%; }
+.wave svg { width: 100%; height: 100%; }
+.wave1 { animation: waveSway 6s var(--ease-glide) infinite; opacity: 0.35; }
+.wave2 { animation: waveSway 4s var(--ease-glide) infinite reverse; opacity: 0.2; bottom: -10px; }
+@keyframes waveSway {
+  0%,100% { transform: translateX(0); }
+  50%      { transform: translateX(5%); }
+}
+
+/* Bubble particles */
+.bubble-field { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0,229,255,0.25);
+  border: 1px solid rgba(0,229,255,0.4);
+  animation: bubbleRise linear infinite;
+}
+@keyframes bubbleRise {
+  0%   { transform: translateY(0) scale(1); opacity: 0.7; }
+  100% { transform: translateY(-200px) scale(0.3); opacity: 0; }
+}
+
+/* Turtle swimming */
+.turtle-swim {
+  position: absolute; font-size: 32px; z-index: 2;
+  animation: turtleX 9s linear infinite, turtleY 2.2s var(--ease-glide) infinite;
+  top: 30%;
+}
+@keyframes turtleX {
+  0%   { left: -50px; }
+  100% { left: calc(100% + 50px); }
+}
+@keyframes turtleY {
+  0%,100% { margin-top: 0; }
+  50%      { margin-top: -20px; }
+}
+
+/* ── HAVEN — Princess ── */
+.haven-card {
+  background: linear-gradient(145deg, #1a0030, #2d0060, #1a0040);
+}
+.haven-card:hover { box-shadow: 0 20px 60px rgba(180,79,255,0.3); }
+.haven-card .kc-name { color: var(--pink); text-shadow: 0 0 30px rgba(255,96,192,0.5); }
+
+/* ── WINTER — Ice Princess ── */
+.winter-card {
+  background: linear-gradient(145deg, #00101a, #001a30, #002244);
+}
+.winter-card:hover { box-shadow: 0 20px 60px rgba(176,226,255,0.25); }
+.winter-card .kc-name { color: var(--ice); text-shadow: 0 0 30px rgba(176,226,255,0.5); }
+
+/* Shared princess sparkle field */
+.sparkle-field { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.sp {
+  position: absolute;
+  font-size: 14px;
+  animation: spFloat linear infinite;
+  opacity: 0;
+}
+@keyframes spFloat {
+  0%   { transform: translateY(0) rotate(0deg) scale(0); opacity: 0; }
+  20%  { opacity: 1; transform: translateY(-15px) rotate(45deg) scale(1); }
+  80%  { opacity: 0.8; }
+  100% { transform: translateY(-80px) rotate(180deg) scale(0.5); opacity: 0; }
+}
+
+/* Crown glow */
+.crown-glow {
+  position: absolute; top: 16px; right: 20px; z-index: 3;
+  font-size: 44px;
+  animation: crownPulse 2s var(--ease-glide) infinite;
+}
+@keyframes crownPulse {
+  0%,100% { transform: scale(1) rotate(-5deg); filter: drop-shadow(0 0 8px rgba(255,215,0,0.4)); }
+  50%      { transform: scale(1.15) rotate(5deg); filter: drop-shadow(0 0 20px rgba(255,215,0,0.9)); }
+}
+
+/* ── PARENT + GRACE CARDS ── */
+.crew-mini {
+  border-radius: 14px; padding: 30px 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  position: relative; overflow: hidden;
+  transition: transform 320ms var(--ease-bloom), box-shadow 320ms var(--ease-out);
+}
+.crew-mini:hover { transform: translateY(-5px); }
+.crew-mini .m-emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+.crew-mini .m-name {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(22px, 3vw, 30px); margin-bottom: 4px;
+}
+.crew-mini .m-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px; letter-spacing: 0.1em; opacity: 0.55; margin-bottom: 6px;
+}
+.crew-mini .m-role { font-size: 12px; opacity: 0.4; }
+
+.parents-card {
+  background: linear-gradient(145deg, rgba(255,215,0,0.07), rgba(255,215,0,0.02));
+  border-color: rgba(255,215,0,0.2);
+}
+.parents-card:hover { box-shadow: 0 14px 50px rgba(255,215,0,0.15); }
+.parents-card .m-name { color: var(--gold2); }
+
+.grace-card {
+  background: linear-gradient(145deg, rgba(0,229,255,0.06), rgba(0,229,255,0.01));
+  border-color: rgba(0,229,255,0.18);
+}
+.grace-card:hover { box-shadow: 0 14px 50px rgba(0,229,255,0.15); }
+.grace-card .m-name { color: var(--teal); }
+
+/* ======================================
+   LAZY RIVER
+   ====================================== */
+#lazy-river {
+  --sec-acc: var(--acc-river);
+  padding: 100px 5%;
+  background: linear-gradient(180deg, var(--space) 0%, #000c20 50%, var(--space) 100%);
+  text-align: center; overflow: hidden;
+}
+#lazy-river .lr-tag {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px; letter-spacing: 0.7em; color: var(--teal);
+  text-transform: uppercase; display: block; margin-bottom: 14px;
+}
+#lazy-river h2 {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(38px, 7.5vw, 88px);
+  line-height: 0.9; margin-bottom: 14px;
+}
+#lazy-river h2 .blue { color: var(--teal); text-shadow: 0 0 50px rgba(0,229,255,0.4); }
+#lazy-river .lr-sub {
+  font-size: clamp(13px, 1.8vw, 16px);
+  color: rgba(255,255,255,0.45); margin-bottom: 50px;
+}
+
+.lr-wrap { max-width: 560px; margin: 0 auto; position: relative; }
+
+#texas-svg {
+  width: 100%; height: auto;
+  filter: drop-shadow(0 0 35px rgba(0,196,232,0.4));
+  animation: tex-pulse 3s var(--ease-glide) infinite;
+}
+@keyframes tex-pulse {
+  /* Tamed range — was 20→60px and read as "puffing drift" at the section boundary.
+     25→38px keeps the glow alive without growing the bounding silhouette. */
+  0%,100% { filter: drop-shadow(0 0 25px rgba(0,196,232,0.35)); }
+  50%      { filter: drop-shadow(0 0 38px rgba(0,196,232,0.62)); }
+}
+
+.lr-legend {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 14px; margin-top: 38px;
+}
+.lr-item {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid rgba(0,229,255,0.18);
+  background: rgba(0,229,255,0.04);
+  padding: 8px 16px; border-radius: 100px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px; color: rgba(255,255,255,0.65);
+}
+.lr-item span:first-child { font-size: 22px; }
+
+/* ======================================
+   HOTEL HIGHLIGHT
+   ====================================== */
+#hotel {
+  --sec-acc: var(--acc-hotel);
+  padding: 0; overflow: hidden; position: relative; z-index: 2;
+}
+.hotel-img-wrap {
+  position: relative;
+  overflow: hidden;
+  /* Fallback backdrop — visible if the Marriott CDN URL fails or is offline. */
+  background:
+    radial-gradient(120% 80% at 50% 100%, rgba(255,215,0,0.10), transparent 60%),
+    linear-gradient(180deg, var(--deep-sea) 0%, var(--space2) 60%, var(--space) 100%);
+}
+.hotel-img-wrap img {
+  /* width/height attrs on the <img> handle CLS; no CSS aspect-ratio needed.
+     No transform animation here — sustained Ken Burns while the user is mid-scroll
+     reads as the page fighting them ("see-saw"). Image stands on its own. */
+  width: 100%; height: clamp(320px, 45vw, 600px);
+  object-fit: cover; display: block;
+}
+.hotel-img-wrap::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(to top,  rgba(6,5,26,0.9) 0%,  transparent 35%),
+    linear-gradient(to bottom, rgba(6,5,26,0.7) 0%, transparent 30%),
+    linear-gradient(135deg, rgba(0,229,255,0.06), transparent 50%);
+}
+.hotel-text {
+  position: absolute; bottom: 40px; left: 0; right: 0;
+  text-align: center; z-index: 3; padding: 0 5%;
+}
+.hotel-text h2 {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(28px, 6vw, 80px);
+  color: #fff; line-height: 1;
+  margin-bottom: 10px;
+}
+.hotel-text h2 em { color: var(--gold2); font-style: normal; }
+.hotel-text p {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(13px, 2vw, 18px);
+  color: rgba(255,255,255,0.5); letter-spacing: 0.3em;
+}
+
+.hotel-pills {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 12px; padding: 40px 5%;
+  background: var(--space2);
+}
+.h-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 20px; border-radius: 100px;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(13px, 1.8vw, 16px);
+  transition: background 280ms var(--ease-quick), border-color 280ms var(--ease-quick), transform 280ms var(--ease-bloom);
+}
+.h-pill:hover { background: rgba(0,229,255,0.06); border-color: rgba(0,229,255,0.3); }
+.h-pill .pi { font-size: 22px; }
+
+/* ======================================
+   ROOMS
+   ====================================== */
+#rooms {
+  --sec-acc: var(--acc-rooms);
+  padding: 100px 5%;
+  background: var(--space);
+  text-align: center;
+}
+#rooms .r-tag {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px; letter-spacing: 0.7em; color: var(--gold);
+  text-transform: uppercase; display: block; margin-bottom: 14px;
+}
+#rooms h2 {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(38px, 7.5vw, 88px);
+  margin-bottom: 60px; color: #fff;
+}
+#rooms h2 em { color: var(--gold2); font-style: normal; }
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 22px; max-width: 1050px; margin: 0 auto;
+}
+.room-card {
+  border-radius: 14px; padding: 44px 28px;
+  border: 1px solid rgba(255,255,255,0.07);
+  position: relative; overflow: hidden;
+  transition: transform 380ms var(--ease-bloom), box-shadow 380ms var(--ease-out);
+  text-align: center;
+}
+.room-card::before {
+  content: attr(data-n);
+  position: absolute; top: -16px; right: 0;
+  font-family: 'Lilita One', cursive;
+  font-size: 120px; line-height: 1;
+  opacity: 0.04; pointer-events: none;
+}
+.room-card:hover { transform: translateY(-8px); }
+
+.rc-king {
+  background: linear-gradient(160deg, rgba(255,215,0,0.08), rgba(255,215,0,0.02));
+  border-color: rgba(255,215,0,0.2);
+}
+.rc-king:hover { box-shadow: 0 24px 70px rgba(255,215,0,0.12); }
+
+.rc-kids {
+  background: linear-gradient(160deg, rgba(0,229,255,0.07), rgba(180,79,255,0.05));
+  border-color: rgba(0,229,255,0.2);
+}
+.rc-kids:hover { box-shadow: 0 24px 70px rgba(0,229,255,0.12); }
+
+.rc-grace {
+  background: linear-gradient(160deg, rgba(0,229,255,0.06), rgba(0,229,255,0.01));
+  border-color: rgba(0,229,255,0.15);
+}
+.rc-grace:hover { box-shadow: 0 24px 70px rgba(0,229,255,0.1); }
+
+.r-emoji { font-size: 48px; display: block; margin-bottom: 18px; }
+.r-type {
+  font-family: 'Fredoka One', cursive;
+  font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
+  margin-bottom: 8px; opacity: 0.6;
+}
+.rc-king .r-type { color: var(--gold2); }
+.rc-kids .r-type { color: var(--teal); }
+.rc-grace .r-type { color: var(--teal); }
+
+.r-name {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(22px, 3vw, 30px); margin-bottom: 12px;
+}
+.r-guests { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.8; }
+.r-guests strong { color: #fff; }
+
+/* ======================================
+   FINALE — LAUNCH COUNTDOWN
+   ====================================== */
+#finale {
+  --sec-acc: var(--acc-finale);
+  position: relative; min-height: 100vh; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 80px 5%; overflow: hidden;
+}
+#finale::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 55% at 50% 60%, rgba(0,229,255,0.06), transparent 70%);
+  pointer-events: none;
+}
+
+#fireworks-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+
+.fn-wrap { position: relative; z-index: 3; }
+
+.fn-rocket {
+  font-size: clamp(50px, 10vw, 90px);
+  display: inline-block; margin-bottom: 10px;
+  position: relative;
+  animation: rocketHover 2s var(--ease-glide) infinite;
+}
+@keyframes rocketHover {
+  0%,100% { transform: translateY(0) rotate(-8deg); }
+  50%      { transform: translateY(-15px) rotate(8deg); }
+}
+
+.fn-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(12px, 2vw, 16px);
+  letter-spacing: 0.6em; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.fn-title {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(40px, 11vw, 130px);
+  line-height: 0.85; margin-bottom: 20px; color: #fff;
+}
+.fn-title .hl { color: var(--gold2); text-shadow: 0 0 80px rgba(255,215,0,0.4); display: block; }
+.fn-city { color: var(--teal); display: block; font-size: 0.65em; }
+
+.fn-date {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(14px, 2.5vw, 22px);
+  letter-spacing: 0.3em; color: rgba(255,255,255,0.45);
+  margin-bottom: 55px;
+}
+
+/* Finale countdown */
+.fn-cd {
+  display: flex; align-items: flex-start;
+  gap: clamp(8px, 3vw, 40px);
+}
+.fn-u { text-align: center; }
+.fn-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,229,255,0.2); border-radius: 14px;
+  padding: clamp(14px, 2.5vw, 28px) clamp(18px, 3.5vw, 38px);
+  position: relative;
+}
+.fn-n {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(55px, 12vw, 140px);
+  font-weight: 700; color: var(--gold2); line-height: 1;
+  display: block;
+  text-shadow: 0 0 60px rgba(255,215,0,0.35);
+}
+.fn-l {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(10px, 1.3vw, 13px); letter-spacing: 0.35em;
+  color: rgba(255,255,255,0.35); text-transform: uppercase;
+  display: block; margin-top: 10px;
+}
+.fn-sep {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(40px, 8vw, 100px); font-weight: 700;
+  color: rgba(0,229,255,0.25); padding-top: 10px; line-height: 1;
+}
+
+.fn-go {
+  margin-top: 50px;
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(18px, 3.5vw, 36px);
+  color: rgba(255,255,255,0.25); letter-spacing: 0.15em;
+}
+
+/* ======================================
+   RESPONSIVE MISC
+   ====================================== */
+@media(max-width: 768px) {
+  #crew { padding: 70px 5%; }
+  #lazy-river { padding: 70px 5%; }
+  #rooms { padding: 70px 5%; }
+  #finale { padding: 60px 5%; }
+}
+
+/* Tighter countdown — wrap to 2x2 grid below 540px so digits never clip the viewport. */
+@media (max-width: 540px) {
+  .cd-wrap {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    max-width: 330px;
+    margin: 0 auto;
+    align-items: stretch;
+  }
+  .cd-unit { width: 100%; }
+  .cd-box {
+    padding: 14px 10px;
+    border-radius: 14px;
+  }
+  .cd-n { font-size: clamp(38px, 14vw, 56px); }
+  .cd-sep { display: none; }
+  .cd-l { font-size: 10px; }
+}
+
+/* Same tighter treatment for finale countdown. */
+@media (max-width: 540px) {
+  .fn-cd {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 330px;
+    margin: 0 auto;
+  }
+  .fn-u { width: 100%; }
+  .fn-sep { display: none; }
+}
+
+/* ======================================
+   DECK NAV — explicit emoji pager
+   Desktop: right-edge vertical rail with hover-revealed ribbon labels.
+   Mobile:  bottom-fixed horizontal pill bar with auto-hide on scroll-down.
+   Hidden until #opening is removed by JS.
+   ====================================== */
+#deck-nav {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 600ms var(--ease-out),
+              transform 400ms var(--ease-out);
+}
+#deck-nav.dn-ready { opacity: 1; }
+
+.dn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  font-size: 19px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: inherit;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  transition: transform 280ms var(--ease-bloom),
+              background 200ms var(--ease-quick),
+              border-color 200ms var(--ease-quick),
+              box-shadow 200ms var(--ease-quick);
+}
+.dn-pill:hover  { transform: scale(1.12); background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.24); }
+.dn-pill:active { transform: scale(0.95); }
+.dn-pill:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* Active pill: gold halo + breathing pulse */
+.dn-pill.dn-active {
+  background: rgba(255,215,0,0.20);
+  border-color: rgba(255,215,0,0.6);
+  box-shadow: 0 0 18px rgba(255,215,0,0.40);
+  animation: dn-pulse 2.4s var(--ease-glide) infinite;
+}
+@keyframes dn-pulse {
+  0%,100% { box-shadow: 0 0 18px rgba(255,215,0,0.34); }
+  50%      { box-shadow: 0 0 30px rgba(255,215,0,0.62); }
+}
+
+/* DESKTOP — right-edge vertical rail */
+@media (min-width: 768px) {
+  #deck-nav {
+    right: clamp(14px, 1.6vw, 28px);
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 12px;
+  }
+  #deck-nav.dn-hidden { transform: translateY(-50%) translateX(28px); opacity: 0; pointer-events: none; }
+
+  /* Ribbon label slides out to the left on hover or active — strengthened:
+     ribbon is the per-section indicator now that the floating callout is gone. */
+  .dn-pill::after {
+    content: attr(data-label);
+    position: absolute;
+    right: 100%; top: 50%;
+    transform: translateY(-50%) translateX(8px);
+    margin-right: 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    background: rgba(6,5,26,0.92);
+    border: 1px solid rgba(255,215,0,0.35);
+    padding: 8px 16px;
+    border-radius: 100px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 0 0 18px rgba(255,215,0,0.20);
+    transition: opacity 220ms var(--ease-out),
+                transform 320ms var(--ease-bloom);
+  }
+  .dn-pill:hover::after,
+  .dn-pill.dn-active::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  .dn-pill.dn-active::after {
+    color: var(--gold2);
+    border-color: rgba(255,215,0,0.6);
+    box-shadow: 0 0 26px rgba(255,215,0,0.4);
+  }
+}
+
+/* MOBILE — bottom-fixed horizontal pill bar */
+@media (max-width: 767px) {
+  #deck-nav {
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    flex-direction: row;
+    gap: 4px;
+    background: rgba(0,0,12,0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 7px 9px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+  }
+  #deck-nav.dn-hidden { transform: translateX(-50%) translateY(80px); opacity: 0; pointer-events: none; }
+  .dn-pill {
+    width: 38px; height: 38px;
+    font-size: 17px;
+    background: transparent;
+    border-color: transparent;
+  }
+  .dn-pill::after { display: none; } /* no ribbons on mobile */
+  .dn-pill.dn-active {
+    background: rgba(255,215,0,0.18);
+    border-color: rgba(255,215,0,0.55);
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  #deck-nav, .dn-pill, .dn-pill::after { transition-duration: 1ms !important; }
+  .dn-pill.dn-active { animation: none !important; }
+}
+
+/* ======================================
+   ONBOARDING HINT — one-shot "TAP A PILL!" anchored to the FIRST pill.
+   Fades in ~1s after nav reveals, wiggles for attention, auto-fades after 6s,
+   or dismisses early on first pill click / scroll past hero.
+   ====================================== */
+.dn-onboard {
+  position: absolute;
+  font-family: 'Fredoka One', cursive;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: #0c0b30;
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 60%, var(--coral) 110%);
+  padding: 8px 14px;
+  border-radius: 100px;
+  white-space: nowrap;
+  pointer-events: none;
+  text-transform: uppercase;
+  opacity: 0;
+  z-index: 5;
+  box-shadow: 0 0 30px rgba(255,215,0,0.55),
+              inset 0 0 12px rgba(255,255,255,0.32);
+}
+.dn-onboard-text {
+  display: inline-block;
+  animation: dn-onboard-wiggle 1.1s var(--ease-glide) infinite;
+}
+@keyframes dn-onboard-wiggle {
+  0%, 100% { transform: rotate(-4deg) scale(1); }
+  50%      { transform: rotate(4deg)  scale(1.04); }
+}
+#deck-nav.dn-ready .dn-onboard:not(.dismissed) {
+  animation: dn-onboard-in  500ms var(--ease-bloom) forwards 900ms,
+             dn-onboard-out 500ms var(--ease-out)   forwards 6500ms;
+}
+.dn-onboard.dismissed {
+  animation: dn-onboard-out 350ms var(--ease-out) forwards !important;
+}
+@keyframes dn-onboard-in {
+  from { opacity: 0; transform: translate(6px, 0) scale(0.9); }
+  to   { opacity: 1; transform: translate(0, 0)   scale(1); }
+}
+@keyframes dn-onboard-out {
+  to { opacity: 0; transform: translate(8px, 0) scale(0.9); }
+}
+
+/* Desktop: hint sits ABOVE the rail. Anchored at the rail's right edge so it
+   extends LEFT into the viewport (centering over the 44px-wide rail would
+   push it off-screen). Arrow is absolute-positioned at the bottom-right of
+   the hint so it visually points down at the rocket pill. */
+@media (min-width: 768px) {
+  .dn-onboard {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 16px;
+    padding-right: 18px;  /* extra room so the arrow has space */
+  }
+  .dn-onboard::after {
+    content: '👇';
+    position: absolute;
+    bottom: -16px;
+    right: 12px;          /* aligns visually with the rail/first pill center */
+    font-size: 18px;
+    line-height: 1;
+    filter: drop-shadow(0 0 6px rgba(255,215,0,0.6));
+    animation: dn-onboard-arrow-y 1s var(--ease-glide) infinite;
+  }
+  @keyframes dn-onboard-arrow-y {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(5px); }
+  }
+}
+
+/* Mobile: hint sits ABOVE the FIRST pill (left edge of the bottom bar). */
+@media (max-width: 767px) {
+  .dn-onboard {
+    bottom: 100%;
+    left: 6px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    padding: 7px 12px;
+  }
+  .dn-onboard::before {
+    content: '👇';
+    display: block;
+    text-align: left;
+    margin-bottom: -2px;
+    margin-left: 8px;
+    font-size: 13px;
+    animation: dn-onboard-arrow-y 1s var(--ease-glide) infinite;
+  }
+  @keyframes dn-onboard-arrow-y {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(3px); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dn-onboard,
+  .dn-onboard-text,
+  .dn-onboard::before,
+  .dn-onboard::after { animation: none !important; }
+}
+
+/* ======================================
+   UFO DRIFTER — random ambient cameo
+   ====================================== */
+.ufo-drifter {
+  position: fixed;
+  left: -10vw;
+  font-size: clamp(22px, 2.6vw, 36px);
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 0 22px rgba(0,229,255,0.7))
+          drop-shadow(0 0 36px rgba(180,79,255,0.4));
+  animation: ufo-cross linear forwards;
+  will-change: transform;
+}
+@keyframes ufo-cross {
+  0%   { transform: translateX(0)      translateY(0)    rotate(-4deg); opacity: 0; }
+  10%  { opacity: 1; }
+  50%  {                                  translateY(-22px); }
+  90%  { opacity: 1; }
+  100% { transform: translateX(120vw)  translateY(0)    rotate(6deg);  opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== OPENING ===================== -->
+<div id="opening">
+  <div class="o-tag">Incoming Transmission 📡</div>
+  <span class="o-rocket">🚀</span>
+  <div class="o-head">ADVENTURERS,<br><span>ASSEMBLE!</span></div>
+  <div class="o-names">
+    <em>Wyatt</em> · <em>June</em> · <em>Haven</em> · <em>Winter</em>
+  </div>
+  <div class="o-dest">DESTINATION: HOUSTON 🤠</div>
+  <div class="o-date">JULY 10 — 12, 2026 · MARRIOTT MARQUIS</div>
+
+  <div class="o-countdown" aria-live="polite">
+    <div class="o-cd-label">T-MINUS</div>
+    <div class="o-cd-num" id="o-cd-num">3</div>
+  </div>
+  <div class="o-hint">tap anywhere to launch now</div>
+</div>
+
+<!-- ===================== STAR FIELD ===================== -->
+<canvas id="starfield"></canvas>
+
+<!-- ===================== DECK NAV ===================== -->
+<nav id="deck-nav" aria-label="Deck navigation">
+  <button class="dn-pill" type="button" data-tgt="hero"       data-label="MISSION COUNTDOWN" aria-label="Jump to Mission Countdown">🚀</button>
+  <button class="dn-pill" type="button" data-tgt="crew"       data-label="MEET THE CREW"     aria-label="Jump to Meet the Crew">🤩</button>
+  <button class="dn-pill" type="button" data-tgt="lazy-river" data-label="TEXAS LAZY RIVER"  aria-label="Jump to Texas Lazy River">🌊</button>
+  <button class="dn-pill" type="button" data-tgt="hotel"      data-label="ADVENTURE PALACE"  aria-label="Jump to Adventure Palace">🏨</button>
+  <button class="dn-pill" type="button" data-tgt="rooms"      data-label="YOUR ROOMS"        aria-label="Jump to Your Rooms">🛏️</button>
+  <button class="dn-pill" type="button" data-tgt="finale"     data-label="BLAST OFF"         aria-label="Jump to Blast Off">🎆</button>
+  <div class="dn-onboard" aria-hidden="true"><span class="dn-onboard-text">👋 TAP A PILL!</span></div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero" class="layer">
+  <div class="hero-orb"></div>
+  <div class="hero-shock"></div>
+
+  <div class="h-label">🚀 &nbsp; Mission Countdown &nbsp; 🚀</div>
+
+  <div class="h-title letter-drop" style="--ld-base: 4400ms">
+    <span class="t1"><span class="ld" style="--li:0">H</span><span class="ld" style="--li:1">O</span><span class="ld" style="--li:2">U</span><span class="ld" style="--li:3">S</span><span class="ld" style="--li:4">T</span><span class="ld" style="--li:5">O</span><span class="ld" style="--li:6">N</span></span>
+    <span class="t2" style="--ld-base: 4900ms"><span class="ld" style="--li:0">B</span><span class="ld" style="--li:1">O</span><span class="ld" style="--li:2">U</span><span class="ld" style="--li:3">N</span><span class="ld" style="--li:4">D</span></span>
+  </div>
+
+  <div class="h-date">JULY 10 &mdash; 12 &nbsp;·&nbsp; 2026</div>
+
+  <div class="cd-wrap">
+    <div class="cd-unit">
+      <div class="cd-box" id="h-d-box"><span class="cd-n" id="h-d">24</span></div>
+      <span class="cd-l">Days</span>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit">
+      <div class="cd-box" id="h-h-box"><span class="cd-n" id="h-h">00</span></div>
+      <span class="cd-l">Hours</span>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit">
+      <div class="cd-box" id="h-m-box"><span class="cd-n" id="h-m">00</span></div>
+      <span class="cd-l">Mins</span>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit">
+      <div class="cd-box" id="h-s-box"><span class="cd-n" id="h-s">00</span></div>
+      <span class="cd-l">Secs</span>
+    </div>
+  </div>
+
+  <div class="scroll-arrow">
+    <span>MEET THE CREW</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ===================== CREW ===================== -->
+<section id="crew" class="sec">
+  <span class="sec-label rv">Mission Personnel</span>
+  <h2 class="rv d1 bloom">MEET THE <em>CREW</em></h2>
+  <span class="rule rv d2"></span>
+  <p class="intro rv d2">Seven adventurers. One epic summer. Let's go.</p>
+
+  <!-- 4 kids in 2×2 grid -->
+  <div class="kids-grid">
+
+    <!-- WYATT -->
+    <div class="kid-card wyatt-card rv d1">
+      <div class="card-bg">
+        <div class="lego-field" id="lego-field"></div>
+        <div class="soccer-ball">⚽</div>
+        <div class="cr7-badge">CR7 &hearts;</div>
+      </div>
+      <div class="card-content">
+        <span class="kc-emoji">⚡</span>
+        <div class="kc-name">WYATT</div>
+        <div class="kc-title">The Champion Builder</div>
+        <div class="kc-msg">"Lego master by day, CR7 superfan forever. This summer, your biggest adventure awaits."</div>
+      </div>
+    </div>
+
+    <!-- JUNE -->
+    <div class="kid-card june-card rv d2">
+      <div class="card-bg">
+        <div class="bubble-field" id="bubble-field"></div>
+        <div class="ocean-waves">
+          <div class="wave wave1">
+            <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+              <path d="M0,30 C150,5 300,55 450,30 C600,5 750,55 900,30 C1050,5 1150,50 1200,30 L1200,60 L0,60 Z" fill="rgba(0,100,200,0.3)"/>
+            </svg>
+          </div>
+          <div class="wave wave2">
+            <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+              <path d="M0,40 C200,15 400,55 600,35 C800,15 1000,55 1200,40 L1200,60 L0,60 Z" fill="rgba(0,150,200,0.2)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="turtle-swim">🐢</div>
+      </div>
+      <div class="card-content">
+        <span class="kc-emoji">🌊</span>
+        <div class="kc-name">JUNE</div>
+        <div class="kc-title">The Ocean Explorer</div>
+        <div class="kc-msg">"Future marine biologist. Turtle whisperer. The rooftop pool is your ocean this July."</div>
+      </div>
+    </div>
+
+    <!-- HAVEN -->
+    <div class="kid-card haven-card rv d3">
+      <div class="card-bg">
+        <div class="sparkle-field" id="haven-sparks"></div>
+        <div class="crown-glow">👑</div>
+      </div>
+      <div class="card-content">
+        <span class="kc-emoji">🌸</span>
+        <div class="kc-name">HAVEN</div>
+        <div class="kc-title">The Royal Princess</div>
+        <div class="kc-msg">"Your palace is waiting in Houston, Princess Haven. A whole kingdom of adventures."</div>
+      </div>
+    </div>
+
+    <!-- WINTER -->
+    <div class="kid-card winter-card rv d4">
+      <div class="card-bg">
+        <div class="sparkle-field" id="winter-sparks"></div>
+        <div class="crown-glow">👑</div>
+      </div>
+      <div class="card-content">
+        <span class="kc-emoji">❄️</span>
+        <div class="kc-name">WINTER</div>
+        <div class="kc-title">The Ice Princess</div>
+        <div class="kc-msg">"The smallest princess with the biggest adventure ahead. Houston, here comes Winter."</div>
+      </div>
+    </div>
+
+  </div><!-- /kids-grid -->
+
+  <!-- Parents + Grace -->
+  <div class="crew-row" style="margin-top:20px">
+
+    <div class="crew-mini parents-card rv d2">
+      <span class="m-emoji">👑</span>
+      <div class="m-name">Haris &amp; Steph</div>
+      <div class="m-title">The Architects</div>
+      <div class="m-role">King Room · The masterminds who made this happen</div>
+    </div>
+
+    <div class="crew-mini grace-card rv d3">
+      <span class="m-emoji">🏆</span>
+      <div class="m-name">Ms. Grace</div>
+      <div class="m-title">The MVP</div>
+      <div class="m-role">Joining Queen Room · National treasure. Legend.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== LAZY RIVER ===================== -->
+<section id="lazy-river" class="sec">
+  <span class="lr-tag rv">Crown Jewel of the Rooftop</span>
+  <h2 class="rv d1 bloom">THE <span class="blue">TEXAS</span><br>LAZY RIVER</h2>
+  <span class="rule rv d2"></span>
+  <p class="lr-sub rv d2">A rooftop lazy river shaped like the state of Texas — the world's only one. And you're floating it. 🤯</p>
+
+  <div class="lr-wrap rv d2">
+    <svg id="texas-svg" viewBox="0 0 530 490" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+          <stop offset="0%">
+            <animate attributeName="stop-color" values="#00b4d8;#52dfef;#7ae9ff;#00b4d8" dur="4s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="50%">
+            <animate attributeName="stop-color" values="#0077b6;#00b4d8;#48cae4;#0077b6" dur="4s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="100%">
+            <animate attributeName="stop-color" values="#48cae4;#90e0ef;#caf0f8;#48cae4" dur="4s" repeatCount="indefinite"/>
+          </stop>
+        </linearGradient>
+        <filter id="glow4">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="blur4" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="4"/>
+        </filter>
+      </defs>
+
+      <!-- Texas path -->
+      <path id="tx"
+        d="M 90,22 L 235,22 L 235,112 L 432,112 L 428,142 L 432,168
+           L 416,196 L 402,228 L 390,258 L 372,282 L 358,308 L 338,332
+           L 312,352 L 280,370 L 248,386 L 216,398 L 186,405
+           L 158,396 L 132,378 L 110,355 L 90,326 L 72,294
+           L 60,260 L 50,226 L 45,194 L 47,162 L 53,132
+           L 62,108 L 74,84 L 83,58 L 88,36 Z"
+        fill="none"
+      />
+
+      <!-- glow halo -->
+      <use href="#tx" stroke="rgba(0,180,216,0.12)" stroke-width="42" filter="url(#blur4)"/>
+
+      <!-- river body -->
+      <use href="#tx" stroke="url(#wg)" stroke-width="26"
+           stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <animate attributeName="stroke-dasharray" values="0 2700;2700 0" dur="2.5s" fill="freeze" begin="0.8s"/>
+      </use>
+
+      <!-- shimmer ripple -->
+      <use href="#tx" stroke="rgba(180,240,255,0.55)" stroke-width="9"
+           stroke-linecap="round" stroke-linejoin="round" fill="none"
+           stroke-dasharray="35 80" filter="url(#glow4)">
+        <animate attributeName="stroke-dashoffset" from="0" to="-115" dur="1.6s" repeatCount="indefinite"/>
+      </use>
+
+      <!-- white sparkle dots -->
+      <use href="#tx" stroke="rgba(255,255,255,0.45)" stroke-width="3"
+           fill="none" stroke-dasharray="2 220">
+        <animate attributeName="stroke-dashoffset" from="0" to="-222" dur="2.4s" repeatCount="indefinite"/>
+      </use>
+
+      <!-- river edge -->
+      <use href="#tx" stroke="rgba(182,240,255,0.15)" stroke-width="32" fill="none"/>
+
+      <!-- ⚽ WYATT floatie -->
+      <text font-size="22" text-anchor="middle" dy="8" opacity="0">⚽
+        <animateMotion dur="10s" repeatCount="indefinite" begin="3.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="3.5s"/>
+      </text>
+
+      <!-- 🐢 JUNE floatie -->
+      <text font-size="22" text-anchor="middle" dy="8" opacity="0">🐢
+        <animateMotion dur="10s" repeatCount="indefinite" begin="6.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="6.5s"/>
+      </text>
+
+      <!-- 👑 HAVEN floatie -->
+      <text font-size="22" text-anchor="middle" dy="8" opacity="0">👑
+        <animateMotion dur="10s" repeatCount="indefinite" begin="9.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="9.5s"/>
+      </text>
+
+      <!-- ❄️ WINTER floatie -->
+      <text font-size="22" text-anchor="middle" dy="8" opacity="0">❄️
+        <animateMotion dur="10s" repeatCount="indefinite" begin="12.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="12.5s"/>
+      </text>
+
+      <!-- TEXAS label -->
+      <text x="210" y="228" font-family="'Fredoka One',cursive" font-size="34" font-weight="700"
+        fill="rgba(0,196,232,0.22)" text-anchor="middle" letter-spacing="8">TEXAS</text>
+
+      <!-- Star + Houston dot -->
+      <text x="210" y="272" font-size="26" text-anchor="middle" opacity="0.3">⭐</text>
+      <circle cx="256" cy="200" r="5" fill="#ffd700" opacity="0.75">
+        <animate attributeName="r" values="5;9;5" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.75;0.3;0.75" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text x="268" y="197" font-family="'Fredoka One',cursive" font-size="10"
+        fill="#ffd700" opacity="0.6" letter-spacing="1">YOU</text>
+    </svg>
+  </div>
+
+  <div class="lr-legend rv d3">
+    <div class="lr-item"><span>⚽</span><span>Wyatt's lane</span></div>
+    <div class="lr-item"><span>🐢</span><span>June's lane</span></div>
+    <div class="lr-item"><span>👑</span><span>Haven &amp; Winter's lane</span></div>
+    <div class="lr-item"><span>☀️</span><span>Rooftop · 6th floor</span></div>
+  </div>
+</section>
+
+<!-- ===================== HOTEL ===================== -->
+<section id="hotel" class="sec rv">
+  <div class="hotel-img-wrap rv">
+    <img src="https://cache.marriott.com/is/image/marriotts7prod/mc-houmq-aerial-26847:Wide-Hor?wid=1336&fit=constrain"
+         alt="Marriott Marquis Houston aerial view"
+         width="1336" height="751"
+         loading="lazy" decoding="async">
+    <div class="hotel-text rv d2">
+      <h2 class="rv d1 bloom">YOUR <em>ADVENTURE</em><br>PALACE</h2>
+      <p>MARRIOTT MARQUIS · HOUSTON, TEXAS</p>
+    </div>
+  </div>
+  <div class="hotel-pills">
+    <div class="h-pill rv d1"><span class="pi">🌊</span> Texas Lazy River</div>
+    <div class="h-pill rv d2"><span class="pi">🏊</span> Rooftop Infinity Pool</div>
+    <div class="h-pill rv d3"><span class="pi">🔥</span> Fire Pits</div>
+    <div class="h-pill rv d4"><span class="pi">🌆</span> Houston Skyline Views</div>
+    <div class="h-pill rv d5"><span class="pi">⛺</span> Poolside Cabanas</div>
+  </div>
+</section>
+
+<!-- ===================== ROOMS ===================== -->
+<section id="rooms" class="sec">
+  <span class="r-tag rv">Mission HQ Assignments</span>
+  <h2 class="rv d1 bloom">YOUR <em>ROOMS</em></h2>
+  <span class="rule rv d2"></span>
+
+  <div class="rooms-grid">
+    <div class="room-card rc-king rv d1" data-n="01">
+      <span class="r-emoji">👑</span>
+      <div class="r-type">King Room</div>
+      <div class="r-name">The Boss Suite</div>
+      <div class="r-guests"><strong>Haris &amp; Steph</strong><br>Mission command. King bed. City views.</div>
+    </div>
+
+    <div class="room-card rc-kids rv d2" data-n="02">
+      <span class="r-emoji">🏰</span>
+      <div class="r-type">Queen Room</div>
+      <div class="r-name">The Adventure Bunker</div>
+      <div class="r-guests"><strong>Wyatt · June · Haven · Winter</strong><br>Two Queen beds. Maximum adventure HQ.</div>
+    </div>
+
+    <div class="room-card rc-grace rv d3" data-n="03">
+      <span class="r-emoji">🏆</span>
+      <div class="r-type">Joining Queen Room</div>
+      <div class="r-name">Ms. Grace HQ</div>
+      <div class="r-guests"><strong>Ms. Grace</strong><br>Connected to the kids. The MVP gets her own base.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FINALE ===================== -->
+<section id="finale" class="sec">
+  <canvas id="fireworks-canvas"></canvas>
+
+  <div class="fn-wrap">
+    <span class="fn-rocket rv">🚀<span class="fn-flame" aria-hidden="true"></span></span>
+    <div class="fn-label rv d1">T-Minus and counting...</div>
+
+    <div class="fn-title rv d2 letter-drop scroll-gated">
+      <span class="hl"><span class="ld" style="--li:0">B</span><span class="ld" style="--li:1">L</span><span class="ld" style="--li:2">A</span><span class="ld" style="--li:3">S</span><span class="ld" style="--li:4">T</span><span class="ld" style="--li:5">&nbsp;</span><span class="ld" style="--li:6">O</span><span class="ld" style="--li:7">F</span><span class="ld" style="--li:8">F</span></span>
+      <span class="fn-city">TO HOUSTON</span>
+    </div>
+
+    <div class="fn-date rv d3">JULY 10, 2026 · 3 DAYS. 3 NIGHTS. FOREVER MEMORIES.</div>
+
+    <div class="fn-cd rv d4">
+      <div class="fn-u">
+        <div class="fn-box"><span class="fn-n" id="f-d">24</span></div>
+        <span class="fn-l">Days</span>
+      </div>
+      <div class="fn-sep">:</div>
+      <div class="fn-u">
+        <div class="fn-box"><span class="fn-n" id="f-h">00</span></div>
+        <span class="fn-l">Hours</span>
+      </div>
+      <div class="fn-sep">:</div>
+      <div class="fn-u">
+        <div class="fn-box"><span class="fn-n" id="f-m">00</span></div>
+        <span class="fn-l">Minutes</span>
+      </div>
+      <div class="fn-sep">:</div>
+      <div class="fn-u">
+        <div class="fn-box"><span class="fn-n" id="f-s">00</span></div>
+        <span class="fn-l">Seconds</span>
+      </div>
+    </div>
+
+    <div class="fn-go rv d5">Wyatt &nbsp;·&nbsp; June &nbsp;·&nbsp; Haven &nbsp;·&nbsp; Winter<br>your adventure awaits 🤠</div>
+  </div>
+</section>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+// ─────────────────────────────────────────────────────────
+// OPENING — T-MINUS countdown drives the dismissal.
+// Tap anywhere on the overlay to skip immediately.
+// ─────────────────────────────────────────────────────────
+function skipOpening() {
+  const o = document.getElementById('opening');
+  if (!o) return;
+  o.classList.add('out');
+  setTimeout(() => o.remove(), 1100);
+}
+
+// Tap-anywhere-to-skip on the overlay
+(function() {
+  const o = document.getElementById('opening');
+  if (!o) return;
+  o.addEventListener('click', skipOpening, { once: false });
+  o.style.cursor = 'pointer';
+})();
+
+// T-MINUS 3 → 2 → 1 → BLAST!  (synced with .o-rocket rocketLaunch at 4.9s)
+(function runOpeningCountdown() {
+  const numEl = document.getElementById('o-cd-num');
+  if (!numEl) return;
+  const SEQ = [
+    { text: '3',           blast: false },
+    { text: '2',           blast: false },
+    { text: '1',           blast: false },
+    { text: '🚀 BLAST!',   blast: true  },
+  ];
+  let idx = 0;
+  function tick() {
+    if (!document.getElementById('opening')) return; // user tapped to skip
+    const step = SEQ[idx];
+    numEl.textContent = step.text;
+    numEl.classList.remove('cd-pop', 'is-blast');
+    void numEl.offsetWidth;
+    numEl.classList.add(step.blast ? 'is-blast' : 'cd-pop');
+    idx++;
+    if (idx < SEQ.length) setTimeout(tick, 700);
+    else setTimeout(skipOpening, 700);
+  }
+  setTimeout(tick, 2800); // first beat lands at t=2.8s (after content fades in)
+})();
+
+// ─────────────────────────────────────────────────────────
+// COUNTDOWN
+// ─────────────────────────────────────────────────────────
+const TARGET = new Date('2026-07-10T00:00:00');
+const prevVals = { d:'', h:'', m:'', s:'' };
+
+function fmt(n) { return String(n).padStart(2,'0'); }
+
+function pop(boxId) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  box.classList.remove('pop');
+  void box.offsetWidth; // reflow
+  box.classList.add('pop');
+  box.addEventListener('animationend', () => box.classList.remove('pop'), { once: true });
+}
+
+function tick() {
+  const diff = TARGET - new Date();
+  if (diff <= 0) return;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000)  / 60000);
+  const s = Math.floor((diff % 60000)    / 1000);
+
+  const fD = fmt(d), fH = fmt(h), fM = fmt(m), fS = fmt(s);
+
+  if (fD !== prevVals.d) { setVal('h-d','f-d', fD); pop('h-d-box'); prevVals.d = fD; }
+  if (fH !== prevVals.h) { setVal('h-h','f-h', fH); pop('h-h-box'); prevVals.h = fH; }
+  if (fM !== prevVals.m) { setVal('h-m','f-m', fM); pop('h-m-box'); prevVals.m = fM; }
+  if (fS !== prevVals.s) { setVal('h-s','f-s', fS); pop('h-s-box'); prevVals.s = fS; }
+}
+
+function setVal(heroId, finaleId, val) {
+  const a = document.getElementById(heroId);
+  const b = document.getElementById(finaleId);
+  if (a) a.textContent = val;
+  if (b) b.textContent = val;
+}
+
+tick();
+setInterval(tick, 1000);
+
+// ─────────────────────────────────────────────────────────
+// STAR FIELD
+// ─────────────────────────────────────────────────────────
+(function() {
+  const c = document.getElementById('starfield');
+  const cx = c.getContext('2d');
+  let W, H;
+
+  function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  // Create stars
+  const STAR_COUNT = 220;
+  const stars = Array.from({ length: STAR_COUNT }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random() * 1.6 + 0.3,
+    a: Math.random() * 0.8 + 0.1,
+    speed: Math.random() * 0.6 + 0.1,
+    tw: Math.random() * Math.PI * 2,
+    twSpeed: Math.random() * 0.02 + 0.005,
+  }));
+
+  // Shooting stars
+  const shoots = [];
+  function spawnShoot() {
+    shoots.push({
+      x: Math.random() * W,
+      y: Math.random() * H * 0.5,
+      len: Math.random() * 120 + 60,
+      speed: Math.random() * 12 + 8,
+      a: 1,
+      angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
+    });
+    setTimeout(spawnShoot, Math.random() * 5000 + 3000);
+  }
+  setTimeout(spawnShoot, 2000);
+
+  function loop() {
+    cx.clearRect(0, 0, W, H);
+
+    // Stars
+    stars.forEach(s => {
+      s.tw += s.twSpeed;
+      const alpha = s.a * (0.5 + 0.5 * Math.sin(s.tw));
+      cx.save();
+      cx.globalAlpha = alpha;
+      cx.fillStyle = '#fff';
+      cx.beginPath();
+      cx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      cx.fill();
+      cx.restore();
+    });
+
+    // Shooting stars
+    for (let i = shoots.length - 1; i >= 0; i--) {
+      const sh = shoots[i];
+      cx.save();
+      cx.globalAlpha = sh.a;
+      cx.strokeStyle = 'rgba(255,255,255,0.9)';
+      cx.lineWidth = 1.5;
+      cx.beginPath();
+      cx.moveTo(sh.x, sh.y);
+      cx.lineTo(sh.x - Math.cos(sh.angle) * sh.len, sh.y - Math.sin(sh.angle) * sh.len);
+      cx.stroke();
+      cx.restore();
+      sh.x += Math.cos(sh.angle) * sh.speed;
+      sh.y += Math.sin(sh.angle) * sh.speed;
+      sh.a -= 0.025;
+      if (sh.a <= 0) shoots.splice(i, 1);
+    }
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ─────────────────────────────────────────────────────────
+// SCROLL REVEAL — .rv → .on as element enters viewport.
+// One-shot: each element gets .on exactly once.
+// ─────────────────────────────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('on');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+// SECTION SWEEP — fires a one-shot gradient sweep across .sec as it enters.
+// Separate observer with looser threshold so the sweep registers as the section
+// crosses the bottom of the viewport, not after it's fully in.
+const secSweepObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('swept');
+      secSweepObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.04, rootMargin: '0px 0px -10% 0px' });
+document.querySelectorAll('section.sec').forEach(el => secSweepObs.observe(el));
+
+// ─────────────────────────────────────────────────────────
+// LEGO BRICKS — WYATT
+// ─────────────────────────────────────────────────────────
+(function() {
+  const field = document.getElementById('lego-field');
+  if (!field) return;
+  const COLORS = ['#e3000f','#006db7','#ffcf00','#00a650','#ff7000','#ffffff','#8b008b'];
+  const COLS = 10, ROWS = 8;
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const brick = document.createElement('div');
+      brick.className = 'lego-brick';
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      brick.style.cssText = `
+        left: ${col * 10 + Math.random() * 5}%;
+        top:  ${row * 12 + 5}%;
+        background: ${color};
+        transform: rotate(${(Math.random()-0.5)*12}deg);
+        animation: legoDrop 0.5s var(--ease-out) forwards, legoFLoat ${1.5 + Math.random()}s var(--ease-glide) ${Math.random() * 2}s infinite;
+        animation-delay: ${row * 0.06 + col * 0.04 + 0.3}s;
+        opacity: 0;
+      `;
+      field.appendChild(brick);
+    }
+  }
+})();
+
+// Lego keyframes injected
+const legoStyle = document.createElement('style');
+legoStyle.textContent = `
+  @keyframes legoDrop {
+    from { transform: translateY(-60px) rotate(20deg); opacity:0; }
+    to   { transform: translateY(0) rotate(0deg); opacity:0.35; }
+  }
+  @keyframes legoFLoat {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-4px) rotate(3deg); }
+  }
+`;
+document.head.appendChild(legoStyle);
+
+// ─────────────────────────────────────────────────────────
+// BUBBLES — JUNE
+// ─────────────────────────────────────────────────────────
+(function() {
+  const field = document.getElementById('bubble-field');
+  if (!field) return;
+  for (let i = 0; i < 16; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = Math.random() * 14 + 5;
+    b.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${Math.random() * 90 + 5}%;
+      bottom: ${Math.random() * 40}%;
+      animation-duration: ${Math.random() * 4 + 3}s;
+      animation-delay: ${Math.random() * 5}s;
+    `;
+    field.appendChild(b);
+  }
+})();
+
+// ─────────────────────────────────────────────────────────
+// PRINCESS SPARKLES — Haven & Winter
+// ─────────────────────────────────────────────────────────
+(function() {
+  const HAVEN_EMOJIS  = ['✨','⭐','💜','🌸','💫'];
+  const WINTER_EMOJIS = ['✨','❄️','⭐','💙','🌟'];
+
+  function makeSparks(containerId, emojis, count) {
+    const field = document.getElementById(containerId);
+    if (!field) return;
+    for (let i = 0; i < count; i++) {
+      const sp = document.createElement('div');
+      sp.className = 'sp';
+      sp.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      sp.style.cssText = `
+        left: ${Math.random() * 100}%;
+        bottom: ${Math.random() * 80 + 10}%;
+        font-size: ${Math.random() * 12 + 10}px;
+        animation-duration: ${Math.random() * 3 + 2}s;
+        animation-delay: ${Math.random() * 4}s;
+      `;
+      field.appendChild(sp);
+    }
+  }
+
+  makeSparks('haven-sparks',  HAVEN_EMOJIS,  18);
+  makeSparks('winter-sparks', WINTER_EMOJIS, 18);
+})();
+
+// ─────────────────────────────────────────────────────────
+// FIREWORKS — FINALE
+// ─────────────────────────────────────────────────────────
+let fireworksStarted = false;
+const finaleEl = document.getElementById('finale');
+
+const finaleObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !fireworksStarted) {
+      fireworksStarted = true;
+      startFireworks();
+    }
+  });
+}, { threshold: 0.3 });
+finaleObs.observe(finaleEl);
+
+function startFireworks() {
+  const canvas = document.getElementById('fireworks-canvas');
+  canvas.width  = finaleEl.offsetWidth;
+  canvas.height = finaleEl.offsetHeight;
+  const ctx = canvas.getContext('2d');
+
+  const COLORS = [
+    '#ffd700','#ffe95c',  // gold
+    '#00e5ff','#52dfef',  // teal (June/Winter)
+    '#ff60c0','#b44fff',  // pink/purple (Haven)
+    '#00ff6a','#7fff00',  // green (Wyatt)
+    '#ffffff','#ff6b35',  // white, orange
+  ];
+
+  class Particle {
+    constructor(x, y, vx, vy, color) {
+      this.x = x; this.y = y;
+      this.vx = vx; this.vy = vy;
+      this.color = color;
+      this.a = 1;
+      this.r = Math.random() * 3 + 1;
+      this.gravity = 0.09;
+      this.drag = 0.98;
+    }
+    update() {
+      this.vx *= this.drag;
+      this.vy *= this.drag;
+      this.vy += this.gravity;
+      this.x  += this.vx;
+      this.y  += this.vy;
+      this.a  -= 0.013;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, this.a);
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    alive() { return this.a > 0; }
+  }
+
+  class Rocket {
+    constructor() { this.reset(); }
+    reset() {
+      this.x  = canvas.width * (0.15 + Math.random() * 0.7);
+      this.y  = canvas.height + 10;
+      this.vy = -(12 + Math.random() * 8);
+      this.targetY = canvas.height * (0.08 + Math.random() * 0.38);
+      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.exploded = false;
+      this.particles = [];
+      this.trail = [];
+    }
+    update() {
+      if (!this.exploded) {
+        this.y += this.vy;
+        this.trail.push({ x: this.x, y: this.y, a: 0.6 });
+        if (this.trail.length > 12) this.trail.shift();
+        this.trail.forEach(t => t.a -= 0.05);
+        if (this.y <= this.targetY) {
+          this.exploded = true;
+          const NUM = 90 + Math.floor(Math.random() * 40);
+          for (let i = 0; i < NUM; i++) {
+            const angle = (Math.PI * 2 * i) / NUM;
+            const speed = Math.random() * 7 + 2;
+            const c = Math.random() < 0.3 ? '#ffffff' : this.color;
+            this.particles.push(new Particle(
+              this.x, this.y,
+              Math.cos(angle) * speed,
+              Math.sin(angle) * speed,
+              c
+            ));
+          }
+        }
+      }
+      this.particles.forEach(p => p.update());
+      this.particles = this.particles.filter(p => p.alive());
+    }
+    draw(ctx) {
+      if (!this.exploded) {
+        // Trail
+        this.trail.forEach(t => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, t.a);
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+        // Rocket
+        ctx.save();
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 12; ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      this.particles.forEach(p => p.draw(ctx));
+    }
+    done() { return this.exploded && this.particles.length === 0; }
+  }
+
+  const rockets = [];
+  let frame = 0;
+  let spawnTimer = 0;
+
+  function fxLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Spawn rockets
+    spawnTimer++;
+    if (spawnTimer >= 28) {
+      spawnTimer = 0;
+      rockets.push(new Rocket());
+    }
+
+    rockets.forEach(r => { r.update(); r.draw(ctx); });
+    // Remove done rockets (but keep re-spawning via timer above)
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      if (rockets[i].done()) rockets.splice(i, 1);
+    }
+
+    frame++;
+    if (frame < 900) requestAnimationFrame(fxLoop); // ~30s at 30fps
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  fxLoop();
+}
+
+// ─────────────────────────────────────────────────────────
+// DECK NAV — explicit emoji pager + one-time onboarding hint
+// ─────────────────────────────────────────────────────────
+(function() {
+  const nav = document.getElementById('deck-nav');
+  if (!nav) return;
+  const pills   = Array.from(nav.querySelectorAll('.dn-pill'));
+  const targets = pills.map(p => document.getElementById(p.dataset.tgt)).filter(Boolean);
+  const onboard = nav.querySelector('.dn-onboard');
+  const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function dismissOnboard() {
+    if (onboard && !onboard.classList.contains('dismissed')) {
+      onboard.classList.add('dismissed');
+    }
+  }
+
+  // Click → smooth scroll to section. First click also dismisses the onboard hint.
+  pills.forEach(p => {
+    p.addEventListener('click', () => {
+      dismissOnboard();
+      const target = document.getElementById(p.dataset.tgt);
+      if (!target) return;
+      target.scrollIntoView({
+        behavior: reduceMotion() ? 'instant' : 'smooth',
+        block: 'start',
+      });
+    });
+  });
+
+  // Reveal nav once the opening overlay is gone.
+  function showWhenReady() {
+    if (!document.getElementById('opening')) {
+      nav.classList.add('dn-ready');
+      return true;
+    }
+    return false;
+  }
+  if (!showWhenReady()) {
+    const pollId = setInterval(() => { if (showWhenReady()) clearInterval(pollId); }, 200);
+  }
+
+  // Active-section tracking. Pick highest visibility ratio.
+  const ratioMap = new Map();
+  targets.forEach(t => ratioMap.set(t.id, 0));
+  const activeObs = new IntersectionObserver(entries => {
+    entries.forEach(e => ratioMap.set(e.target.id, e.intersectionRatio));
+    let bestId = null, bestRatio = 0;
+    for (const [id, ratio] of ratioMap) {
+      if (ratio > bestRatio) { bestRatio = ratio; bestId = id; }
+    }
+    pills.forEach(p => p.classList.toggle('dn-active', p.dataset.tgt === bestId));
+  }, { threshold: [0.15, 0.3, 0.5, 0.7, 0.9] });
+  targets.forEach(t => activeObs.observe(t));
+
+  // Dismiss onboarding hint when user scrolls past hero.
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > window.innerHeight * 0.5) dismissOnboard();
+  }, { passive: true });
+
+  // Mobile: hide nav on scroll-down, show on scroll-up + after a 1.5s scroll pause.
+  if (matchMedia('(max-width: 767px)').matches) {
+    let lastY = window.scrollY;
+    let pauseTimer = null;
+    function setHidden(hidden) { nav.classList.toggle('dn-hidden', hidden); }
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y > lastY + 12 && y > 200)      setHidden(true);
+      else if (y < lastY - 12)             setHidden(false);
+      lastY = y;
+      clearTimeout(pauseTimer);
+      pauseTimer = setTimeout(() => setHidden(false), 1500);
+    }, { passive: true });
+  }
+})();
+
+// ─────────────────────────────────────────────────────────
+// UFO DRIFTER — ambient cameo. Spawns occasionally after the opening clears.
+// ─────────────────────────────────────────────────────────
+(function() {
+  function spawn() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ufo = document.createElement('div');
+    ufo.className = 'ufo-drifter';
+    ufo.textContent = '🛸';
+    ufo.setAttribute('aria-hidden', 'true');
+    ufo.style.top = (8 + Math.random() * 55) + 'vh';
+    const dur = 5.4 + Math.random() * 3;
+    ufo.style.animationDuration = dur + 's';
+    document.body.appendChild(ufo);
+    setTimeout(() => ufo.remove(), (dur + 0.5) * 1000);
+    const next = 7000 + Math.random() * 9000;
+    setTimeout(spawn, next);
+  }
+  // First UFO appears ~7s in (just after the opening overlay clears).
+  setTimeout(spawn, 7000);
+})();
+</script>
+</body>
+</html>
