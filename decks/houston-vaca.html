@@ -327,9 +327,10 @@ body {
 }
 .cd-l {
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(9px, 1.3vw, 12px); letter-spacing: 0.3em;
-  color: rgba(255,255,255,0.4); text-transform: uppercase;
-  display: block; margin-top: 8px;
+  font-size: clamp(15px, 2vw, 19px); letter-spacing: 0.32em;
+  color: var(--gold); text-transform: uppercase;
+  display: block; margin-top: 12px;
+  text-shadow: 0 0 16px rgba(255,215,0,0.45);
 }
 .cd-sep {
   font-family: 'Space Mono', monospace;
@@ -525,9 +526,15 @@ body {
 }
 #crew h2 em { color: var(--gold2); font-style: normal; }
 #crew .intro {
-  text-align: center; font-size: clamp(14px, 2vw, 17px);
-  color: rgba(255,255,255,0.5); max-width: 500px;
-  margin: 0 auto 70px; line-height: 1.7;
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(22px, 3.6vw, 34px);
+  color: var(--gold2);
+  max-width: 760px;
+  margin: 0 auto 70px; line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 28px rgba(255,233,92,0.35),
+               0 0 60px rgba(255,215,0,0.18);
 }
 
 /* ── KID CARDS grid ── */
@@ -552,11 +559,42 @@ body {
   min-height: 320px;
   display: flex; flex-direction: column;
   justify-content: flex-end;
-  border: 1px solid rgba(255,255,255,0.08);
-  transition: transform 380ms var(--ease-bloom), box-shadow 380ms var(--ease-out);
+  border: 1.5px solid rgba(255,255,255,0.10);
+  transition: transform 380ms var(--ease-bloom), box-shadow 380ms var(--ease-out), border-color 380ms var(--ease-out);
   cursor: default;
+  animation: kid-glow-breathe 4.2s var(--ease-glide) infinite;
 }
-.kid-card:hover { transform: translateY(-8px) scale(1.01); }
+.kid-card:hover {
+  transform: translateY(-12px) scale(1.025);
+  border-color: var(--kid-accent-strong, rgba(255,255,255,0.4));
+}
+@keyframes kid-glow-breathe {
+  0%, 100% {
+    box-shadow: 0 0 24px var(--kid-glow, rgba(255,255,255,0.18)),
+                inset 0 0 0 1px transparent;
+  }
+  50% {
+    box-shadow: 0 0 60px var(--kid-glow, rgba(255,255,255,0.45)),
+                0 0 110px var(--kid-glow, rgba(255,255,255,0.25)),
+                inset 0 0 24px var(--kid-glow-inset, rgba(255,255,255,0.06));
+  }
+}
+
+/* Shimmer streak that periodically sweeps across the card */
+.kid-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 25%, var(--kid-shimmer, rgba(255,255,255,0.16)) 50%, transparent 75%);
+  background-size: 250% 100%;
+  background-position: 200% 0;
+  pointer-events: none; z-index: 2;
+  animation: kid-shimmer-sweep 7s var(--ease-glide) infinite;
+}
+@keyframes kid-shimmer-sweep {
+  0%, 70% { background-position: 200% 0; opacity: 0; }
+  75%     { opacity: 1; }
+  100%    { background-position: -100% 0; opacity: 0; }
+}
 
 .kid-card .card-bg {
   position: absolute; inset: 0; z-index: 0;
@@ -567,15 +605,30 @@ body {
 .kc-emoji {
   font-size: 60px; display: block;
   margin-bottom: 12px;
-  animation: emoji-float 3s var(--ease-glide) infinite;
+  animation: emoji-float 3s var(--ease-glide) infinite,
+             emoji-burst 5.5s var(--ease-bloom) infinite;
+  filter: drop-shadow(0 0 18px var(--kid-glow, rgba(255,255,255,0.4)));
 }
 @keyframes emoji-float {
   0%,100% { transform: translateY(0) rotate(-3deg); }
   50%      { transform: translateY(-12px) rotate(4deg); }
 }
-.kid-card:nth-child(2) .kc-emoji { animation-delay: 0.6s; }
-.kid-card:nth-child(3) .kc-emoji { animation-delay: 1.2s; }
-.kid-card:nth-child(4) .kc-emoji { animation-delay: 1.8s; }
+@keyframes emoji-burst {
+  0%, 82%, 100% { filter: drop-shadow(0 0 18px var(--kid-glow, rgba(255,255,255,0.4))); }
+  88%           { transform: translateY(-18px) rotate(20deg) scale(1.32); filter: drop-shadow(0 0 60px var(--kid-glow-strong, rgba(255,255,255,0.95))); }
+  92%           { transform: translateY(-10px) rotate(-12deg) scale(1.18); }
+  96%           { transform: translateY(-4px)  rotate(6deg)   scale(1.06); }
+}
+.kid-card:nth-child(1) .kc-emoji { animation-delay: 0s,    0s;   }
+.kid-card:nth-child(2) .kc-emoji { animation-delay: 0.6s,  1.2s; }
+.kid-card:nth-child(3) .kc-emoji { animation-delay: 1.2s,  2.5s; }
+.kid-card:nth-child(4) .kc-emoji { animation-delay: 1.8s,  3.8s; }
+
+/* Per-kid accent variables driving glow color, shimmer tint, and emoji halo */
+.wyatt-card  { --kid-glow: rgba(0,255,106,0.42);  --kid-glow-strong: rgba(0,255,106,0.95);  --kid-glow-inset: rgba(0,255,106,0.12); --kid-shimmer: rgba(0,255,106,0.22); --kid-accent-strong: rgba(0,255,106,0.7); }
+.june-card   { --kid-glow: rgba(0,217,240,0.5);   --kid-glow-strong: rgba(0,217,240,0.95);  --kid-glow-inset: rgba(0,217,240,0.16);  --kid-shimmer: rgba(0,217,240,0.22); --kid-accent-strong: rgba(0,217,240,0.7); }
+.haven-card  { --kid-glow: rgba(180,79,255,0.5);  --kid-glow-strong: rgba(180,79,255,0.95); --kid-glow-inset: rgba(255,96,192,0.14); --kid-shimmer: rgba(255,96,192,0.22); --kid-accent-strong: rgba(180,79,255,0.75); }
+.winter-card { --kid-glow: rgba(204,238,255,0.6); --kid-glow-strong: rgba(204,238,255,0.95);--kid-glow-inset: rgba(204,238,255,0.18);--kid-shimmer: rgba(204,238,255,0.30); --kid-accent-strong: rgba(204,238,255,0.85); }
 
 .kc-name {
   font-family: 'Lilita One', cursive;
@@ -584,13 +637,14 @@ body {
 }
 .kc-title {
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(13px, 2vw, 17px);
-  opacity: 0.7; margin-bottom: 10px; letter-spacing: 0.05em;
+  font-size: clamp(15px, 2.1vw, 19px);
+  opacity: 0.85; margin-bottom: 12px; letter-spacing: 0.05em;
 }
 .kc-msg {
-  font-size: clamp(12px, 1.6vw, 14px);
-  color: rgba(255,255,255,0.65); line-height: 1.6;
-  font-style: italic;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(15px, 1.85vw, 18px);
+  color: rgba(255,255,255,0.82); line-height: 1.5;
+  letter-spacing: 0.005em;
 }
 
 /* ── WYATT — Lego + Soccer ── */
@@ -731,21 +785,36 @@ body {
 /* ── PARENT + GRACE CARDS ── */
 .crew-mini {
   border-radius: 14px; padding: 30px 24px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.10);
   position: relative; overflow: hidden;
-  transition: transform 320ms var(--ease-bloom), box-shadow 320ms var(--ease-out);
+  transition: transform 320ms var(--ease-bloom), box-shadow 320ms var(--ease-out), border-color 320ms var(--ease-out);
+  animation: mini-glow-breathe 5.5s var(--ease-glide) infinite;
 }
-.crew-mini:hover { transform: translateY(-5px); }
-.crew-mini .m-emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+.crew-mini:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255,215,0,0.45);
+}
+@keyframes mini-glow-breathe {
+  0%, 100% { box-shadow: 0 0 18px rgba(255,215,0,0.10); }
+  50%      { box-shadow: 0 0 38px rgba(255,215,0,0.22), 0 0 70px rgba(255,215,0,0.10); }
+}
+.crew-mini .m-emoji {
+  font-size: 40px; display: block; margin-bottom: 12px;
+  animation: emoji-float 3.5s var(--ease-glide) infinite;
+  filter: drop-shadow(0 0 12px rgba(255,215,0,0.4));
+}
 .crew-mini .m-name {
   font-family: 'Lilita One', cursive;
   font-size: clamp(22px, 3vw, 30px); margin-bottom: 4px;
 }
 .crew-mini .m-title {
   font-family: 'Fredoka One', cursive;
-  font-size: 13px; letter-spacing: 0.1em; opacity: 0.55; margin-bottom: 6px;
+  font-size: clamp(15px, 1.7vw, 17px); letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 8px;
 }
-.crew-mini .m-role { font-size: 12px; opacity: 0.4; }
+.crew-mini .m-role {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(14px, 1.5vw, 15px); opacity: 0.65; line-height: 1.5;
+}
 
 .parents-card {
   background: linear-gradient(145deg, rgba(255,215,0,0.07), rgba(255,215,0,0.02));
@@ -782,11 +851,17 @@ body {
 }
 #lazy-river h2 .blue { color: var(--teal); text-shadow: 0 0 50px rgba(0,229,255,0.4); }
 #lazy-river .lr-sub {
-  font-size: clamp(13px, 1.8vw, 16px);
-  color: rgba(255,255,255,0.45); margin-bottom: 50px;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(22px, 3.6vw, 34px);
+  color: var(--gold2);
+  max-width: 760px;
+  margin: 0 auto 50px; line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 28px rgba(255,233,92,0.35),
+               0 0 60px rgba(255,215,0,0.18);
 }
 
-.lr-wrap { max-width: 560px; margin: 0 auto; position: relative; }
+.lr-wrap { max-width: 720px; margin: 0 auto; position: relative; }
 
 #texas-svg {
   width: 100%; height: auto;
@@ -951,7 +1026,7 @@ body {
   font-family: 'Lilita One', cursive;
   font-size: clamp(22px, 3vw, 30px); margin-bottom: 12px;
 }
-.r-guests { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.8; }
+.r-guests { font-family: 'Fredoka One', cursive; font-size: clamp(15px, 1.7vw, 17px); color: rgba(255,255,255,0.78); line-height: 1.6; }
 .r-guests strong { color: #fff; }
 
 /* ======================================
@@ -1001,9 +1076,10 @@ body {
 
 .fn-date {
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(14px, 2.5vw, 22px);
-  letter-spacing: 0.3em; color: rgba(255,255,255,0.45);
+  font-size: clamp(16px, 2.5vw, 22px);
+  letter-spacing: 0.3em; color: var(--gold);
   margin-bottom: 55px;
+  text-shadow: 0 0 16px rgba(255,215,0,0.4);
 }
 
 /* Finale countdown */
@@ -1027,9 +1103,10 @@ body {
 }
 .fn-l {
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(10px, 1.3vw, 13px); letter-spacing: 0.35em;
-  color: rgba(255,255,255,0.35); text-transform: uppercase;
-  display: block; margin-top: 10px;
+  font-size: clamp(15px, 2vw, 19px); letter-spacing: 0.32em;
+  color: var(--gold); text-transform: uppercase;
+  display: block; margin-top: 14px;
+  text-shadow: 0 0 16px rgba(255,215,0,0.45);
 }
 .fn-sep {
   font-family: 'Space Mono', monospace;
@@ -1041,7 +1118,7 @@ body {
   margin-top: 50px;
   font-family: 'Lilita One', cursive;
   font-size: clamp(18px, 3.5vw, 36px);
-  color: rgba(255,255,255,0.25); letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.45); letter-spacing: 0.15em;
 }
 
 /* ======================================
@@ -1072,7 +1149,7 @@ body {
   }
   .cd-n { font-size: clamp(38px, 14vw, 56px); }
   .cd-sep { display: none; }
-  .cd-l { font-size: 10px; }
+  .cd-l { font-size: 13px; letter-spacing: 0.25em; }
 }
 
 /* Same tighter treatment for finale countdown. */
@@ -1089,240 +1166,45 @@ body {
 }
 
 /* ======================================
-   DECK NAV — explicit emoji pager
-   Desktop: right-edge vertical rail with hover-revealed ribbon labels.
-   Mobile:  bottom-fixed horizontal pill bar with auto-hide on scroll-down.
-   Hidden until #opening is removed by JS.
+   SCROLL HINT — small directional cue at the bottom of each section.
+   No nav anymore; the hints carry the "keep going" affordance.
    ====================================== */
-#deck-nav {
-  position: fixed;
-  z-index: 50;
+.scroll-hint {
   display: flex;
-  pointer-events: auto;
-  opacity: 0;
-  transition: opacity 600ms var(--ease-out),
-              transform 400ms var(--ease-out);
-}
-#deck-nav.dn-ready { opacity: 1; }
-
-.dn-pill {
-  display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  font-size: 19px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: inherit;
-  font-family: inherit;
-  padding: 0;
-  cursor: pointer;
-  position: relative;
-  transition: transform 280ms var(--ease-bloom),
-              background 200ms var(--ease-quick),
-              border-color 200ms var(--ease-quick),
-              box-shadow 200ms var(--ease-quick);
-}
-.dn-pill:hover  { transform: scale(1.12); background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.24); }
-.dn-pill:active { transform: scale(0.95); }
-.dn-pill:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-
-/* Active pill: gold halo + breathing pulse */
-.dn-pill.dn-active {
-  background: rgba(255,215,0,0.20);
-  border-color: rgba(255,215,0,0.6);
-  box-shadow: 0 0 18px rgba(255,215,0,0.40);
-  animation: dn-pulse 2.4s var(--ease-glide) infinite;
-}
-@keyframes dn-pulse {
-  0%,100% { box-shadow: 0 0 18px rgba(255,215,0,0.34); }
-  50%      { box-shadow: 0 0 30px rgba(255,215,0,0.62); }
-}
-
-/* DESKTOP — right-edge vertical rail */
-@media (min-width: 768px) {
-  #deck-nav {
-    right: clamp(14px, 1.6vw, 28px);
-    top: 50%;
-    transform: translateY(-50%);
-    flex-direction: column;
-    gap: 12px;
-  }
-  #deck-nav.dn-hidden { transform: translateY(-50%) translateX(28px); opacity: 0; pointer-events: none; }
-
-  /* Ribbon label slides out to the left on hover or active — strengthened:
-     ribbon is the per-section indicator now that the floating callout is gone. */
-  .dn-pill::after {
-    content: attr(data-label);
-    position: absolute;
-    right: 100%; top: 50%;
-    transform: translateY(-50%) translateX(8px);
-    margin-right: 14px;
-    font-family: 'Fredoka One', cursive;
-    font-size: 12px;
-    letter-spacing: 0.22em;
-    color: var(--gold);
-    background: rgba(6,5,26,0.92);
-    border: 1px solid rgba(255,215,0,0.35);
-    padding: 8px 16px;
-    border-radius: 100px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    box-shadow: 0 0 18px rgba(255,215,0,0.20);
-    transition: opacity 220ms var(--ease-out),
-                transform 320ms var(--ease-bloom);
-  }
-  .dn-pill:hover::after,
-  .dn-pill.dn-active::after {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-  }
-  .dn-pill.dn-active::after {
-    color: var(--gold2);
-    border-color: rgba(255,215,0,0.6);
-    box-shadow: 0 0 26px rgba(255,215,0,0.4);
-  }
-}
-
-/* MOBILE — bottom-fixed horizontal pill bar */
-@media (max-width: 767px) {
-  #deck-nav {
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    flex-direction: row;
-    gap: 4px;
-    background: rgba(0,0,12,0.55);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    padding: 7px 9px;
-    border-radius: 100px;
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
-  }
-  #deck-nav.dn-hidden { transform: translateX(-50%) translateY(80px); opacity: 0; pointer-events: none; }
-  .dn-pill {
-    width: 38px; height: 38px;
-    font-size: 17px;
-    background: transparent;
-    border-color: transparent;
-  }
-  .dn-pill::after { display: none; } /* no ribbons on mobile */
-  .dn-pill.dn-active {
-    background: rgba(255,215,0,0.18);
-    border-color: rgba(255,215,0,0.55);
-  }
-}
-
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  #deck-nav, .dn-pill, .dn-pill::after { transition-duration: 1ms !important; }
-  .dn-pill.dn-active { animation: none !important; }
-}
-
-/* ======================================
-   ONBOARDING HINT — one-shot "TAP A PILL!" anchored to the FIRST pill.
-   Fades in ~1s after nav reveals, wiggles for attention, auto-fades after 6s,
-   or dismisses early on first pill click / scroll past hero.
-   ====================================== */
-.dn-onboard {
-  position: absolute;
-  font-family: 'Fredoka One', cursive;
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  color: #0c0b30;
-  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 60%, var(--coral) 110%);
-  padding: 8px 14px;
-  border-radius: 100px;
-  white-space: nowrap;
-  pointer-events: none;
-  text-transform: uppercase;
+  gap: 8px;
+  margin: 70px auto 0;
+  max-width: 360px;
+  text-align: center;
   opacity: 0;
-  z-index: 5;
-  box-shadow: 0 0 30px rgba(255,215,0,0.55),
-              inset 0 0 12px rgba(255,255,255,0.32);
+  transform: translateY(12px);
+  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+  pointer-events: none;
 }
-.dn-onboard-text {
-  display: inline-block;
-  animation: dn-onboard-wiggle 1.1s var(--ease-glide) infinite;
+.scroll-hint.on { opacity: 0.82; transform: translateY(0); }
+.scroll-hint .sh-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(12px, 1.6vw, 15px);
+  letter-spacing: 0.42em;
+  color: var(--gold);
+  text-transform: uppercase;
+  text-shadow: 0 0 14px rgba(255,215,0,0.45);
 }
-@keyframes dn-onboard-wiggle {
-  0%, 100% { transform: rotate(-4deg) scale(1); }
-  50%      { transform: rotate(4deg)  scale(1.04); }
+.scroll-hint .sh-arrow {
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--gold-soft);
+  line-height: 1;
+  animation: sh-bob 1.6s var(--ease-glide) infinite;
+  filter: drop-shadow(0 0 16px rgba(255,215,0,0.5));
 }
-#deck-nav.dn-ready .dn-onboard:not(.dismissed) {
-  animation: dn-onboard-in  500ms var(--ease-bloom) forwards 900ms,
-             dn-onboard-out 500ms var(--ease-out)   forwards 6500ms;
+@keyframes sh-bob {
+  0%, 100% { transform: translateY(0)  scale(1);    opacity: 0.65; }
+  50%      { transform: translateY(10px) scale(1.08); opacity: 1; }
 }
-.dn-onboard.dismissed {
-  animation: dn-onboard-out 350ms var(--ease-out) forwards !important;
-}
-@keyframes dn-onboard-in {
-  from { opacity: 0; transform: translate(6px, 0) scale(0.9); }
-  to   { opacity: 1; transform: translate(0, 0)   scale(1); }
-}
-@keyframes dn-onboard-out {
-  to { opacity: 0; transform: translate(8px, 0) scale(0.9); }
-}
-
-/* Desktop: hint sits ABOVE the rail. Anchored at the rail's right edge so it
-   extends LEFT into the viewport (centering over the 44px-wide rail would
-   push it off-screen). Arrow is absolute-positioned at the bottom-right of
-   the hint so it visually points down at the rocket pill. */
-@media (min-width: 768px) {
-  .dn-onboard {
-    bottom: 100%;
-    right: 0;
-    margin-bottom: 16px;
-    padding-right: 18px;  /* extra room so the arrow has space */
-  }
-  .dn-onboard::after {
-    content: '👇';
-    position: absolute;
-    bottom: -16px;
-    right: 12px;          /* aligns visually with the rail/first pill center */
-    font-size: 18px;
-    line-height: 1;
-    filter: drop-shadow(0 0 6px rgba(255,215,0,0.6));
-    animation: dn-onboard-arrow-y 1s var(--ease-glide) infinite;
-  }
-  @keyframes dn-onboard-arrow-y {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(5px); }
-  }
-}
-
-/* Mobile: hint sits ABOVE the FIRST pill (left edge of the bottom bar). */
-@media (max-width: 767px) {
-  .dn-onboard {
-    bottom: 100%;
-    left: 6px;
-    margin-bottom: 10px;
-    font-size: 11px;
-    padding: 7px 12px;
-  }
-  .dn-onboard::before {
-    content: '👇';
-    display: block;
-    text-align: left;
-    margin-bottom: -2px;
-    margin-left: 8px;
-    font-size: 13px;
-    animation: dn-onboard-arrow-y 1s var(--ease-glide) infinite;
-  }
-  @keyframes dn-onboard-arrow-y {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(3px); }
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .dn-onboard,
-  .dn-onboard-text,
-  .dn-onboard::before,
-  .dn-onboard::after { animation: none !important; }
+  .scroll-hint .sh-arrow { animation: none !important; }
+  .scroll-hint { transition-duration: 1ms !important; }
 }
 
 /* ======================================
@@ -1365,22 +1247,10 @@ body {
     <div class="o-cd-label">T-MINUS</div>
     <div class="o-cd-num" id="o-cd-num">3</div>
   </div>
-  <div class="o-hint">tap anywhere to launch now</div>
 </div>
 
 <!-- ===================== STAR FIELD ===================== -->
 <canvas id="starfield"></canvas>
-
-<!-- ===================== DECK NAV ===================== -->
-<nav id="deck-nav" aria-label="Deck navigation">
-  <button class="dn-pill" type="button" data-tgt="hero"       data-label="MISSION COUNTDOWN" aria-label="Jump to Mission Countdown">🚀</button>
-  <button class="dn-pill" type="button" data-tgt="crew"       data-label="MEET THE CREW"     aria-label="Jump to Meet the Crew">🤩</button>
-  <button class="dn-pill" type="button" data-tgt="lazy-river" data-label="TEXAS LAZY RIVER"  aria-label="Jump to Texas Lazy River">🌊</button>
-  <button class="dn-pill" type="button" data-tgt="hotel"      data-label="ADVENTURE PALACE"  aria-label="Jump to Adventure Palace">🏨</button>
-  <button class="dn-pill" type="button" data-tgt="rooms"      data-label="YOUR ROOMS"        aria-label="Jump to Your Rooms">🛏️</button>
-  <button class="dn-pill" type="button" data-tgt="finale"     data-label="BLAST OFF"         aria-label="Jump to Blast Off">🎆</button>
-  <div class="dn-onboard" aria-hidden="true"><span class="dn-onboard-text">👋 TAP A PILL!</span></div>
-</nav>
 
 <!-- ===================== HERO ===================== -->
 <section id="hero" class="layer">
@@ -1445,7 +1315,7 @@ body {
         <span class="kc-emoji">⚡</span>
         <div class="kc-name">WYATT</div>
         <div class="kc-title">The Champion Builder</div>
-        <div class="kc-msg">"Lego master by day, CR7 superfan forever. This summer, your biggest adventure awaits."</div>
+        <div class="kc-msg">"Lego master by day, CR7 superfan forever. This summer, our biggest adventure awaits."</div>
       </div>
     </div>
 
@@ -1468,10 +1338,10 @@ body {
         <div class="turtle-swim">🐢</div>
       </div>
       <div class="card-content">
-        <span class="kc-emoji">🌊</span>
+        <span class="kc-emoji">🐬</span>
         <div class="kc-name">JUNE</div>
         <div class="kc-title">The Ocean Explorer</div>
-        <div class="kc-msg">"Future marine biologist. Turtle whisperer. The rooftop pool is your ocean this July."</div>
+        <div class="kc-msg">"Future marine biologist. Turtle whisperer. The rooftop pool is our ocean this July."</div>
       </div>
     </div>
 
@@ -1482,10 +1352,10 @@ body {
         <div class="crown-glow">👑</div>
       </div>
       <div class="card-content">
-        <span class="kc-emoji">🌸</span>
+        <span class="kc-emoji">🦄</span>
         <div class="kc-name">HAVEN</div>
         <div class="kc-title">The Royal Princess</div>
-        <div class="kc-msg">"Your palace is waiting in Houston, Princess Haven. A whole kingdom of adventures."</div>
+        <div class="kc-msg">"Our palace is waiting in Houston, Princess Haven. A whole kingdom of adventures."</div>
       </div>
     </div>
 
@@ -1508,20 +1378,25 @@ body {
   <!-- Parents + Grace -->
   <div class="crew-row" style="margin-top:20px">
 
-    <div class="crew-mini parents-card rv d2">
-      <span class="m-emoji">👑</span>
-      <div class="m-name">Haris &amp; Steph</div>
-      <div class="m-title">The Architects</div>
-      <div class="m-role">King Room · The masterminds who made this happen</div>
-    </div>
-
-    <div class="crew-mini grace-card rv d3">
+    <div class="crew-mini grace-card rv d2">
       <span class="m-emoji">🏆</span>
       <div class="m-name">Ms. Grace</div>
       <div class="m-title">The MVP</div>
       <div class="m-role">Joining Queen Room · National treasure. Legend.</div>
     </div>
 
+    <div class="crew-mini parents-card rv d3">
+      <span class="m-emoji">👑</span>
+      <div class="m-name">Haris &amp; Steph</div>
+      <div class="m-title">The Architects</div>
+      <div class="m-role">King Room · The masterminds who made this happen</div>
+    </div>
+
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <span class="sh-label">TEXAS LAZY RIVER</span>
+    <span class="sh-arrow">↓</span>
   </div>
 </section>
 
@@ -1592,25 +1467,25 @@ body {
       <use href="#tx" stroke="rgba(182,240,255,0.15)" stroke-width="32" fill="none"/>
 
       <!-- ⚽ WYATT floatie -->
-      <text font-size="22" text-anchor="middle" dy="8" opacity="0">⚽
+      <text font-size="34" text-anchor="middle" dy="10" opacity="0" filter="url(#glow4)">⚽
         <animateMotion dur="10s" repeatCount="indefinite" begin="3.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
         <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="3.5s"/>
       </text>
 
       <!-- 🐢 JUNE floatie -->
-      <text font-size="22" text-anchor="middle" dy="8" opacity="0">🐢
+      <text font-size="34" text-anchor="middle" dy="10" opacity="0" filter="url(#glow4)">🐢
         <animateMotion dur="10s" repeatCount="indefinite" begin="6.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
         <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="6.5s"/>
       </text>
 
       <!-- 👑 HAVEN floatie -->
-      <text font-size="22" text-anchor="middle" dy="8" opacity="0">👑
+      <text font-size="34" text-anchor="middle" dy="10" opacity="0" filter="url(#glow4)">👑
         <animateMotion dur="10s" repeatCount="indefinite" begin="9.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
         <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="9.5s"/>
       </text>
 
       <!-- ❄️ WINTER floatie -->
-      <text font-size="22" text-anchor="middle" dy="8" opacity="0">❄️
+      <text font-size="34" text-anchor="middle" dy="10" opacity="0" filter="url(#glow4)">❄️
         <animateMotion dur="10s" repeatCount="indefinite" begin="12.5s" rotate="auto"><mpath href="#tx"/></animateMotion>
         <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.92;1" dur="10s" repeatCount="indefinite" begin="12.5s"/>
       </text>
@@ -1633,36 +1508,46 @@ body {
   <div class="lr-legend rv d3">
     <div class="lr-item"><span>⚽</span><span>Wyatt's lane</span></div>
     <div class="lr-item"><span>🐢</span><span>June's lane</span></div>
-    <div class="lr-item"><span>👑</span><span>Haven &amp; Winter's lane</span></div>
-    <div class="lr-item"><span>☀️</span><span>Rooftop · 6th floor</span></div>
+    <div class="lr-item"><span>👑</span><span>Haven's lane</span></div>
+    <div class="lr-item"><span>❄️</span><span>Winter's lane</span></div>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <span class="sh-label">OUR PALACE</span>
+    <span class="sh-arrow">↓</span>
   </div>
 </section>
 
 <!-- ===================== HOTEL ===================== -->
 <section id="hotel" class="sec rv">
   <div class="hotel-img-wrap rv">
-    <img src="https://cache.marriott.com/is/image/marriotts7prod/mc-houmq-aerial-26847:Wide-Hor?wid=1336&fit=constrain"
+    <img src="mm.avif"
          alt="Marriott Marquis Houston aerial view"
-         width="1336" height="751"
+         width="1920" height="1438"
          loading="lazy" decoding="async">
     <div class="hotel-text rv d2">
-      <h2 class="rv d1 bloom">YOUR <em>ADVENTURE</em><br>PALACE</h2>
+      <h2 class="rv d1 bloom">OUR <em>ADVENTURE</em><br>PALACE</h2>
       <p>MARRIOTT MARQUIS · HOUSTON, TEXAS</p>
     </div>
   </div>
   <div class="hotel-pills">
-    <div class="h-pill rv d1"><span class="pi">🌊</span> Texas Lazy River</div>
-    <div class="h-pill rv d2"><span class="pi">🏊</span> Rooftop Infinity Pool</div>
-    <div class="h-pill rv d3"><span class="pi">🔥</span> Fire Pits</div>
-    <div class="h-pill rv d4"><span class="pi">🌆</span> Houston Skyline Views</div>
-    <div class="h-pill rv d5"><span class="pi">⛺</span> Poolside Cabanas</div>
+    <div class="h-pill rv d1"><span class="pi">🌀</span> Texas-Shaped Lazy River</div>
+    <div class="h-pill rv d2"><span class="pi">🪩</span> Rooftop Infinity Pool</div>
+    <div class="h-pill rv d3"><span class="pi">🐉</span> Fire Pits (Dragon Vibes)</div>
+    <div class="h-pill rv d4"><span class="pi">🛸</span> Houston Skyline Views</div>
+    <div class="h-pill rv d5"><span class="pi">🦩</span> Poolside Cabanas</div>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <span class="sh-label">OUR ROOMS</span>
+    <span class="sh-arrow">↓</span>
   </div>
 </section>
 
 <!-- ===================== ROOMS ===================== -->
 <section id="rooms" class="sec">
   <span class="r-tag rv">Mission HQ Assignments</span>
-  <h2 class="rv d1 bloom">YOUR <em>ROOMS</em></h2>
+  <h2 class="rv d1 bloom">OUR <em>ROOMS</em></h2>
   <span class="rule rv d2"></span>
 
   <div class="rooms-grid">
@@ -1686,6 +1571,11 @@ body {
       <div class="r-name">Ms. Grace HQ</div>
       <div class="r-guests"><strong>Ms. Grace</strong><br>Connected to the kids. The MVP gets her own base.</div>
     </div>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <span class="sh-label">BLAST OFF</span>
+    <span class="sh-arrow">↓</span>
   </div>
 </section>
 
@@ -1726,15 +1616,14 @@ body {
       </div>
     </div>
 
-    <div class="fn-go rv d5">Wyatt &nbsp;·&nbsp; June &nbsp;·&nbsp; Haven &nbsp;·&nbsp; Winter<br>your adventure awaits 🤠</div>
+    <div class="fn-go rv d5">Wyatt &nbsp;·&nbsp; June &nbsp;·&nbsp; Haven &nbsp;·&nbsp; Winter<br>our adventure awaits 🤠</div>
   </div>
 </section>
 
 <!-- ===================== JAVASCRIPT ===================== -->
 <script>
 // ─────────────────────────────────────────────────────────
-// OPENING — T-MINUS countdown drives the dismissal.
-// Tap anywhere on the overlay to skip immediately.
+// OPENING — T-MINUS countdown drives the dismissal. No skip.
 // ─────────────────────────────────────────────────────────
 function skipOpening() {
   const o = document.getElementById('opening');
@@ -1742,14 +1631,6 @@ function skipOpening() {
   o.classList.add('out');
   setTimeout(() => o.remove(), 1100);
 }
-
-// Tap-anywhere-to-skip on the overlay
-(function() {
-  const o = document.getElementById('opening');
-  if (!o) return;
-  o.addEventListener('click', skipOpening, { once: false });
-  o.style.cursor = 'pointer';
-})();
 
 // T-MINUS 3 → 2 → 1 → BLAST!  (synced with .o-rocket rocketLaunch at 4.9s)
 (function runOpeningCountdown() {
@@ -1931,7 +1812,7 @@ document.querySelectorAll('section.sec').forEach(el => secSweepObs.observe(el));
   const field = document.getElementById('lego-field');
   if (!field) return;
   const COLORS = ['#e3000f','#006db7','#ffcf00','#00a650','#ff7000','#ffffff','#8b008b'];
-  const COLS = 10, ROWS = 8;
+  const COLS = 12, ROWS = 10;
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       const brick = document.createElement('div');
@@ -1971,7 +1852,7 @@ document.head.appendChild(legoStyle);
 (function() {
   const field = document.getElementById('bubble-field');
   if (!field) return;
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 28; i++) {
     const b = document.createElement('div');
     b.className = 'bubble';
     const size = Math.random() * 14 + 5;
@@ -2011,8 +1892,8 @@ document.head.appendChild(legoStyle);
     }
   }
 
-  makeSparks('haven-sparks',  HAVEN_EMOJIS,  18);
-  makeSparks('winter-sparks', WINTER_EMOJIS, 18);
+  makeSparks('haven-sparks',  HAVEN_EMOJIS,  30);
+  makeSparks('winter-sparks', WINTER_EMOJIS, 30);
 })();
 
 // ─────────────────────────────────────────────────────────
@@ -2167,79 +2048,20 @@ function startFireworks() {
 }
 
 // ─────────────────────────────────────────────────────────
-// DECK NAV — explicit emoji pager + one-time onboarding hint
+// SCROLL HINT — each .scroll-hint fades in via IO when its section enters
 // ─────────────────────────────────────────────────────────
 (function() {
-  const nav = document.getElementById('deck-nav');
-  if (!nav) return;
-  const pills   = Array.from(nav.querySelectorAll('.dn-pill'));
-  const targets = pills.map(p => document.getElementById(p.dataset.tgt)).filter(Boolean);
-  const onboard = nav.querySelector('.dn-onboard');
-  const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function dismissOnboard() {
-    if (onboard && !onboard.classList.contains('dismissed')) {
-      onboard.classList.add('dismissed');
-    }
-  }
-
-  // Click → smooth scroll to section. First click also dismisses the onboard hint.
-  pills.forEach(p => {
-    p.addEventListener('click', () => {
-      dismissOnboard();
-      const target = document.getElementById(p.dataset.tgt);
-      if (!target) return;
-      target.scrollIntoView({
-        behavior: reduceMotion() ? 'instant' : 'smooth',
-        block: 'start',
-      });
+  const hints = document.querySelectorAll('.scroll-hint');
+  if (!hints.length) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('on');
+        obs.unobserve(e.target);
+      }
     });
-  });
-
-  // Reveal nav once the opening overlay is gone.
-  function showWhenReady() {
-    if (!document.getElementById('opening')) {
-      nav.classList.add('dn-ready');
-      return true;
-    }
-    return false;
-  }
-  if (!showWhenReady()) {
-    const pollId = setInterval(() => { if (showWhenReady()) clearInterval(pollId); }, 200);
-  }
-
-  // Active-section tracking. Pick highest visibility ratio.
-  const ratioMap = new Map();
-  targets.forEach(t => ratioMap.set(t.id, 0));
-  const activeObs = new IntersectionObserver(entries => {
-    entries.forEach(e => ratioMap.set(e.target.id, e.intersectionRatio));
-    let bestId = null, bestRatio = 0;
-    for (const [id, ratio] of ratioMap) {
-      if (ratio > bestRatio) { bestRatio = ratio; bestId = id; }
-    }
-    pills.forEach(p => p.classList.toggle('dn-active', p.dataset.tgt === bestId));
-  }, { threshold: [0.15, 0.3, 0.5, 0.7, 0.9] });
-  targets.forEach(t => activeObs.observe(t));
-
-  // Dismiss onboarding hint when user scrolls past hero.
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > window.innerHeight * 0.5) dismissOnboard();
-  }, { passive: true });
-
-  // Mobile: hide nav on scroll-down, show on scroll-up + after a 1.5s scroll pause.
-  if (matchMedia('(max-width: 767px)').matches) {
-    let lastY = window.scrollY;
-    let pauseTimer = null;
-    function setHidden(hidden) { nav.classList.toggle('dn-hidden', hidden); }
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY;
-      if (y > lastY + 12 && y > 200)      setHidden(true);
-      else if (y < lastY - 12)             setHidden(false);
-      lastY = y;
-      clearTimeout(pauseTimer);
-      pauseTimer = setTimeout(() => setHidden(false), 1500);
-    }, { passive: true });
-  }
+  }, { threshold: 0.2, rootMargin: '0px 0px -40px 0px' });
+  hints.forEach(h => obs.observe(h));
 })();
 
 // ─────────────────────────────────────────────────────────
