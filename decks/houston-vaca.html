@@ -1584,6 +1584,15 @@ body {
 
 /* Same tighter treatment for finale countdown. */
 @media (max-width: 540px) {
+  .rooms-grid {
+    overflow: hidden;
+    contain: paint;
+  }
+  .rooms-grid::before {
+    left: 0;
+    width: 100%;
+    transform: rotateX(68deg);
+  }
   .fn-cd {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2774,10 +2783,10 @@ function startFireworks() {
       this.vx = vx; this.vy = vy;
       this.color = color;
       this.a = 1;
-      this.r = opts.r || Math.random() * 3 + 1;
-      this.gravity = opts.gravity ?? 0.09;
+      this.r = opts.r || (mobileFinale ? Math.random() * 3.2 + 1.6 : Math.random() * 3 + 1);
+      this.gravity = opts.gravity ?? (mobileFinale ? 0.055 : 0.09);
       this.drag = opts.drag ?? 0.98;
-      this.fade = opts.fade ?? 0.013;
+      this.fade = opts.fade ?? (mobileFinale ? 0.008 : 0.013);
     }
     update() {
       this.vx *= this.drag;
@@ -2791,6 +2800,8 @@ function startFireworks() {
       ctx.save();
       ctx.globalAlpha = Math.max(0, this.a);
       ctx.fillStyle = this.color;
+      ctx.shadowBlur = mobileFinale ? 14 : 18;
+      ctx.shadowColor = this.color;
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
       ctx.fill();
@@ -2858,9 +2869,14 @@ function startFireworks() {
   let spawnTimer = 0;
   const cues = mobileFinale
     ? [
-        { frame: 45,  kind: 'circle', x: 0.30, y: 0.26, color: '#00e5ff' },
-        { frame: 140, kind: 'texas',  x: 0.70, y: 0.30, color: '#ffd700' },
-        { frame: 240, kind: 'circle', x: 0.50, y: 0.36, color: '#ff60c0' },
+        { frame: 5,   kind: 'circle',       x: 0.20, y: 0.24, color: '#00e5ff' },
+        { frame: 18,  kind: 'circle',       x: 0.78, y: 0.25, color: '#ffd700' },
+        { frame: 34,  kind: 'text:TX',      x: 0.30, y: 0.20, color: '#00e5ff' },
+        { frame: 62,  kind: 'texas',        x: 0.70, y: 0.30, color: '#ffd700' },
+        { frame: 96,  kind: 'circle',       x: 0.46, y: 0.30, color: '#ff60c0' },
+        { frame: 145, kind: 'text:HOUSTON', x: 0.50, y: 0.20, color: '#ffe95c' },
+        { frame: 230, kind: 'circle',       x: 0.50, y: 0.38, color: '#ff60c0' },
+        { frame: 330, kind: 'texas',        x: 0.38, y: 0.34, color: '#00ff6a' },
       ]
     : [
         { frame: 55,  kind: 'text:TX',      x: 0.28, y: 0.26, color: '#00e5ff' },
@@ -2874,11 +2890,11 @@ function startFireworks() {
     if (kind === 'texas') return texasBurst(x, y, color);
 
     const particles = [];
-    const NUM = mobileFinale ? 34 + Math.floor(Math.random() * 22) : 90 + Math.floor(Math.random() * 50);
+    const NUM = mobileFinale ? 110 + Math.floor(Math.random() * 70) : 90 + Math.floor(Math.random() * 50);
     for (let i = 0; i < NUM; i++) {
       const angle = (Math.PI * 2 * i) / NUM;
       const wobble = 0.7 + Math.random() * 0.6;
-      const speed = (Math.random() * (mobileFinale ? 3.2 : 6) + (mobileFinale ? 1.6 : 2.4)) * wobble;
+      const speed = (Math.random() * (mobileFinale ? 5.6 : 6) + (mobileFinale ? 2.4 : 2.4)) * wobble;
       const c = Math.random() < 0.28 ? '#ffffff' : color;
       particles.push(new Particle(
         x, y,
@@ -2897,7 +2913,7 @@ function startFireworks() {
       [-0.68,0.82],[-0.88,0.50],[-1.02,0.06],[-1.00,-0.30],[-0.88,-0.58]
     ];
     const particles = [];
-    for (let i = 0; i < (mobileFinale ? 58 : 150); i++) {
+    for (let i = 0; i < (mobileFinale ? 118 : 150); i++) {
       const a = pts[i % pts.length];
       const b = pts[(i + 1) % pts.length];
       const mix = Math.random();
@@ -2941,7 +2957,7 @@ function startFireworks() {
         }
       }
     }
-    return points.slice(0, mobileFinale ? 90 : 260).map(p => new Particle(
+    return points.slice(0, mobileFinale ? 190 : 260).map(p => new Particle(
       x, y,
       p.x * 0.055,
       p.y * 0.055,
@@ -2968,13 +2984,13 @@ function startFireworks() {
 
     // Spawn rockets
     spawnTimer++;
-    if (spawnTimer >= (mobileFinale ? 64 : 28)) {
+    if (spawnTimer >= (mobileFinale ? 42 : 28)) {
       spawnTimer = 0;
-      rockets.push(new Rocket(!mobileFinale && frame % 5 === 0 ? 'texas' : null));
+      rockets.push(new Rocket(frame % (mobileFinale ? 4 : 5) === 0 ? 'texas' : null));
     }
 
-    if (mobileFinale && rockets.length > 3) rockets.splice(0, rockets.length - 3);
-    if (mobileFinale && scripted.length > 180) scripted.splice(0, scripted.length - 180);
+    if (mobileFinale && rockets.length > 5) rockets.splice(0, rockets.length - 5);
+    if (mobileFinale && scripted.length > 380) scripted.splice(0, scripted.length - 380);
 
     rockets.forEach(r => { r.update(); r.draw(ctx); });
     scripted.forEach(p => { p.update(); p.draw(ctx); });
@@ -2988,7 +3004,7 @@ function startFireworks() {
     }
 
     frame++;
-    if (frame < (mobileFinale ? 420 : 900)) requestAnimationFrame(fxLoop);
+    if (frame < (mobileFinale ? 720 : 900)) requestAnimationFrame(fxLoop);
     else {
       cleanupResize();
       ctx.clearRect(0, 0, W, H);
