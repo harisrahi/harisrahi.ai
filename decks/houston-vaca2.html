@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="houston-vaca-build" content="ios-safe-v3-2026-06-17">
+<meta name="houston-vaca-build" content="ios-safe-v4-2026-06-17">
 <title>🚀 HOUSTON MISSION · JULY 2026</title>
 <script>
 (function() {
-  var BUILD_ID = 'ios-safe-v3-2026-06-17';
+  var BUILD_ID = 'ios-safe-v4-2026-06-17';
   function detectIOSWebKitSafe() {
     var ua = navigator.userAgent || '';
     var platform = navigator.platform || '';
@@ -1469,6 +1469,57 @@ body {
   pointer-events: none; z-index: 1;
 }
 
+.safe-fireworks {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.safe-fw {
+  --core: rgba(255,255,255,0.96);
+  --ray: rgba(255,215,0,0.82);
+  --dot: rgba(0,229,255,0.72);
+  --rot: 0deg;
+  --scale: 1;
+  position: absolute;
+  width: clamp(88px, 26vw, 150px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(var(--rot)) scale(var(--scale));
+  opacity: 0.9;
+  background:
+    radial-gradient(circle at 50% 50%, var(--core) 0 4px, transparent 5px),
+    repeating-conic-gradient(from var(--rot), transparent 0 8deg, var(--ray) 8deg 11deg, transparent 11deg 19deg);
+}
+
+.safe-fw::before,
+.safe-fw::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.safe-fw::before {
+  inset: 18%;
+  border: 2px dotted var(--dot);
+}
+
+.safe-fw::after {
+  inset: 36%;
+  border: 1px solid rgba(255,255,255,0.58);
+}
+
+.safe-fw.gold { left: 12%; top: 17%; --ray: rgba(255,215,0,0.9); --dot: rgba(255,233,92,0.76); --scale: 0.82; }
+.safe-fw.teal { left: 88%; top: 21%; --ray: rgba(0,229,255,0.86); --dot: rgba(144,224,239,0.72); --rot: 12deg; --scale: 0.76; }
+.safe-fw.pink { left: 82%; top: 46%; --ray: rgba(255,96,192,0.82); --dot: rgba(180,79,255,0.70); --rot: 27deg; --scale: 0.58; }
+.safe-fw.green { left: 12%; top: 57%; --ray: rgba(0,255,106,0.74); --dot: rgba(255,255,255,0.58); --rot: -14deg; --scale: 0.54; }
+.safe-fw.ice { left: 90%; top: 76%; --ray: rgba(204,238,255,0.72); --dot: rgba(0,229,255,0.62); --rot: 34deg; --scale: 0.52; }
+.safe-fw.coral { left: 10%; top: 83%; --ray: rgba(255,107,53,0.74); --dot: rgba(255,215,0,0.64); --rot: -28deg; --scale: 0.5; }
+
 .finale-portal {
   position: absolute;
   left: 50%;
@@ -1922,6 +1973,10 @@ body {
       radial-gradient(circle at 34% 52%, rgba(0,255,106,0.26) 0 4px, transparent 5px),
       repeating-conic-gradient(from 18deg at 50% 58%, rgba(255,215,0,0.055) 0 7deg, transparent 7deg 18deg);
     opacity: 0.68;
+  }
+
+  html.ios-safe .safe-fireworks {
+    display: block;
   }
 
   html.ios-safe .fn-wrap {
@@ -2391,6 +2446,14 @@ body {
 <!-- ===================== FINALE ===================== -->
 <section id="finale" class="sec">
   <canvas id="fireworks-canvas"></canvas>
+  <div class="safe-fireworks" aria-hidden="true">
+    <span class="safe-fw gold"></span>
+    <span class="safe-fw teal"></span>
+    <span class="safe-fw pink"></span>
+    <span class="safe-fw green"></span>
+    <span class="safe-fw ice"></span>
+    <span class="safe-fw coral"></span>
+  </div>
   <div class="finale-portal" aria-hidden="true"></div>
 
   <div class="fn-wrap">
@@ -2432,7 +2495,7 @@ body {
 
 <!-- ===================== JAVASCRIPT ===================== -->
 <script>
-const HOUSTON_VACA_BUILD = window.__HOUSTON_VACA_BUILD || 'ios-safe-v3-2026-06-17';
+const HOUSTON_VACA_BUILD = window.__HOUSTON_VACA_BUILD || 'ios-safe-v4-2026-06-17';
 
 function detectIOSWebKitSafe() {
   const ua = navigator.userAgent || '';
