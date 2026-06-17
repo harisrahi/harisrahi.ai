@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="houston-vaca-build" content="ios-safe-v4-2026-06-17">
+<meta name="houston-vaca-build" content="ios-safe-v5-2026-06-17">
 <title>🚀 HOUSTON MISSION · JULY 2026</title>
 <script>
 (function() {
-  var BUILD_ID = 'ios-safe-v4-2026-06-17';
+  var BUILD_ID = 'ios-safe-v5-2026-06-17';
   function detectIOSWebKitSafe() {
     var ua = navigator.userAgent || '';
     var platform = navigator.platform || '';
@@ -1493,6 +1493,8 @@ body {
   background:
     radial-gradient(circle at 50% 50%, var(--core) 0 4px, transparent 5px),
     repeating-conic-gradient(from var(--rot), transparent 0 8deg, var(--ray) 8deg 11deg, transparent 11deg 19deg);
+  animation: safe-fw-twinkle 2.8s var(--ease-glide) infinite both;
+  animation-delay: var(--delay, 0s);
 }
 
 .safe-fw::before,
@@ -1506,19 +1508,45 @@ body {
 .safe-fw::before {
   inset: 18%;
   border: 2px dotted var(--dot);
+  transform-origin: center;
+  animation: safe-fw-ring 2.8s var(--ease-out) infinite both;
+  animation-delay: var(--delay, 0s);
 }
 
 .safe-fw::after {
   inset: 36%;
   border: 1px solid rgba(255,255,255,0.58);
+  transform-origin: center;
+  animation: safe-fw-core 2.8s var(--ease-pop) infinite both;
+  animation-delay: var(--delay, 0s);
 }
 
-.safe-fw.gold { left: 12%; top: 17%; --ray: rgba(255,215,0,0.9); --dot: rgba(255,233,92,0.76); --scale: 0.82; }
-.safe-fw.teal { left: 88%; top: 21%; --ray: rgba(0,229,255,0.86); --dot: rgba(144,224,239,0.72); --rot: 12deg; --scale: 0.76; }
-.safe-fw.pink { left: 82%; top: 46%; --ray: rgba(255,96,192,0.82); --dot: rgba(180,79,255,0.70); --rot: 27deg; --scale: 0.58; }
-.safe-fw.green { left: 12%; top: 57%; --ray: rgba(0,255,106,0.74); --dot: rgba(255,255,255,0.58); --rot: -14deg; --scale: 0.54; }
-.safe-fw.ice { left: 90%; top: 76%; --ray: rgba(204,238,255,0.72); --dot: rgba(0,229,255,0.62); --rot: 34deg; --scale: 0.52; }
-.safe-fw.coral { left: 10%; top: 83%; --ray: rgba(255,107,53,0.74); --dot: rgba(255,215,0,0.64); --rot: -28deg; --scale: 0.5; }
+.safe-fw.gold { left: 12%; top: 17%; --ray: rgba(255,215,0,0.9); --dot: rgba(255,233,92,0.76); --scale: 0.82; --delay: -0.10s; }
+.safe-fw.teal { left: 88%; top: 21%; --ray: rgba(0,229,255,0.86); --dot: rgba(144,224,239,0.72); --rot: 12deg; --scale: 0.76; --delay: -0.72s; }
+.safe-fw.pink { left: 82%; top: 46%; --ray: rgba(255,96,192,0.82); --dot: rgba(180,79,255,0.70); --rot: 27deg; --scale: 0.58; --delay: -1.38s; }
+.safe-fw.green { left: 12%; top: 57%; --ray: rgba(0,255,106,0.74); --dot: rgba(255,255,255,0.58); --rot: -14deg; --scale: 0.54; --delay: -1.92s; }
+.safe-fw.ice { left: 90%; top: 76%; --ray: rgba(204,238,255,0.72); --dot: rgba(0,229,255,0.62); --rot: 34deg; --scale: 0.52; --delay: -2.34s; }
+.safe-fw.coral { left: 10%; top: 83%; --ray: rgba(255,107,53,0.74); --dot: rgba(255,215,0,0.64); --rot: -28deg; --scale: 0.5; --delay: -2.72s; }
+
+@keyframes safe-fw-twinkle {
+  0%, 100% { opacity: 0.32; }
+  14% { opacity: 0.98; }
+  42% { opacity: 0.72; }
+  72% { opacity: 0.22; }
+}
+
+@keyframes safe-fw-ring {
+  0% { transform: scale(0.34); opacity: 0; }
+  12% { opacity: 0.9; }
+  72% { opacity: 0.34; }
+  100% { transform: scale(1.28); opacity: 0; }
+}
+
+@keyframes safe-fw-core {
+  0%, 100% { transform: scale(0.62); opacity: 0.28; }
+  16% { transform: scale(1.18); opacity: 0.92; }
+  38% { transform: scale(0.84); opacity: 0.58; }
+}
 
 .finale-portal {
   position: absolute;
