@@ -1675,6 +1675,10 @@ body {
   100% { transform: translateX(120vw)  translateY(0)    rotate(6deg);  opacity: 0; }
 }
 
+@media(max-width: 820px), (pointer: coarse) {
+  #alchemy-canvas { display: none !important; }
+}
+
 @media(max-width: 820px) {
   .mission-core { top: 22%; opacity: 0.58; }
   .scroll-meter { display: none; }
@@ -1732,17 +1736,40 @@ body {
   html.ios-safe .ocean-waves,
   html.ios-safe .wave,
   html.ios-safe .turtle,
+  html.ios-safe .turtle-swim,
   html.ios-safe .r-emoji,
+  html.ios-safe .kc-emoji,
   html.ios-safe .crew-emoji,
+  html.ios-safe .soccer-ball,
   html.ios-safe .princess-crown,
+  html.ios-safe .crown-glow,
   html.ios-safe .frost-crystal,
+  html.ios-safe .frost-branches,
+  html.ios-safe .castle-lines,
   html.ios-safe .fn-rocket,
+  html.ios-safe .fn-flame,
   html.ios-safe .scroll-hint .sh-arrow,
+  html.ios-safe .scroll-line,
   html.ios-safe #texas-svg,
   html.ios-safe #finale::before {
     animation: none !important;
     filter: none !important;
   }
+
+  html.ios-safe #texas-svg *,
+  html.ios-safe #texas-svg [filter] {
+    animation: none !important;
+    filter: none !important;
+  }
+
+  html.ios-safe #texas-svg animate,
+  html.ios-safe #texas-svg animateMotion {
+    display: none !important;
+  }
+
+  html.ios-safe #wg stop:nth-child(1) { stop-color: #7ae9ff; }
+  html.ios-safe #wg stop:nth-child(2) { stop-color: #00b4d8; }
+  html.ios-safe #wg stop:nth-child(3) { stop-color: #90e0ef; }
 
   html.ios-safe .bubble,
   html.ios-safe .sp,
@@ -2218,10 +2245,23 @@ const IOS_WEBKIT_SAFE = /iP(hone|od|ad)/.test(navigator.platform) ||
 
 if (IOS_WEBKIT_SAFE) {
   document.documentElement.classList.add('ios-safe');
+  applyIosSafeStaticSvg();
 }
 
 function effectDpr(maxDesktopDpr = 2) {
   return Math.min(window.devicePixelRatio || 1, IOS_WEBKIT_SAFE ? 1 : MOBILE_EFFECTS ? MOBILE_CANVAS_DPR : maxDesktopDpr);
+}
+
+function applyIosSafeStaticSvg() {
+  const svg = document.getElementById('texas-svg');
+  if (!svg) return;
+  const stops = svg.querySelectorAll('#wg stop');
+  const staticStops = ['#7ae9ff', '#00b4d8', '#90e0ef'];
+  stops.forEach((stop, index) => {
+    stop.setAttribute('stop-color', staticStops[index] || staticStops[staticStops.length - 1]);
+  });
+  svg.querySelectorAll('[filter]').forEach(el => el.removeAttribute('filter'));
+  svg.querySelectorAll('animate, animateMotion').forEach(el => el.remove());
 }
 
 function scheduleCanvasResize(resize) {
@@ -2466,7 +2506,7 @@ setInterval(tick, 1000);
 // AI ALCHEMY FIELD — reaction trails that connect the whole deck.
 // ─────────────────────────────────────────────────────────
 (function() {
-  if (REDUCED_MOTION || IOS_WEBKIT_SAFE) return;
+  if (REDUCED_MOTION || IOS_WEBKIT_SAFE || MOBILE_EFFECTS) return;
   const canvas = document.getElementById('alchemy-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
