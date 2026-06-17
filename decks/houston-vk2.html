@@ -2126,7 +2126,19 @@ const IOS_WEBKIT = (() => {
 })();
 
 function effectDpr(maxDesktopDpr = 2) {
-  return Math.min(window.devicePixelRatio || 1, MOBILE_EFFECTS ? MOBILE_CANVAS_DPR : maxDesktopDpr);
+  return Math.min(window.devicePixelRatio || 1, IOS_WEBKIT ? 1 : MOBILE_EFFECTS ? MOBILE_CANVAS_DPR : maxDesktopDpr);
+}
+
+function waitForOpeningClear(start) {
+  if (!IOS_WEBKIT || !document.getElementById('opening')) {
+    start();
+    return;
+  }
+  window.addEventListener('houston-opening-complete', () => requestAnimationFrame(start), { once: true });
+}
+
+function dispatchHoustonEvent(name) {
+  window.dispatchEvent(new Event(name));
 }
 
 function scheduleCanvasResize(resize) {
@@ -2177,7 +2189,10 @@ function finishOpening() {
   if (!o) return;
   try { sessionStorage.setItem(INTRO_COMPLETE_KEY, '1'); } catch (_) {}
   o.classList.add('out');
-  setTimeout(() => o.remove(), 1100);
+  setTimeout(() => {
+    o.remove();
+    dispatchHoustonEvent('houston-opening-complete');
+  }, 1100);
 }
 
 // T-MINUS 3 → 2 → 1 → BLAST!  (synced with .o-rocket rocketLaunch at 4.9s)
@@ -2188,6 +2203,7 @@ function finishOpening() {
   try {
     if (sessionStorage.getItem(INTRO_COMPLETE_KEY) === '1') {
       opening.remove();
+      dispatchHoustonEvent('houston-opening-complete');
       return;
     }
   } catch (_) {}
@@ -2264,10 +2280,15 @@ setInterval(tick, 1000);
 // ─────────────────────────────────────────────────────────
 // STAR FIELD
 // ─────────────────────────────────────────────────────────
-(function() {
+(function starField() {
+  if (IOS_WEBKIT && document.getElementById('opening')) {
+    waitForOpeningClear(starField);
+    return;
+  }
   if (REDUCED_MOTION) return;
   const c = document.getElementById('starfield');
   const cx = c.getContext('2d');
+  let stoppedForFinale = false;
   let W, H;
 
   function resize() {
@@ -2286,7 +2307,7 @@ setInterval(tick, 1000);
   window.addEventListener('resize', scheduleCanvasResize(resize), { passive: true });
 
   // Create stars
-  const STAR_COUNT = MOBILE_EFFECTS ? 110 : 220;
+  const STAR_COUNT = IOS_WEBKIT ? 70 : MOBILE_EFFECTS ? 110 : 220;
   const stars = Array.from({ length: STAR_COUNT }, () => ({
     x: Math.random(),
     y: Math.random(),
@@ -2299,23 +2320,24 @@ setInterval(tick, 1000);
 
   // Shooting stars
   const shoots = [];
-  const SHOOT_LIMIT = MOBILE_EFFECTS ? 2 : 5;
+  const SHOOT_LIMIT = IOS_WEBKIT ? 1 : MOBILE_EFFECTS ? 2 : 5;
   function spawnShoot() {
     if (shoots.length < SHOOT_LIMIT) {
       shoots.push({
         x: Math.random() * W,
         y: Math.random() * H * 0.5,
-        len: Math.random() * (MOBILE_EFFECTS ? 80 : 120) + 60,
-        speed: Math.random() * (MOBILE_EFFECTS ? 8 : 12) + 8,
+        len: Math.random() * (IOS_WEBKIT ? 58 : MOBILE_EFFECTS ? 80 : 120) + (IOS_WEBKIT ? 46 : 60),
+        speed: Math.random() * (IOS_WEBKIT ? 6 : MOBILE_EFFECTS ? 8 : 12) + (IOS_WEBKIT ? 6 : 8),
         a: 1,
         angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
       });
     }
-    setTimeout(spawnShoot, Math.random() * (MOBILE_EFFECTS ? 7000 : 5000) + (MOBILE_EFFECTS ? 5000 : 3000));
+    setTimeout(spawnShoot, Math.random() * (IOS_WEBKIT ? 9000 : MOBILE_EFFECTS ? 7000 : 5000) + (IOS_WEBKIT ? 7000 : MOBILE_EFFECTS ? 5000 : 3000));
   }
   setTimeout(spawnShoot, 2000);
 
   function loop() {
+    if (stoppedForFinale) return;
     cx.clearRect(0, 0, W, H);
 
     // Stars
@@ -2351,24 +2373,34 @@ setInterval(tick, 1000);
 
     requestAnimationFrame(loop);
   }
+  window.addEventListener('houston-finale-enter', () => {
+    if (!IOS_WEBKIT) return;
+    stoppedForFinale = true;
+    cx.clearRect(0, 0, W, H);
+  }, { once: true });
   loop();
 })();
 
 // ─────────────────────────────────────────────────────────
 // AI ALCHEMY FIELD — reaction trails that connect the whole deck.
 // ─────────────────────────────────────────────────────────
-(function() {
+(function alchemyField() {
+  if (IOS_WEBKIT && document.getElementById('opening')) {
+    waitForOpeningClear(alchemyField);
+    return;
+  }
   if (REDUCED_MOTION) return;
   const canvas = document.getElementById('alchemy-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  let stoppedForFinale = false;
   let W = 0, H = 0, dpr = 1;
   let lastY = window.scrollY;
   let scrollVelocity = 0;
   const pointer = { x: 0.5, y: 0.5, active: false };
   const palette = ['#ffd700', '#00e5ff', '#00ff6a', '#ff60c0', '#b44fff', '#ffffff'];
 
-  const motes = Array.from({ length: MOBILE_EFFECTS ? 30 : 62 }, (_, i) => ({
+  const motes = Array.from({ length: IOS_WEBKIT ? 18 : MOBILE_EFFECTS ? 30 : 62 }, (_, i) => ({
     x: Math.random(),
     y: Math.random(),
     vx: (Math.random() - 0.5) * 0.0014,
@@ -2398,6 +2430,7 @@ setInterval(tick, 1000);
   }
 
   function loop(t) {
+    if (stoppedForFinale) return;
     const y = window.scrollY;
     scrollVelocity += (y - lastY - scrollVelocity) * 0.08;
     lastY = y;
@@ -2440,7 +2473,7 @@ setInterval(tick, 1000);
         const b = motes[j];
         const bx = b.x * W, by = b.y * H;
         const dist = Math.hypot(ax - bx, ay - by);
-        const linkDist = MOBILE_EFFECTS ? 92 : 128;
+        const linkDist = IOS_WEBKIT ? 74 : MOBILE_EFFECTS ? 92 : 128;
         if (dist < linkDist) {
           const alpha = (1 - dist / linkDist) * 0.18;
           ctx.strokeStyle = `rgba(0,229,255,${alpha})`;
@@ -2475,6 +2508,11 @@ setInterval(tick, 1000);
   resize();
   window.addEventListener('resize', scheduleCanvasResize(resize), { passive: true });
   window.addEventListener('pointermove', onPointer, { passive: true });
+  window.addEventListener('houston-finale-enter', () => {
+    if (!IOS_WEBKIT) return;
+    stoppedForFinale = true;
+    ctx.clearRect(0, 0, W, H);
+  }, { once: true });
   requestAnimationFrame(loop);
 })();
 
@@ -2740,16 +2778,39 @@ document.head.appendChild(legoStyle);
 // ─────────────────────────────────────────────────────────
 let fireworksStarted = false;
 const finaleEl = document.getElementById('finale');
+const finaleStartThreshold = IOS_WEBKIT ? 0.68 : 0.3;
 
 const finaleObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting && !fireworksStarted) {
       fireworksStarted = true;
-      startFireworks();
+      finaleObs.disconnect();
+      startFinaleSequence();
     }
   });
-}, { threshold: 0.3 });
+}, { threshold: finaleStartThreshold });
 finaleObs.observe(finaleEl);
+
+function startFinaleSequence() {
+  if (!IOS_WEBKIT) {
+    startFireworks();
+    return;
+  }
+  dispatchHoustonEvent('houston-finale-enter');
+  let lastY = window.scrollY;
+  let checks = 0;
+  function waitForScrollSettle() {
+    const y = window.scrollY;
+    const settled = Math.abs(y - lastY) < 2;
+    lastY = y;
+    if (settled || checks++ >= 8) {
+      requestAnimationFrame(startFireworks);
+    } else {
+      setTimeout(waitForScrollSettle, 120);
+    }
+  }
+  setTimeout(waitForScrollSettle, 240);
+}
 
 function startFireworks() {
   if (REDUCED_MOTION) return;
@@ -3039,7 +3100,7 @@ function startFireworks() {
   }
 
   resize();
-  const finaleResizeObserver = 'ResizeObserver' in window
+  const finaleResizeObserver = !iosFinale && 'ResizeObserver' in window
     ? new ResizeObserver(requestResize)
     : null;
   if (finaleResizeObserver) finaleResizeObserver.observe(finaleEl);
