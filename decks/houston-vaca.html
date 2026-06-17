@@ -98,6 +98,7 @@ body {
   font-family: 'Nunito', sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
+  min-height: 100svh;
 }
 
 /* ======================================
@@ -337,6 +338,7 @@ body {
    ====================================== */
 #hero {
   min-height: 100vh;
+  min-height: 100svh;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   text-align: center; padding: 80px 5% 60px;
@@ -1275,6 +1277,7 @@ body {
     linear-gradient(180deg, var(--space) 0%, #12091d 45%, var(--space) 100%);
   text-align: center;
   overflow: hidden;
+  overflow-anchor: none;
 }
 #rooms .r-tag {
   font-family: 'Fredoka One', cursive;
@@ -1405,10 +1408,11 @@ body {
    ====================================== */
 #finale {
   --sec-acc: var(--acc-finale);
-  position: relative; min-height: 100vh; z-index: 2;
+  position: relative; min-height: 100vh; min-height: 100svh; z-index: 2;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   text-align: center; padding: 80px 5%; overflow: hidden;
+  overflow-anchor: none;
 }
 #finale::before {
   content: ''; position: absolute; inset: 0;
@@ -2694,17 +2698,32 @@ function startFireworks() {
   const canvas = document.getElementById('fireworks-canvas');
   if (!canvas || !finaleEl) return;
   const ctx = canvas.getContext('2d');
-  let W = 0, H = 0, dpr = 1;
+  let W = 0, H = 0, dpr = 1, resizeFrame = 0;
+  const startScrollY = window.scrollY;
+
+  function restoreIfSnappedToTop() {
+    // Mobile browser chrome resizes can briefly snap the document to 0 when Finale starts.
+    if (startScrollY > window.innerHeight && window.scrollY < 32) {
+      window.scrollTo(0, startScrollY);
+    }
+  }
 
   function resize() {
+    resizeFrame = 0;
+    const rect = finaleEl.getBoundingClientRect();
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = Math.max(1, finaleEl.offsetWidth);
-    H = Math.max(1, finaleEl.offsetHeight);
-    canvas.width = Math.floor(W * dpr);
-    canvas.height = Math.floor(H * dpr);
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
+    W = Math.max(1, Math.round(rect.width));
+    H = Math.max(1, Math.round(rect.height));
+    const bitmapW = Math.floor(W * dpr);
+    const bitmapH = Math.floor(H * dpr);
+    if (canvas.width !== bitmapW) canvas.width = bitmapW;
+    if (canvas.height !== bitmapH) canvas.height = bitmapH;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    restoreIfSnappedToTop();
+  }
+
+  function requestResize() {
+    if (!resizeFrame) resizeFrame = requestAnimationFrame(resize);
   }
 
   const COLORS = [
@@ -2915,11 +2934,26 @@ function startFireworks() {
 
     frame++;
     if (frame < 900) requestAnimationFrame(fxLoop);
-    else ctx.clearRect(0, 0, W, H);
+    else {
+      cleanupResize();
+      ctx.clearRect(0, 0, W, H);
+    }
   }
 
   resize();
-  window.addEventListener('resize', resize, { passive: true });
+  const finaleResizeObserver = 'ResizeObserver' in window
+    ? new ResizeObserver(requestResize)
+    : null;
+  if (finaleResizeObserver) finaleResizeObserver.observe(finaleEl);
+  window.addEventListener('orientationchange', requestResize, { passive: true });
+  requestAnimationFrame(restoreIfSnappedToTop);
+  setTimeout(restoreIfSnappedToTop, 300);
+
+  function cleanupResize() {
+    if (finaleResizeObserver) finaleResizeObserver.disconnect();
+    window.removeEventListener('orientationchange', requestResize);
+  }
+
   fxLoop();
 }
 
