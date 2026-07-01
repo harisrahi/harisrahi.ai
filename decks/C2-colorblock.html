@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haris Rahi — AI Practitioner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Hanken+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ─── RESET & BASE ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bone:      #F5F0E8;
+    --bone-dim:  #EDE7D8;
+    --claret:    #8C1F1F;
+    --claret-dk: #6E1616;
+    --claret-lt: #A82525;
+    --ink:       #0D0D0D;
+    --ink-soft:  #1A1A1A;
+    --mono-sm:   "Space Mono", "Courier New", monospace;
+    --serif:     "Playfair Display", Georgia, serif;
+    --sans:      "Hanken Grotesk", "Helvetica Neue", sans-serif;
+    --grid:      1440px;
+    --pad:       clamp(32px, 6vw, 96px);
+  }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+  /* ─── SECTION ROOMS ─── */
+  .room {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+  .room-inner {
+    max-width: var(--grid);
+    margin: 0 auto;
+    padding: clamp(64px, 10vh, 128px) var(--pad);
+  }
+
+  /* Color field assignments */
+  .room--bone   { background: var(--bone);   color: var(--ink); }
+  .room--claret { background: var(--claret); color: var(--bone); }
+  .room--ink    { background: var(--ink);    color: var(--bone); }
+
+  /* ─── GLOBAL TYPE ─── */
+  .label {
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+  .room--bone .label   { color: var(--ink); }
+  .room--claret .label { color: var(--bone); }
+  .room--ink .label    { color: var(--bone); }
+
+  /* ─── SECTION NUMBERS ─── */
+  .section-num {
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.38;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  /* ─── RULE LINES ─── */
+  .rule {
+    width: 40px;
+    height: 2px;
+    margin-bottom: 36px;
+    display: block;
+  }
+  .room--bone .rule   { background: var(--claret); }
+  .room--claret .rule { background: var(--bone); opacity: 0.4; }
+  .room--ink .rule    { background: var(--claret); }
+
+  /* ──────────────────────────────────────────
+     HERO — bone field
+  ────────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  #hero .room-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 80px;
+    row-gap: 0;
+    align-items: end;
+    padding-top: clamp(64px, 12vh, 160px);
+    padding-bottom: clamp(64px, 10vh, 120px);
+  }
+
+  .hero-eyebrow {
+    grid-column: 1 / 3;
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--claret);
+    margin-bottom: 24px;
+    opacity: 0.9;
+  }
+
+  .hero-headline {
+    grid-column: 1 / 2;
+    font-family: var(--serif);
+    font-size: clamp(42px, 5.2vw, 76px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    /* Hard left, no centering */
+  }
+
+  .hero-right {
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 4px;
+  }
+
+  .hero-subhead {
+    font-family: var(--sans);
+    font-size: clamp(14px, 1.05vw, 17px);
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--ink);
+    opacity: 0.78;
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  .hero-proof {
+    border-top: 1px solid var(--ink);
+    opacity: 0.15;
+    margin-bottom: 28px;
+  }
+
+  .proof-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(13,13,13,0.15);
+  }
+  .proof-item {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .proof-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--claret);
+    margin-top: 8px;
+  }
+  .proof-text {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink);
+    opacity: 0.6;
+  }
+
+  /* Large decorative numeral behind hero */
+  .hero-bg-num {
+    position: absolute;
+    bottom: -0.15em;
+    right: var(--pad);
+    font-family: var(--serif);
+    font-size: clamp(220px, 28vw, 420px);
+    font-weight: 900;
+    color: var(--claret);
+    opacity: 0.045;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.05em;
+  }
+
+  /* ──────────────────────────────────────────
+     01 THE PROBLEM — claret field
+  ────────────────────────────────────────── */
+  #problem .room-inner {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    column-gap: 96px;
+    row-gap: 0;
+    align-items: start;
+  }
+
+  .problem-left {
+    padding-top: 4px;
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+
+  .problem-headline {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.6vw, 54px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--bone);
+    margin-bottom: 40px;
+  }
+
+  .problem-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .problem-body {
+    font-family: var(--sans);
+    font-size: clamp(15px, 1.1vw, 18px);
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--bone);
+    opacity: 0.82;
+    margin-bottom: 36px;
+  }
+
+  .problem-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--bone);
+    opacity: 0.15;
+    margin: 40px 0;
+  }
+
+  .problem-pull {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 1.8vw, 28px);
+    line-height: 1.5;
+    color: var(--bone);
+    border-left: 2px solid rgba(245,240,232,0.3);
+    padding-left: 28px;
+    margin-top: 8px;
+  }
+
+  /* ──────────────────────────────────────────
+     02 HOW IT WORKS — ink field
+  ────────────────────────────────────────── */
+  #howworks .room-inner {
+    display: grid;
+    grid-template-rows: auto auto;
+    row-gap: 80px;
+  }
+
+  .how-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 80px;
+    align-items: end;
+  }
+
+  .how-headline {
+    font-family: var(--serif);
+    font-size: clamp(38px, 4.4vw, 66px);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--bone);
+  }
+
+  .how-subhead {
+    font-family: var(--sans);
+    font-size: clamp(14px, 1vw, 16px);
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--bone);
+    opacity: 0.55;
+    max-width: 400px;
+    align-self: end;
+  }
+
+  .how-steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 2px;
+  }
+
+  .step {
+    padding: 48px 44px 52px;
+    position: relative;
+  }
+  .step:nth-child(1) { background: #161616; }
+  .step:nth-child(2) { background: var(--claret-dk); }
+  .step:nth-child(3) { background: #1E1E1E; }
+
+  .step-num {
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--bone);
+    opacity: 0.35;
+    margin-bottom: 32px;
+    display: block;
+  }
+
+  .step-title {
+    font-family: var(--serif);
+    font-size: clamp(18px, 1.5vw, 22px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--bone);
+    margin-bottom: 20px;
+  }
+
+  .step-title em {
+    font-style: normal;
+    color: var(--bone);
+    opacity: 0.45;
+    display: block;
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+
+  .step-body {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--bone);
+    opacity: 0.6;
+  }
+
+  /* ──────────────────────────────────────────
+     03 PROOF — bone field
+  ────────────────────────────────────────── */
+  #proof .room-inner {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    column-gap: 80px;
+    align-items: start;
+  }
+
+  .proof-left { }
+
+  .proof-headline {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.4vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin-bottom: 16px;
+    max-width: 580px;
+  }
+
+  .proof-subhead {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--ink);
+    opacity: 0.65;
+    max-width: 480px;
+    margin-bottom: 56px;
+  }
+
+  .proof-citation {
+    background: var(--ink);
+    color: var(--bone);
+    padding: 28px 32px;
+    margin-bottom: 56px;
+    max-width: 560px;
+  }
+  .proof-citation-label {
+    font-family: var(--mono-sm);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--claret-lt);
+    margin-bottom: 14px;
+    display: block;
+    opacity: 1;
+  }
+  .proof-citation-body {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--bone);
+    opacity: 0.75;
+  }
+
+  .proof-outcomes {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 560px;
+  }
+  .outcome {
+    padding: 28px 0;
+    border-top: 1px solid rgba(13,13,13,0.12);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .outcome:last-child { border-bottom: 1px solid rgba(13,13,13,0.12); }
+  .outcome-idx {
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--claret);
+    padding-top: 3px;
+  }
+  .outcome-text {
+    font-family: var(--serif);
+    font-size: clamp(16px, 1.3vw, 20px);
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  /* Portrait block */
+  .proof-portrait {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    aspect-ratio: 3/4;
+    background: var(--ink-soft);
+    display: flex;
+    align-items: flex-end;
+    padding: 24px;
+    margin-top: 8px;
+  }
+  .portrait-name {
+    font-family: var(--mono-sm);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--bone);
+    opacity: 0.5;
+  }
+  .portrait-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      160deg,
+      #2a1a1a 0%,
+      var(--ink-soft) 60%,
+      #1a1010 100%
+    );
+  }
+  .portrait-rule {
+    position: absolute;
+    top: 32px;
+    left: 32px;
+    width: 28px;
+    height: 2px;
+    background: var(--claret);
+    opacity: 0.6;
+  }
+
+  /* ──────────────────────────────────────────
+     04 START — ink field
+  ────────────────────────────────────────── */
+  #start {
+    min-height: 60vh;
+    display: flex;
+    align-items: flex-end;
+  }
+  #start .room-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 80px;
+    align-items: end;
+    padding-top: clamp(80px, 12vh, 160px);
+    padding-bottom: clamp(80px, 12vh, 160px);
+  }
+
+  .start-headline {
+    font-family: var(--serif);
+    font-size: clamp(48px, 6.5vw, 96px);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    color: var(--bone);
+  }
+  .start-headline span {
+    display: block;
+    color: var(--claret-lt);
+    opacity: 1;
+  }
+
+  .start-right {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding-bottom: 8px;
+  }
+
+  .start-body {
+    font-family: var(--sans);
+    font-size: clamp(14px, 1.05vw, 17px);
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--bone);
+    opacity: 0.65;
+    max-width: 480px;
+  }
+
+  .start-email {
+    font-family: var(--mono-sm);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--bone);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(245,240,232,0.25);
+    padding-bottom: 3px;
+    transition: border-color 0.2s;
+    width: fit-content;
+  }
+  .start-email:hover {
+    border-color: var(--claret-lt);
+    color: var(--claret-lt);
+  }
+
+  /* Large decorative text at bottom */
+  .start-bg {
+    position: absolute;
+    bottom: -0.18em;
+    left: calc(var(--pad) - 10px);
+    font-family: var(--serif);
+    font-size: clamp(160px, 22vw, 340px);
+    font-weight: 900;
+    color: var(--bone);
+    opacity: 0.025;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+  }
+
+  /* ──────────────────────────────────────────
+     THIN TOP BAR (site header)
+  ────────────────────────────────────────── */
+  .site-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 18px var(--pad);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bone);
+    border-bottom: 1px solid rgba(13,13,13,0.08);
+    mix-blend-mode: normal;
+  }
+  .site-bar-name {
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.75;
+  }
+  .site-bar-tag {
+    font-family: var(--mono-sm);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--claret);
+    opacity: 0.8;
+  }
+
+  /* ──────────────────────────────────────────
+     BETWEEN-SECTION TRANSITIONS (thin color bleeds)
+  ────────────────────────────────────────── */
+  .field-divider {
+    width: 100%;
+    height: 3px;
+  }
+  .fd--claret  { background: var(--claret); }
+  .fd--ink     { background: var(--ink); }
+  .fd--bone    { background: var(--bone); }
+
+  /* ──────────────────────────────────────────
+     UTILITY
+  ────────────────────────────────────────── */
+  strong { font-weight: 500; }
+
+  /* ──────────────────────────────────────────
+     RESPONSIVE — narrow window fallback
+  ────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    #hero .room-inner,
+    #problem .room-inner,
+    #proof .room-inner,
+    #start .room-inner,
+    .how-header {
+      grid-template-columns: 1fr;
+      row-gap: 48px;
+    }
+
+    .hero-headline,
+    .hero-right { grid-column: 1 / 2; }
+
+    .how-steps { grid-template-columns: 1fr; gap: 2px; }
+    .step:nth-child(2) { background: var(--claret); }
+
+    .proof-portrait { display: none; }
+    .problem-left { position: static; }
+    .start-headline span { display: inline; }
+
+    .how-subhead { max-width: 100%; }
+    .hero-bg-num, .start-bg { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── FIXED BAR ─── -->
+<header class="site-bar">
+  <span class="site-bar-name">Haris Rahi</span>
+  <span class="site-bar-tag">AI Practitioner &amp; Builder</span>
+</header>
+
+
+<!-- ═══════════════════════════════════════════
+     HERO — bone field
+════════════════════════════════════════════ -->
+<section class="room room--bone" id="hero">
+  <div class="hero-bg-num" aria-hidden="true">HR</div>
+  <div class="room-inner">
+    <p class="hero-eyebrow">AI augmenting humans</p>
+
+    <h1 class="hero-headline">
+      Don't rent<br>AI expertise.<br>Build it inside<br>your team.
+    </h1>
+
+    <div class="hero-right">
+      <p class="hero-subhead">
+        I'm an independent AI practitioner. Since 2023 I've been building AI solutions, deploying them into production, and training the people who use them, most recently inside Accenture and now on my own. I work directly with multidisciplinary teams across sourcing, procurement, legal, finance, and sales.
+      </p>
+
+      <div class="proof-items">
+        <div class="proof-item">
+          <div class="proof-dot"></div>
+          <p class="proof-text">AI tools I built while I was at Accenture were cited as strengths by Everest Group.</p>
+        </div>
+        <div class="proof-item">
+          <div class="proof-dot"></div>
+          <p class="proof-text">My very first deployment had 300+ practitioners using AI daily within 6 months.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="field-divider fd--claret"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     01 — claret field
+════════════════════════════════════════════ -->
+<section class="room room--claret" id="problem">
+  <div class="room-inner">
+    <div class="problem-left">
+      <span class="section-num">01</span>
+      <span class="label" style="opacity:0.5;">The Problem</span>
+      <h2 class="problem-headline">
+        Most companies rent their AI know-how. Their people never build their own.
+      </h2>
+    </div>
+
+    <div class="problem-right">
+      <p class="problem-body">
+        Here's what I see happening: companies invest in generic AI training, hire consultants to redesign the work in slide decks, then bring in managed services to run the tools. Each step looks sensible. Together they propagate vendor dependence.
+      </p>
+
+      <div class="problem-divider"></div>
+
+      <p class="problem-body">
+        AI training that sits outside a team's actual work never sticks. Tools built without the people who use them don't get trusted, and nobody in-house can keep them current once the vendor moves on. AI is changing every few weeks right now. The only way to keep up is to teach your people to think and build with it themselves.
+      </p>
+
+      <blockquote class="problem-pull">
+        Invest in your people first. That investment compounds as AI advances, and it protects your institutional intelligence.
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<div class="field-divider fd--ink"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     02 — ink field
+════════════════════════════════════════════ -->
+<section class="room room--ink" id="howworks">
+  <div class="room-inner">
+    <div class="how-header">
+      <div>
+        <span class="section-num" style="color:var(--bone);">02</span>
+        <span class="label">How It Works</span>
+        <h2 class="how-headline">
+          Three steps.<br>Each one builds<br>on the last.
+        </h2>
+      </div>
+      <p class="how-subhead">
+        Anyone can develop AI fluency. I simply teach the method that got me there.
+      </p>
+    </div>
+
+    <div class="how-steps">
+      <div class="step">
+        <span class="step-num">Step 01</span>
+        <div class="step-title">
+          <em>Foundational Fluency</em>
+          Foundational<br>Fluency
+        </div>
+        <p class="step-body">
+          Your team learns AI on the work already in front of them, not generic exercises.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-num">Step 02</span>
+        <div class="step-title">
+          <em>Augmented Execution</em>
+          Augmented<br>Execution
+        </div>
+        <p class="step-body">
+          AI instincts develop under real work with an experienced builder alongside. I work with your team on live deliverables to catch weak spots and raise output quality.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-num">Step 03</span>
+        <div class="step-title">
+          <em>Advanced Development</em>
+          Advanced<br>Development
+        </div>
+        <p class="step-body">
+          A few people show the aptitude to go past foundational fluency. They evolve to build real applications with agentic coding tools.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="field-divider fd--bone"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     03 — bone field
+════════════════════════════════════════════ -->
+<section class="room room--bone" id="proof">
+  <div class="room-inner">
+    <div class="proof-left">
+      <span class="section-num">03</span>
+      <span class="label">Proof</span>
+      <span class="rule"></span>
+
+      <h2 class="proof-headline">
+        I started my journey building AI solutions for Accenture.
+      </h2>
+      <p class="proof-subhead">
+        My first two production solutions were recognized by Everest Group as part of Accenture's strength in 2025.
+      </p>
+
+      <div class="proof-citation">
+        <span class="proof-citation-label">Everest Group, 2025</span>
+        <p class="proof-citation-body">
+          Both tools are cited as Accenture strengths in the Everest Group 2025 Procurement Outsourcing PEAK Matrix assessment.
+        </p>
+      </div>
+
+      <div class="proof-outcomes">
+        <div class="outcome">
+          <span class="outcome-idx">01</span>
+          <p class="outcome-text">Day-2 usage, not months-later adoption.</p>
+        </div>
+        <div class="outcome">
+          <span class="outcome-idx">02</span>
+          <p class="outcome-text">30&ndash;79% faster execution on rebuilt tasks.</p>
+        </div>
+        <div class="outcome">
+          <span class="outcome-idx">03</span>
+          <p class="outcome-text">Behavior change that held after the engagement ended.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portrait placeholder -->
+    <div class="proof-portrait">
+      <div class="portrait-fill"></div>
+      <div class="portrait-rule"></div>
+      <span class="portrait-name">Haris Rahi</span>
+    </div>
+  </div>
+</section>
+
+<div class="field-divider fd--ink"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     04 — ink field
+════════════════════════════════════════════ -->
+<section class="room room--ink" id="start">
+  <div class="start-bg" aria-hidden="true">Start.</div>
+  <div class="room-inner">
+    <div>
+      <span class="section-num" style="color:var(--bone);">04</span>
+      <span class="label">Start Here</span>
+      <h2 class="start-headline">
+        Ready to invest<br>in your<br><span>people?</span>
+      </h2>
+    </div>
+
+    <div class="start-right">
+      <p class="start-body">
+        If your team has real work to build on and is ready to change how it operates, let's talk. First step: a short conversation, and an honest read on fit.
+      </p>
+      <a class="start-email" href="mailto:haris@harisrahi.ai">haris@harisrahi.ai</a>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
