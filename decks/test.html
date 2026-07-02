@@ -14,23 +14,28 @@
     :root {
       color-scheme: light;
       --ink: #101412;
-      --ink-soft: #2b302d;
+      --ink-soft: #202622;
       --paper: #f7f7f3;
       --paper-warm: #eeeee6;
       --paper-cool: #e9edf0;
       --line: #d4d7cf;
       --line-dark: #303833;
-      --muted: #626b66;
+      --muted: #4f5a54;
       --accent: #8b2f23;
       --accent-dark: #642219;
+      --bone: #f5f0e8;
+      --bone-dim: #ede7d8;
+      --claret: #8c1f1f;
+      --claret-dk: #6e1616;
+      --claret-lt: #a82525;
       --blue: #355766;
       --gold: #9a7a31;
       --max: 1180px;
-      --read: 700px;
+      --read: 660px;
       --pad: 24px;
       --nav-h: 72px;
-      --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-      --sans: "Avenir Next", "Helvetica Neue", Helvetica, sans-serif;
+      --serif: "Playfair Display", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --sans: "Hanken Grotesk", "Avenir Next", "Helvetica Neue", Helvetica, sans-serif;
     }
 
     * {
@@ -51,23 +56,12 @@
       background-size: 68px 68px;
       color: var(--ink);
       font-family: var(--sans);
-      font-size: 17px;
-      line-height: 1.7;
+      font-size: 18px;
+      line-height: 1.66;
       letter-spacing: 0;
       overflow-x: hidden;
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 78% 12%, rgba(139, 47, 35, 0.12), transparent 24rem),
-        radial-gradient(circle at 14% 68%, rgba(53, 87, 102, 0.1), transparent 26rem);
     }
 
     a {
@@ -221,14 +215,16 @@
     .section-inner {
       width: min(100%, var(--max));
       margin: 0 auto;
-      padding: 82px var(--pad);
+      padding: 92px var(--pad);
     }
 
     .kicker {
-      margin: 0 0 18px;
+      margin: 0 0 20px;
       color: var(--accent);
-      font-size: 0.84rem;
+      font-size: 1rem;
       font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: 0;
     }
 
     .dark .kicker {
@@ -268,8 +264,8 @@
     .lede {
       max-width: var(--read);
       color: var(--ink-soft);
-      font-size: 1.18rem;
-      line-height: 1.65;
+      font-size: 1.2rem;
+      line-height: 1.56;
     }
 
     .dark .lede,
@@ -282,7 +278,9 @@
       max-width: var(--read);
       color: var(--ink-soft);
       display: grid;
-      gap: 18px;
+      gap: 22px;
+      font-size: 1.08rem;
+      line-height: 1.62;
     }
 
     .hero {
@@ -304,23 +302,24 @@
     .hero .section-inner {
       min-height: calc(100vh - var(--nav-h));
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) 360px;
-      gap: 64px;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 56px;
       align-items: center;
       position: relative;
       z-index: 1;
-      padding-top: 64px;
-      padding-bottom: 64px;
+      padding-top: 52px;
+      padding-bottom: 48px;
     }
 
     .hero-copy {
       display: grid;
-      gap: 28px;
+      gap: 22px;
     }
 
     .hero .lede {
       color: #e1e5df;
-      font-size: 1.22rem;
+      font-size: 1.17rem;
+      line-height: 1.5;
     }
 
     .hero-actions {
@@ -353,33 +352,48 @@
       border-color: var(--paper);
     }
 
-    .proof-ribbon {
+    .hero-proof-ledger {
       max-width: 940px;
+      border-top: 1px solid rgba(247, 247, 243, 0.24);
+      border-bottom: 1px solid rgba(247, 247, 243, 0.24);
+      display: grid;
+    }
+
+    .hero-proof-ledger p {
+      margin: 0;
       border-left: 4px solid #d7b56b;
-      padding: 16px 0 16px 18px;
-      color: #f1efe8;
+      padding: 11px 0 11px 16px;
+      color: #f4f1e8;
       font-family: var(--serif);
-      font-size: 1.22rem;
-      line-height: 1.38;
+      font-size: 1.08rem;
+      line-height: 1.3;
+    }
+
+    .hero-proof-ledger p + p {
+      border-top: 1px solid rgba(247, 247, 243, 0.18);
     }
 
     .hero-aside {
       align-self: stretch;
       display: grid;
-      align-content: end;
+      align-content: center;
       gap: 18px;
+      justify-self: end;
+      width: min(100%, 300px);
     }
 
     .portrait-frame {
       border: 1px solid rgba(247, 247, 243, 0.2);
       background: rgba(247, 247, 243, 0.04);
+      margin: 0;
       padding: 12px;
     }
 
     .portrait-frame img {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 2 / 3;
       object-fit: cover;
+      object-position: center top;
       filter: saturate(0.86) contrast(1.04);
     }
 
@@ -399,7 +413,35 @@
     }
 
     .section-header .body-copy {
-      padding-top: 10px;
+      border-top: 1px solid rgba(16, 20, 18, 0.16);
+      padding-top: 18px;
+    }
+
+    .section-header > .lede,
+    .section-header .body-copy > .lede,
+    .approach-rail .lede,
+    .proof-copy > .lede,
+    .cta .lede {
+      max-width: 570px;
+      border-left: 4px solid var(--accent);
+      padding-left: 22px;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 1.58rem;
+      line-height: 1.3;
+    }
+
+    .section-header .body-copy > .lede {
+      margin-bottom: 2px;
+    }
+
+    .dark .section-header > .lede,
+    .dark .section-header .body-copy > .lede,
+    .dark .approach-rail .lede,
+    .dark .proof-copy > .lede,
+    .cta .lede {
+      border-left-color: #d7b56b;
+      color: #f1efe8;
     }
 
     .pull-line {
@@ -408,8 +450,8 @@
       border-left: 4px solid var(--accent);
       padding: 20px 0 20px 24px;
       font-family: var(--serif);
-      font-size: 1.72rem;
-      line-height: 1.25;
+      font-size: 1.78rem;
+      line-height: 1.26;
     }
 
     .approach-layout {
@@ -426,32 +468,20 @@
       gap: 22px;
     }
 
-    .approach-rail .lede {
-      font-family: var(--serif);
-      font-size: 1.64rem;
-      line-height: 1.25;
-    }
-
     .approach-body {
       display: grid;
-      gap: 22px;
+      gap: 24px;
       max-width: var(--read);
       color: var(--ink-soft);
+      font-size: 1.08rem;
+      line-height: 1.62;
     }
 
-    .phase-list {
-      display: grid;
-      gap: 14px;
-      margin-top: 42px;
-    }
-
-    details.phase,
     details.faq-item {
       border: 1px solid var(--line);
       background: rgba(247, 247, 243, 0.72);
     }
 
-    details.phase[open],
     details.faq-item[open] {
       background: rgba(255, 255, 252, 0.86);
       border-color: rgba(139, 47, 35, 0.38);
@@ -466,7 +496,6 @@
       display: none;
     }
 
-    .phase summary,
     .faq-item summary {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -475,7 +504,6 @@
       padding: 22px 24px;
     }
 
-    .phase summary::after,
     .faq-item summary::after {
       content: "+";
       color: var(--accent);
@@ -483,20 +511,19 @@
       line-height: 1;
     }
 
-    .phase[open] summary::after,
     .faq-item[open] summary::after {
       content: "-";
     }
 
-    .phase-content,
     .faq-content {
       display: grid;
       gap: 14px;
       padding: 0 24px 24px;
       color: var(--ink-soft);
+      font-size: 1.04rem;
+      line-height: 1.62;
     }
 
-    .phase-content p strong,
     .faq-content strong {
       color: var(--ink);
     }
@@ -512,9 +539,82 @@
       line-height: 1.32;
     }
 
+    .how-field {
+      background: var(--paper-warm);
+      color: var(--ink);
+      border-top-color: rgba(16, 20, 18, 0.14);
+    }
+
+    .method-ledger {
+      display: grid;
+      margin-top: 50px;
+      border-top: 1px solid rgba(16, 20, 18, 0.18);
+    }
+
+    .method-record {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 34px;
+      border-bottom: 1px solid rgba(16, 20, 18, 0.18);
+      padding: 28px 0;
+      align-items: start;
+    }
+
+    .method-record h3,
+    .solution-row h3,
+    .proof-ledger h3,
+    .faq-item h3 {
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .method-copy {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      max-width: 760px;
+    }
+
+    .method-summary-text,
+    .method-detail-text {
+      color: var(--ink-soft);
+      font-size: 1.04rem;
+      line-height: 1.62;
+    }
+
+    .method-summary-text {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .method-summary-text strong,
+    .method-detail-text strong {
+      color: var(--accent-dark);
+      display: inline-block;
+      font-weight: 800;
+      min-width: 5.4rem;
+    }
+
+    .how-field .closing-note {
+      max-width: 960px;
+      border-top: 0;
+      border-left: 4px solid var(--accent);
+      padding: 16px 0 16px 22px;
+      color: var(--ink);
+      font-size: 1.62rem;
+      line-height: 1.28;
+    }
+
+    .cta .kicker {
+      color: #d7b56b;
+    }
+
     .proof-layout {
       display: grid;
-      grid-template-columns: minmax(0, 0.82fr) minmax(320px, 0.58fr);
+      grid-template-columns: minmax(0, 0.72fr) minmax(420px, 0.78fr);
       gap: 62px;
       align-items: start;
     }
@@ -524,21 +624,49 @@
       gap: 22px;
     }
 
-    .evidence-note {
-      border: 1px solid rgba(247, 247, 243, 0.18);
-      background: rgba(247, 247, 243, 0.04);
-      padding: 24px;
+    .proof-ledger {
       display: grid;
-      gap: 18px;
+      border-top: 1px solid rgba(247, 247, 243, 0.24);
     }
 
-    .evidence-note h3 {
+    .proof-record {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 24px;
+      border-bottom: 1px solid rgba(247, 247, 243, 0.18);
+      padding: 20px 0;
+      align-items: start;
+    }
+
+    .proof-ledger h3 {
       color: #f7f7f3;
     }
 
-    .evidence-note p,
-    .evidence-note li {
+    .proof-ledger p,
+    .proof-ledger li {
       color: #d8ddd6;
+      font-size: 1.06rem;
+      line-height: 1.58;
+    }
+
+    .proof-record-copy {
+      display: grid;
+      gap: 12px;
+    }
+
+    .proof-link {
+      color: #f7f7f3;
+      font-size: 0.96rem;
+      font-weight: 800;
+      text-decoration-color: #d7b56b;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 5px;
+    }
+
+    .proof-link:hover,
+    .proof-link:focus-visible {
+      color: #d7b56b;
+      outline-color: #d7b56b;
     }
 
     .outcomes {
@@ -550,41 +678,35 @@
     }
 
     .outcomes li {
-      border-top: 1px solid rgba(247, 247, 243, 0.16);
-      padding-top: 12px;
+      border-top: 1px solid rgba(247, 247, 243, 0.14);
+      padding-top: 10px;
     }
 
     .solution-ledger {
-      margin-top: 46px;
-      border-top: 1px solid var(--line);
+      margin-top: 52px;
+      border-top: 2px solid var(--ink);
     }
 
     .solution-row {
       display: grid;
-      grid-template-columns: 300px minmax(0, 1fr);
-      gap: 34px;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 44px;
       border-bottom: 1px solid var(--line);
-      padding: 24px 0;
+      padding: 30px 0;
       align-items: start;
     }
 
     .solution-row h3 {
-      font-family: var(--sans);
-      font-size: 1rem;
-      font-weight: 800;
-      line-height: 1.35;
+      color: var(--accent-dark);
+      padding-left: 16px;
+      border-left: 4px solid var(--accent);
     }
 
     .solution-row p {
-      max-width: 760px;
+      max-width: 820px;
       color: var(--ink-soft);
-    }
-
-    .open-item {
-      margin-top: 28px;
-      border-left: 4px solid var(--gold);
-      padding: 14px 0 14px 18px;
-      color: var(--muted);
+      font-size: 1.06rem;
+      line-height: 1.58;
     }
 
     .principles-layout {
@@ -595,6 +717,7 @@
     }
 
     .pull-quote {
+      margin-top: 28px;
       border-left: 4px solid #d7b56b;
       padding-left: 22px;
       font-family: var(--serif);
@@ -614,14 +737,17 @@
       border-top: 1px solid rgba(247, 247, 243, 0.18);
       padding-top: 18px;
       color: #d8ddd6;
+      font-size: 1.04rem;
+      line-height: 1.6;
     }
 
     .principles-list strong {
       display: block;
       color: var(--paper);
-      font-family: var(--serif);
-      font-size: 1.22rem;
-      line-height: 1.25;
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.35;
       margin-bottom: 6px;
     }
 
@@ -633,32 +759,67 @@
     }
 
     .cta {
-      background:
-        linear-gradient(90deg, rgba(139, 47, 35, 0.14), transparent 44%),
-        var(--paper-cool);
+      position: relative;
+      overflow: hidden;
+      background: var(--ink);
+      color: var(--bone);
+      border-top-color: var(--line-dark);
+      isolation: isolate;
     }
 
     .cta-layout {
       display: grid;
-      grid-template-columns: minmax(0, 0.76fr) minmax(280px, 0.34fr);
-      gap: 48px;
+      grid-template-columns: minmax(0, 0.95fr) minmax(300px, 0.5fr);
+      gap: 80px;
       align-items: end;
+      min-height: 52vh;
     }
 
     .cta-copy {
-      display: grid;
-      gap: 22px;
+      display: block;
+      max-width: 820px;
+    }
+
+    .cta h2 {
       max-width: 760px;
+      color: var(--bone);
+      font-size: 5.6rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .cta h2 span {
+      color: var(--claret-lt);
+    }
+
+    .cta .lede {
+      margin-top: 36px;
     }
 
     .lower-line {
-      color: var(--ink-soft);
+      margin-top: 24px;
+      max-width: 690px;
+      color: rgba(245, 240, 232, 0.64);
     }
 
     .lower-line a {
-      color: var(--accent-dark);
+      color: var(--bone);
       font-weight: 700;
       overflow-wrap: anywhere;
+    }
+
+    .cta .button {
+      justify-self: end;
+      background: var(--bone);
+      color: var(--ink);
+      border-color: var(--bone);
+    }
+
+    .cta .button:hover,
+    .cta .button:focus-visible {
+      background: var(--claret-lt);
+      border-color: var(--claret-lt);
+      color: var(--bone);
     }
 
     footer {
@@ -688,6 +849,7 @@
       .section-header,
       .approach-layout,
       .proof-layout,
+      .how-field .section-header,
       .principles-layout,
       .cta-layout {
         grid-template-columns: 1fr;
@@ -698,7 +860,12 @@
       }
 
       .hero-aside {
-        max-width: 420px;
+        justify-self: start;
+        width: min(100%, 340px);
+      }
+
+      .cta h2 {
+        font-size: 4.3rem;
       }
 
       .approach-rail {
@@ -709,6 +876,15 @@
         grid-template-columns: 1fr;
         gap: 10px;
       }
+
+      .method-record {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .cta .button {
+        justify-self: start;
+      }
     }
 
     @media (max-width: 760px) {
@@ -718,7 +894,7 @@
       }
 
       body {
-        font-size: 16px;
+        font-size: 16.5px;
       }
 
       .nav-inner {
@@ -756,6 +932,10 @@
         min-height: auto;
       }
 
+      .hero-aside {
+        width: min(100%, 280px);
+      }
+
       h1 {
         font-size: 2.74rem;
       }
@@ -764,30 +944,58 @@
         font-size: 2.12rem;
       }
 
-      .hero .lede,
-      .lede {
-        font-size: 1.04rem;
+      .cta h2 {
+        font-size: 3rem;
       }
 
-      .proof-ribbon,
-      .pull-line,
+      .hero .lede,
+      .lede {
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+
+      .section-header > .lede,
+      .section-header .body-copy > .lede,
       .approach-rail .lede,
+      .proof-copy > .lede,
+      .cta .lede {
+        font-size: 1.24rem;
+        line-height: 1.34;
+      }
+
+      .hero-proof-ledger p,
+      .pull-line,
       .closing-note {
-        font-size: 1.22rem;
+        font-size: 1.24rem;
+      }
+
+      .proof-record {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .how-field .closing-note {
+        font-size: 1.28rem;
       }
 
       .pull-quote {
         font-size: 1.48rem;
       }
 
-      .phase summary,
       .faq-item summary {
         padding: 18px;
       }
 
-      .phase-content,
       .faq-content {
         padding: 0 18px 18px;
+      }
+
+      .method-ledger {
+        margin-top: 42px;
+      }
+
+      .method-record {
+        padding: 22px 0;
       }
     }
 
@@ -815,6 +1023,7 @@
         <a href="#solutions">Solutions</a>
         <a href="#principles">Principles</a>
         <a href="#faq">FAQ</a>
+        <a href="#contact">Start Here</a>
       </nav>
       <div class="nav-cta">
         <a class="button" href="mailto:haris@harisrahi.ai">Start a conversation</a>
@@ -828,18 +1037,21 @@
         <div class="hero-copy">
           <p class="kicker">AI augmenting humans</p>
           <h1 id="hero-title">Don't rent AI expertise. Build it inside your team.</h1>
-          <p class="lede">I'm an independent AI practitioner. Since 2023 I've been building AI solutions, deploying them into production, and training the people who use them, most recently inside Accenture and now on my own. I work directly with multidisciplinary teams across sourcing, procurement, legal, finance, and sales.</p>
+          <p class="lede">I'm an independent AI practitioner. Since 2023 I've been building AI solutions, deploying them into production, and training the people who use them, most recently inside Accenture and now on my own. I work directly with multidisciplinary teams across sourcing, procurement, legal, finance, sales, and operations.</p>
           <div class="hero-actions" aria-label="Hero actions">
             <a class="button" href="mailto:haris@harisrahi.ai">Start a conversation</a>
             <a class="button secondary" href="#how-it-works">How It Works</a>
           </div>
-          <p class="proof-ribbon">AI tools I built while I was at Accenture were cited as strengths by Everest Group · My very first deployment had 300+ practitioners using AI daily within 6 months</p>
+          <div class="hero-proof-ledger" aria-label="Proof points">
+            <p>AI tools I built while I was at Accenture were cited as strengths by Everest Group</p>
+            <p>My very first deployment had 300+ practitioners using AI daily within 6 months</p>
+          </div>
         </div>
         <aside class="hero-aside" aria-label="Haris Rahi">
           <figure class="portrait-frame">
             <img src="assets/haris-headshot-760.jpg" alt="Haris Rahi">
           </figure>
-          <p class="aside-note">Independent AI practitioner. Production builder. Team trainer.</p>
+          <p class="aside-note">AI Instructor</p>
         </aside>
       </div>
     </section>
@@ -875,7 +1087,7 @@
       </div>
     </section>
 
-    <section class="section" id="how-it-works" aria-labelledby="how-title">
+    <section class="section how-field" id="how-it-works" aria-labelledby="how-title">
       <div class="section-inner">
         <div class="section-header">
           <div>
@@ -885,30 +1097,30 @@
           <p class="lede">Anyone can develop AI fluency. I simply teach the method that got me there.</p>
         </div>
 
-        <div class="phase-list">
-          <details class="phase" open>
-            <summary><h3>Step 1: Foundational Fluency</h3></summary>
-            <div class="phase-content">
-              <p><strong>Summary:</strong> Your team learns AI on the work already in front of them, not generic exercises.</p>
-              <p><strong>Detail:</strong> For instance, a contract lead doesn't study "how to write prompts." They use AI to draft a clause for a negotiation they're actually running, refine it, turn it into an agent, and rebuild their process around it. By the end of this step, the team has working tools they built themselves.</p>
+        <div class="method-ledger">
+          <article class="method-record">
+            <h3>Step 1: Foundational Fluency</h3>
+            <div class="method-copy">
+              <p class="method-summary-text"><strong>What changes:</strong> Your team learns AI on the work already in front of them, not generic exercises.</p>
+              <p class="method-detail-text"><strong>How it happens:</strong> For instance, a contract lead doesn't study "how to write prompts." They use AI to draft a clause for a negotiation they're actually running, refine it, turn it into an agent, and rebuild their process around it. By the end of this step, the team has working tools they built themselves.</p>
             </div>
-          </details>
+          </article>
 
-          <details class="phase">
-            <summary><h3>Step 2: Augmented Execution</h3></summary>
-            <div class="phase-content">
-              <p><strong>Summary:</strong> AI instincts develop under real work with an experienced builder alongside. I work with your team on live deliverables to catch weak spots and raise output quality through powerful deliverables.</p>
-              <p><strong>Detail:</strong> Together we find brittle solutions as they happen and push toward harder use cases as fluency grows. When AI disappoints, I show teams why it failed and how to fix it. We don't decide AI doesn't work and drop it.</p>
+          <article class="method-record">
+            <h3>Step 2: Augmented Execution</h3>
+            <div class="method-copy">
+              <p class="method-summary-text"><strong>What changes:</strong> AI instincts develop under real work with an experienced builder alongside. I work with your team on live deliverables to catch weak spots and raise output quality through powerful deliverables.</p>
+              <p class="method-detail-text"><strong>How it happens:</strong> Together we find brittle solutions as they happen and push toward harder use cases as fluency grows. When AI disappoints, I show teams why it failed and how to fix it. We don't decide AI doesn't work and drop it.</p>
             </div>
-          </details>
+          </article>
 
-          <details class="phase">
-            <summary><h3>Step 3: Advanced Development</h3></summary>
-            <div class="phase-content">
-              <p><strong>Summary:</strong> A few people will show the aptitude to go past foundational fluency. They evolve to build real applications with agentic coding tools.</p>
-              <p><strong>Detail:</strong> Anyone can vibe code. The critical skill is building solutions that hold up: properly scoped, structured, debugged, and maintainable. I don't have an engineering degree. I learned to engineer by building with AI. Your internal builders will learn to do the same, becoming your in-house AI engine.</p>
+          <article class="method-record">
+            <h3>Step 3: Advanced Development</h3>
+            <div class="method-copy">
+              <p class="method-summary-text"><strong>What changes:</strong> A few people will show the aptitude to go past foundational fluency. They evolve to build real applications with agentic coding tools.</p>
+              <p class="method-detail-text"><strong>How it happens:</strong> Anyone can vibe code. The critical skill is building solutions that hold up: properly scoped, structured, debugged, and maintainable. I don't have an engineering degree. I learned to engineer by building with AI. Your internal builders will learn to do the same, becoming your in-house AI engine.</p>
             </div>
-          </details>
+          </article>
         </div>
 
         <p class="closing-note">In the end your team's left with practical AI built on its own process, the understanding to keep improving it, and people who own the result instead of complete reliance on vendors.</p>
@@ -926,12 +1138,15 @@
             <p>While I was at Accenture, I designed and built AI products single-handedly. S2C IQ handles contract and risk analysis, while TechTariff IQ models real-time geopolitical risk for adaptive sourcing. I trained the practitioners who would use them: over 300 people using AI daily within 6 months, serving 120+ enterprise clients.</p>
           </div>
         </div>
-        <aside class="evidence-note" aria-label="Everest citation and outcomes">
-          <div>
+        <aside class="proof-ledger" aria-label="Everest citation and outcomes">
+          <div class="proof-record">
             <h3>Everest citation:</h3>
-            <p>Both tools are cited as Accenture strengths in the Everest Group 2025 Procurement Outsourcing PEAK Matrix® assessment.</p>
+            <div class="proof-record-copy">
+              <p>Both tools are cited as Accenture strengths in the Everest Group 2025 Procurement Outsourcing PEAK Matrix® assessment.</p>
+              <a class="proof-link" href="Everest-Group-2025-Focus-Accenture.pdf" target="_blank" rel="noopener">Read the Everest Group report</a>
+            </div>
           </div>
-          <div>
+          <div class="proof-record">
             <h3>Outcomes</h3>
             <ul class="outcomes">
               <li>Day-2 usage, not months-later adoption.</li>
@@ -939,11 +1154,11 @@
               <li>Behavior change that held after the engagement ended.</li>
             </ul>
           </div>
-          <div>
+          <div class="proof-record">
             <h3>In production, not in demos:</h3>
             <p>Everything I build ships. It runs in production, used by real people on real work.</p>
           </div>
-          <div>
+          <div class="proof-record">
             <h3>The no-pedigree point:</h3>
             <p>I have no engineering degree and no data-science background. I learned by building daily on real tasks. That is the proof this method isn't tied to a pedigree. If it can be learned this way in one of the hardest enterprise domains, it can be learned in yours.</p>
           </div>
@@ -995,7 +1210,6 @@
           </article>
         </div>
 
-        <p class="open-item"><strong>Open item:</strong> closing line under the list ("This helps drive trust and adoption of AI tools") still needs a decision — cut, replace, or leave.</p>
       </div>
     </section>
 
@@ -1028,6 +1242,12 @@
 
         <div class="faq-list">
           <details class="faq-item" open>
+            <summary><h3>Q: Why hire you if the goal is independence?</h3></summary>
+            <div class="faq-content">
+              <p><strong>A:</strong> You bring me in to make your team independent. If you bring me back later, it should be for new work or new teams.</p>
+            </div>
+          </details>
+          <details class="faq-item">
             <summary><h3>Q: What does it take for this to actually work?</h3></summary>
             <div class="faq-content">
               <p><strong>A:</strong> Two things. Your people need to be relentlessly curious and willing to change how they work. And leadership needs to give them psychological safety to experiment and fail without punishing it.</p>
@@ -1040,21 +1260,21 @@
             </div>
           </details>
           <details class="faq-item">
+            <summary><h3>Q: Can you help us evaluate different AI products and services?</h3></summary>
+            <div class="faq-content">
+              <p><strong>A:</strong> Yes. I can help you evaluate which product or service is right for your specific needs. I have helped ensure clients don't over-buy or, worse, invest in vendor hype.</p>
+            </div>
+          </details>
+          <details class="faq-item">
             <summary><h3>Q: How do we know if we're a good fit before committing?</h3></summary>
             <div class="faq-content">
               <p><strong>A:</strong> We do an honest fit check on your use cases and what your organization can actually commit to. If the conditions aren't there, I'll tell you. A bad-fit engagement helps no one, including me.</p>
             </div>
           </details>
           <details class="faq-item">
-            <summary><h3>Q: Why hire you if the goal is independence?</h3></summary>
-            <div class="faq-content">
-              <p><strong>A:</strong> You bring me in to make your team independent. If you bring me back later, it should be for new work or new teams.</p>
-            </div>
-          </details>
-          <details class="faq-item">
             <summary><h3>Q: Will this work for my specific function?</h3></summary>
             <div class="faq-content">
-              <p><strong>A:</strong> Yes. Whether it's legal, marketing, sales, or finance, the method is the same: learn how your team works, then build for it.</p>
+              <p><strong>A:</strong> Yes. Whether it's procurement, legal, marketing, sales, or finance, the method is the same: learn how your team works, then build for it.</p>
             </div>
           </details>
           <details class="faq-item">
@@ -1089,9 +1309,9 @@
       <div class="section-inner cta-layout">
         <div class="cta-copy">
           <p class="kicker">Start Here</p>
-          <h2 id="contact-title">Ready to invest in your people?</h2>
-          <p class="lede">If your team has real work to build on and is ready to change how it operates, let's talk. First step: a short conversation, and an honest read on fit. Email me at haris@harisrahi.ai.</p>
-          <p class="lower-line">I also write about what's working in AI, what isn't, and what I'm still figuring out. <a href="https://www.linkedin.com/in/harisrahi/">https://www.linkedin.com/in/harisrahi/</a></p>
+          <h2 id="contact-title">Ready to invest in your <span>people?</span></h2>
+          <p class="lede">If your team has real work to build on and is ready to change how it operates, let's talk. First step: a short conversation, and an honest read on fit.</p>
+          <p class="lower-line">I also write about what's working in AI, what isn't, and what I'm still figuring out. <a href="https://www.linkedin.com/in/harisrahi/">LinkedIn</a></p>
         </div>
         <a class="button" href="mailto:haris@harisrahi.ai">Start a conversation</a>
       </div>
@@ -1099,7 +1319,7 @@
   </main>
 
   <footer>
-    <div class="footer-inner">Haris Rahi · Invest in your people · © 2026 Haris Rahi</div>
+    <div class="footer-inner">harisrahi.ai · © 2026 Haris Rahi</div>
   </footer>
 
   <script>
@@ -1120,6 +1340,15 @@
 
       sections.forEach((section) => observer.observe(section));
     }
+
+    document.querySelectorAll(".faq-item").forEach((item) => {
+      item.addEventListener("toggle", () => {
+        if (!item.open) return;
+        document.querySelectorAll(".faq-item").forEach((other) => {
+          if (other !== item) other.open = false;
+        });
+      });
+    });
   </script>
 </body>
 </html>
