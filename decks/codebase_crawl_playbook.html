@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#10231f">
+  <meta name="description" content="An evidence-led playbook for mapping a legacy application with Codex and Claude Code.">
+  <meta name="author" content="Helsingor LLC">
+  <meta name="copyright" content="Copyright 2026 Helsingor LLC. All rights reserved.">
+  <title>Legacy Codebase Comprehension Playbook</title>
+  <style type="text/css">:root {
+--paper: #f4f1e9;
+--surface: #fbfaf6;
+--surface-strong: #ffffff;
+--ink: #17211e;
+--ink-soft: #52605b;
+--ink-faint: #74807c;
+--rule: #d9d8cf;
+--accent: #d96c37;
+--accent-deep: #a64520;
+--accent-soft: #f5dfd3;
+--green: #163f36;
+--green-soft: #dceae4;
+--code-bg: #10231f;
+--code-ink: #ecf2ee;
+--shadow: 0 16px 50px rgba(32, 44, 39, 0.09);
+--sidebar-width: 19rem;
+--topbar-height: 4.5rem;
+--content-width: 52rem;
+--sans: Aptos, Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+--mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+html[data-theme="dark"] {
+--paper: #101714;
+--surface: #151e1a;
+--surface-strong: #1a2521;
+--ink: #edf3ef;
+--ink-soft: #b5c1bc;
+--ink-faint: #8c9994;
+--rule: #33413b;
+--accent: #f08a55;
+--accent-deep: #ffac7f;
+--accent-soft: #45271b;
+--green: #b7d8cb;
+--green-soft: #233d34;
+--code-bg: #09100e;
+--code-ink: #edf4f0;
+--shadow: 0 18px 60px rgba(0, 0, 0, 0.3);
+}
+* { box-sizing: border-box; }
+html {
+scroll-behavior: smooth;
+scroll-padding-top: calc(var(--topbar-height) + 1.5rem);
+}
+body {
+margin: 0;
+background:
+radial-gradient(circle at 80% -10%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 32rem),
+var(--paper);
+color: var(--ink);
+font-family: var(--sans);
+line-height: 1.65;
+text-rendering: optimizeLegibility;
+}
+button, input { font: inherit; }
+button { color: inherit; }
+a { color: var(--accent-deep); text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+::selection { background: var(--accent-soft); color: var(--ink); }
+.sr-only {
+position: absolute;
+width: 1px;
+height: 1px;
+padding: 0;
+margin: -1px;
+overflow: hidden;
+clip: rect(0, 0, 0, 0);
+white-space: nowrap;
+border: 0;
+}
+.reading-progress {
+position: fixed;
+inset: 0 0 auto;
+z-index: 100;
+height: 3px;
+background: transparent;
+}
+.reading-progress span {
+display: block;
+width: 0;
+height: 100%;
+background: linear-gradient(90deg, var(--accent), #eba36d);
+transition: width 90ms linear;
+}
+.topbar {
+position: fixed;
+inset: 0 0 auto;
+z-index: 80;
+height: var(--topbar-height);
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 1rem;
+padding: 0 1.4rem;
+border-bottom: 1px solid color-mix(in srgb, var(--rule) 85%, transparent);
+background: color-mix(in srgb, var(--surface) 91%, transparent);
+backdrop-filter: blur(18px);
+}
+.brand {
+display: inline-flex;
+align-items: center;
+gap: 0.75rem;
+color: var(--ink);
+text-decoration: none;
+}
+.brand-mark {
+display: grid;
+place-items: center;
+width: 2.2rem;
+height: 2.2rem;
+border-radius: 0.55rem;
+background: var(--green);
+color: var(--surface);
+font-size: 0.9rem;
+font-weight: 800;
+letter-spacing: 0.03em;
+}
+html[data-theme="dark"] .brand-mark { color: #10231f; }
+.brand strong, .brand small { display: block; line-height: 1.15; }
+.brand strong { font-size: 0.9rem; letter-spacing: 0.01em; }
+.brand small { margin-top: 0.2rem; color: var(--ink-faint); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; }
+.topbar-actions { display: flex; align-items: center; gap: 0.5rem; }
+.tool-button {
+min-height: 2.35rem;
+padding: 0.45rem 0.8rem;
+border: 1px solid var(--rule);
+border-radius: 999px;
+background: var(--surface-strong);
+color: var(--ink-soft);
+font-size: 0.76rem;
+font-weight: 700;
+cursor: pointer;
+transition: border-color 150ms ease, color 150ms ease, transform 150ms ease, background 150ms ease;
+}
+.tool-button:hover { border-color: var(--accent); color: var(--ink); transform: translateY(-1px); }
+.tool-button:focus-visible, .search-box:focus-within, .copy-button:focus-visible, .back-to-top:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 38%, transparent); outline-offset: 2px; }
+.icon-button { width: 2.35rem; padding-inline: 0; }
+.page-shell {
+min-height: 100vh;
+padding-top: var(--topbar-height);
+}
+.sidebar {
+position: fixed;
+inset: var(--topbar-height) auto 0 0;
+z-index: 60;
+width: var(--sidebar-width);
+border-right: 1px solid var(--rule);
+background: color-mix(in srgb, var(--surface) 96%, transparent);
+overflow: auto;
+}
+.sidebar-inner { display: flex; min-height: 100%; flex-direction: column; padding: 1.7rem 1.25rem; }
+.sidebar-heading { display: flex; align-items: center; justify-content: space-between; }
+.eyebrow { margin: 0 0 0.75rem; color: var(--accent-deep); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.17em; text-transform: uppercase; }
+.search-box {
+display: flex;
+align-items: center;
+gap: 0.5rem;
+margin-bottom: 1.25rem;
+padding: 0.5rem 0.65rem;
+border: 1px solid var(--rule);
+border-radius: 0.65rem;
+background: var(--surface-strong);
+color: var(--ink-faint);
+}
+.search-box input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 0.78rem; }
+.search-box input::placeholder { color: var(--ink-faint); }
+#toc-nav ul { margin: 0; padding: 0; list-style: none; }
+#toc-nav > ul > li { margin-bottom: 0.65rem; }
+#toc-nav a {
+display: block;
+padding: 0.45rem 0.55rem;
+border-left: 2px solid transparent;
+border-radius: 0 0.45rem 0.45rem 0;
+color: var(--ink-soft);
+font-size: 0.76rem;
+font-weight: 650;
+line-height: 1.35;
+text-decoration: none;
+}
+#toc-nav > ul > li > a { color: var(--ink); font-size: 0.8rem; font-weight: 780; }
+#toc-nav ul ul a { padding-block: 0.34rem; padding-left: 1.05rem; font-size: 0.7rem; font-weight: 530; }
+#toc-nav a:hover { background: var(--accent-soft); color: var(--ink); }
+#toc-nav a.active { border-left-color: var(--accent); background: var(--accent-soft); color: var(--accent-deep); }
+#toc-nav li.filtered-out { display: none; }
+.sidebar-note {
+display: flex;
+gap: 0.65rem;
+margin-top: auto;
+padding: 1.25rem 0.55rem 0;
+color: var(--ink-faint);
+font-size: 0.68rem;
+line-height: 1.45;
+}
+.sidebar-note p { margin: 0; }
+.sidebar-note strong { color: var(--ink-soft); }
+.status-dot { flex: 0 0 auto; width: 0.48rem; height: 0.48rem; margin-top: 0.3rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.document { margin-left: var(--sidebar-width); }
+.document-meta, .playbook-content, .legal-footer { width: min(calc(100% - 3rem), var(--content-width)); margin-inline: auto; }
+.document-meta {
+display: flex;
+flex-wrap: wrap;
+gap: 0.5rem;
+padding-top: clamp(3.2rem, 7vw, 6.4rem);
+color: var(--ink-faint);
+font-size: 0.69rem;
+font-weight: 750;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+.document-meta span { display: inline-flex; align-items: center; }
+.document-meta span:not(:last-child)::after { content: ""; width: 3px; height: 3px; margin-left: 0.5rem; border-radius: 50%; background: var(--accent); }
+.playbook-content { padding-bottom: 5rem; }
+.playbook-content > section.level1:first-of-type > h1 {
+max-width: 48rem;
+margin: 1.4rem 0 2.1rem;
+color: var(--ink);
+font-size: clamp(2.7rem, 6vw, 5rem);
+font-weight: 760;
+letter-spacing: -0.055em;
+line-height: 0.99;
+text-wrap: balance;
+}
+.playbook-content > section.level1:first-of-type > h1::after {
+content: "A rigorous workflow for building a trusted system map before modernization begins.";
+display: block;
+max-width: 39rem;
+margin-top: 1.5rem;
+color: var(--ink-soft);
+font-size: clamp(1rem, 2vw, 1.25rem);
+font-weight: 450;
+letter-spacing: -0.01em;
+line-height: 1.55;
+}
+.playbook-content > section:first-of-type {
+margin-top: 3.4rem;
+}
+.playbook-content section.level1 {
+position: relative;
+margin-top: 7rem;
+padding-top: 4.2rem;
+border-top: 1px solid var(--rule);
+}
+.playbook-content section.level1::before {
+content: attr(data-step);
+position: absolute;
+top: -1.05rem;
+left: 0;
+padding: 0.35rem 0.7rem;
+border: 1px solid var(--rule);
+border-radius: 999px;
+background: var(--paper);
+color: var(--accent-deep);
+font-size: 0.66rem;
+font-weight: 850;
+letter-spacing: 0.13em;
+text-transform: uppercase;
+}
+.playbook-content > section.level1:not(:first-of-type) > h1 {
+margin: 0 0 2.4rem;
+color: var(--ink);
+font-size: clamp(2rem, 4vw, 3.1rem);
+line-height: 1.08;
+letter-spacing: -0.04em;
+text-wrap: balance;
+}
+.playbook-content h2 {
+margin: 3.4rem 0 1rem;
+color: var(--green);
+font-size: clamp(1.2rem, 2vw, 1.55rem);
+line-height: 1.25;
+letter-spacing: -0.025em;
+}
+.playbook-content h3 { margin: 2.5rem 0 0.8rem; font-size: 1.08rem; }
+.playbook-content p { margin: 0.8rem 0 1.15rem; color: var(--ink-soft); font-size: 1rem; }
+.playbook-content strong { color: var(--ink); font-weight: 760; }
+.playbook-content ul, .playbook-content ol { margin: 1rem 0 1.5rem; padding-left: 1.5rem; color: var(--ink-soft); }
+.playbook-content li { margin: 0.48rem 0; padding-left: 0.25rem; }
+.playbook-content li::marker { color: var(--accent); font-weight: 800; }
+.playbook-content > section:first-of-type,
+.playbook-content section.level2:has(> h2:first-child:is(#the-most-important-rule)) {
+padding: 1.6rem 1.8rem;
+border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--rule));
+border-left: 4px solid var(--accent);
+border-radius: 0.9rem;
+background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--surface) 93%, transparent));
+}
+.playbook-content blockquote {
+margin: 2rem 0;
+padding: 1rem 1.4rem;
+border-left: 3px solid var(--accent);
+background: var(--accent-soft);
+color: var(--ink);
+}
+.playbook-content blockquote p { color: inherit; }
+.sourceCode, .playbook-content pre {
+position: relative;
+margin: 1.3rem 0 2rem;
+border: 1px solid color-mix(in srgb, var(--code-bg) 72%, #ffffff);
+border-radius: 0.85rem;
+background: var(--code-bg);
+box-shadow: 0 12px 30px rgba(6, 17, 13, 0.16);
+overflow: hidden;
+}
+.playbook-content pre {
+max-height: 36rem;
+padding: 3.3rem 1.25rem 1.25rem;
+overflow: auto;
+color: var(--code-ink);
+font-family: var(--mono);
+font-size: 0.77rem;
+line-height: 1.65;
+tab-size: 2;
+white-space: pre-wrap;
+overflow-wrap: anywhere;
+}
+.sourceCode pre { margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+.playbook-content code { padding: 0.12em 0.34em; border-radius: 0.28rem; background: var(--green-soft); color: var(--green); font-family: var(--mono); font-size: 0.86em; }
+.playbook-content pre code { padding: 0; background: transparent; color: inherit; font-size: inherit; }
+.code-label {
+position: absolute;
+z-index: 2;
+top: 0.78rem;
+left: 1.15rem;
+color: #94aaa1;
+font-size: 0.62rem;
+font-weight: 800;
+letter-spacing: 0.13em;
+text-transform: uppercase;
+pointer-events: none;
+}
+.copy-button {
+position: absolute;
+z-index: 3;
+top: 0.55rem;
+right: 0.55rem;
+padding: 0.38rem 0.62rem;
+border: 1px solid #41554c;
+border-radius: 0.5rem;
+background: #1a312a;
+color: #dce9e3;
+font-size: 0.66rem;
+font-weight: 750;
+cursor: pointer;
+}
+.copy-button:hover { border-color: var(--accent); color: #fff; }
+.checklist {
+padding: 1.15rem 1.2rem 1.05rem !important;
+border: 1px solid var(--rule);
+border-radius: 0.8rem;
+background: var(--surface);
+list-style: none;
+}
+.checklist li { position: relative; margin: 0; padding: 0; }
+.checklist label { display: flex; gap: 0.72rem; align-items: flex-start; padding: 0.55rem 0.2rem; cursor: pointer; }
+.checklist input { flex: 0 0 auto; width: 1rem; height: 1rem; margin-top: 0.28rem; accent-color: var(--accent); }
+.checklist input:checked + span { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--rule); }
+.legal-footer {
+margin-bottom: 4rem;
+padding: 2rem 0 0;
+border-top: 1px solid var(--rule);
+color: var(--ink-faint);
+font-size: 0.72rem;
+line-height: 1.55;
+}
+.legal-footer p { margin: 0.25rem 0; }
+.legal-footer strong { color: var(--ink-soft); }
+.back-to-top {
+position: fixed;
+right: 1.2rem;
+bottom: 1.2rem;
+z-index: 50;
+display: grid;
+place-items: center;
+width: 2.7rem;
+height: 2.7rem;
+border: 1px solid var(--rule);
+border-radius: 50%;
+background: var(--surface-strong);
+box-shadow: var(--shadow);
+color: var(--ink);
+text-decoration: none;
+opacity: 0;
+transform: translateY(0.5rem);
+pointer-events: none;
+transition: 160ms ease;
+}
+.back-to-top.visible { opacity: 1; transform: none; pointer-events: auto; }
+.toast {
+position: fixed;
+left: 50%;
+bottom: 1.2rem;
+z-index: 110;
+padding: 0.65rem 0.9rem;
+border-radius: 999px;
+background: var(--ink);
+color: var(--surface);
+box-shadow: var(--shadow);
+font-size: 0.72rem;
+font-weight: 700;
+opacity: 0;
+transform: translate(-50%, 0.5rem);
+pointer-events: none;
+transition: 160ms ease;
+}
+.toast.visible { opacity: 1; transform: translate(-50%, 0); }
+.scrim, .mobile-only, .close-menu { display: none; }
+@media (max-width: 920px) {
+:root { --topbar-height: 4.1rem; }
+.mobile-only { display: inline-flex; }
+.topbar { padding-inline: 0.8rem; }
+.brand small { display: none; }
+.brand-mark { width: 2rem; height: 2rem; }
+#reset-checks { display: none; }
+.sidebar { inset: 0 auto 0 0; z-index: 100; width: min(88vw, 20rem); transform: translateX(-102%); box-shadow: var(--shadow); transition: transform 190ms ease; }
+.sidebar.open { transform: none; }
+.sidebar-inner { padding-top: 1.25rem; }
+.close-menu { border: 0; background: transparent; color: var(--ink); font-size: 1.7rem; cursor: pointer; }
+.scrim { position: fixed; inset: 0; z-index: 90; border: 0; background: rgba(5, 12, 9, 0.46); }
+.scrim.visible { display: block; }
+.document { margin-left: 0; }
+.document-meta, .playbook-content, .legal-footer { width: min(calc(100% - 2.2rem), var(--content-width)); }
+}
+@media (max-width: 560px) {
+.brand > span:last-child { display: none; }
+.tool-button { padding-inline: 0.65rem; }
+.icon-button { width: 2.3rem; }
+.playbook-content > section.level1:first-of-type > h1 { font-size: clamp(2.35rem, 13vw, 3.2rem); }
+.playbook-content > section.level1:first-of-type > h1::after { font-size: 1rem; }
+.playbook-content section.level1 { margin-top: 5.5rem; padding-top: 3.4rem; }
+.playbook-content > section:first-of-type, .playbook-content section.level2:has(> h2:first-child:is(#the-most-important-rule)) { padding: 1.2rem; }
+.playbook-content pre { max-height: 29rem; padding-inline: 1rem; font-size: 0.69rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+*, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+@media print {
+:root { --paper: #fff; --surface: #fff; --surface-strong: #fff; --ink: #111; --ink-soft: #333; --ink-faint: #555; --rule: #ccc; --green: #12372f; --accent-deep: #8a3215; }
+@page { size: letter; margin: 0.65in; }
+body { background: #fff; font-size: 10.5pt; }
+.topbar, .sidebar, .reading-progress, .back-to-top, .toast, .scrim, .copy-button, .code-label { display: none !important; }
+.page-shell { padding: 0; }
+.document { margin: 0; }
+.document-meta, .playbook-content, .legal-footer { width: 100%; }
+.document-meta { padding-top: 0; }
+.playbook-content > section.level1:first-of-type > h1 { font-size: 31pt; }
+.playbook-content section.level1 { break-before: page; margin-top: 0; padding-top: 0.35in; }
+.playbook-content section.level1::before { position: static; display: inline-block; margin-bottom: 0.2in; background: #fff; }
+.playbook-content h1, .playbook-content h2, .playbook-content h3 { break-after: avoid; }
+.playbook-content p, .playbook-content li { orphans: 3; widows: 3; }
+.sourceCode, .playbook-content pre { break-inside: auto; box-shadow: none; }
+.playbook-content pre { max-height: none; border-color: #444; background: #f4f4f4; color: #111; white-space: pre-wrap; }
+.checklist { break-inside: avoid; }
+.legal-footer { margin-bottom: 0; }
+}
+</style>
+</head>
+<body>
+  <div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Return to the top">
+      <span class="brand-mark" aria-hidden="true">H</span>
+      <span>
+        <strong>Helsingor LLC</strong>
+        <small>Technical playbook</small>
+      </span>
+    </a>
+    <div class="topbar-actions">
+      <button class="tool-button mobile-only" id="menu-button" type="button" aria-controls="sidebar" aria-expanded="false">
+        <span aria-hidden="true">☰</span> Contents
+      </button>
+      <button class="tool-button" id="reset-checks" type="button">Reset checks</button>
+      <button class="tool-button icon-button" id="theme-button" type="button" aria-label="Change color theme" title="Change color theme">
+        <span aria-hidden="true">◐</span>
+      </button>
+      <button class="tool-button" id="print-button" type="button">
+        <span aria-hidden="true">↗</span> Print or PDF
+      </button>
+    </div>
+  </header>
+
+  <div class="page-shell" id="top">
+    <aside class="sidebar" id="sidebar" aria-label="Playbook contents">
+      <div class="sidebar-inner">
+        <div class="sidebar-heading">
+          <p class="eyebrow">Navigate</p>
+          <button class="close-menu mobile-only" id="close-menu" type="button" aria-label="Close contents">×</button>
+        </div>
+        <label class="search-box">
+          <span class="sr-only">Filter contents</span>
+          <span aria-hidden="true">⌕</span>
+          <input id="toc-search" type="search" placeholder="Filter sections" autocomplete="off">
+        </label>
+        <nav id="toc-nav">
+<ul>
+<li><a href="#a-step-by-step-playbook-for-mapping-a-legacy-application-with-codex-and-claude-code" id="toc-a-step-by-step-playbook-for-mapping-a-legacy-application-with-codex-and-claude-code">A
+Step-by-Step Playbook for Mapping a Legacy Application with Codex and
+Claude Code</a>
+<ul>
+<li><a href="#what-this-playbook-is-for" id="toc-what-this-playbook-is-for">What this playbook is for</a></li>
+<li><a href="#the-most-important-rule" id="toc-the-most-important-rule">The most important rule</a></li>
+</ul></li>
+<li><a href="#step-1-prepare-the-workspace" id="toc-step-1-prepare-the-workspace">Step 1: Prepare the workspace</a>
+<ul>
+<li><a href="#what-you-are-doing" id="toc-what-you-are-doing">What you
+are doing</a></li>
+<li><a href="#why-this-matters" id="toc-why-this-matters">Why this
+matters</a></li>
+<li><a href="#suggested-folder-structure" id="toc-suggested-folder-structure">Suggested folder structure</a></li>
+<li><a href="#choose-the-models" id="toc-choose-the-models">Choose the
+models</a></li>
+<li><a href="#keep-the-repositories-stable" id="toc-keep-the-repositories-stable">Keep the repositories
+stable</a></li>
+<li><a href="#check-before-moving-on" id="toc-check-before-moving-on">Check before moving on</a></li>
+</ul></li>
+<li><a href="#step-2-run-independent-discovery" id="toc-step-2-run-independent-discovery">Step 2: Run independent
+discovery</a>
+<ul>
+<li><a href="#what-this-prompt-does" id="toc-what-this-prompt-does">What
+this prompt does</a></li>
+<li><a href="#why-you-run-it" id="toc-why-you-run-it">Why you run
+it</a></li>
+<li><a href="#how-it-works" id="toc-how-it-works">How it works</a></li>
+<li><a href="#what-you-get" id="toc-what-you-get">What you get</a></li>
+<li><a href="#what-you-do-next" id="toc-what-you-do-next">What you do
+next</a></li>
+<li><a href="#how-to-run-the-prompt" id="toc-how-to-run-the-prompt">How
+to run the prompt</a></li>
+<li><a href="#discovery-prompt" id="toc-discovery-prompt">Discovery
+prompt</a></li>
+<li><a href="#while-the-agents-work" id="toc-while-the-agents-work">While the agents work</a></li>
+<li><a href="#check-before-moving-on-1" id="toc-check-before-moving-on-1">Check before moving on</a></li>
+</ul></li>
+<li><a href="#step-3-have-each-product-check-the-other-report" id="toc-step-3-have-each-product-check-the-other-report">Step 3: Have
+each product check the other report</a>
+<ul>
+<li><a href="#what-this-prompt-does-1" id="toc-what-this-prompt-does-1">What this prompt does</a></li>
+<li><a href="#why-you-run-it-1" id="toc-why-you-run-it-1">Why you run
+it</a></li>
+<li><a href="#how-it-works-1" id="toc-how-it-works-1">How it
+works</a></li>
+<li><a href="#what-you-get-1" id="toc-what-you-get-1">What you
+get</a></li>
+<li><a href="#what-you-do-next-1" id="toc-what-you-do-next-1">What you
+do next</a></li>
+<li><a href="#how-to-run-the-prompt-1" id="toc-how-to-run-the-prompt-1">How to run the prompt</a></li>
+<li><a href="#verification-prompt" id="toc-verification-prompt">Verification prompt</a></li>
+<li><a href="#check-before-moving-on-2" id="toc-check-before-moving-on-2">Check before moving on</a></li>
+</ul></li>
+<li><a href="#step-4-compare-the-checked-reports" id="toc-step-4-compare-the-checked-reports">Step 4: Compare the checked
+reports</a>
+<ul>
+<li><a href="#what-this-prompt-does-2" id="toc-what-this-prompt-does-2">What this prompt does</a></li>
+<li><a href="#why-you-run-it-2" id="toc-why-you-run-it-2">Why you run
+it</a></li>
+<li><a href="#how-it-works-2" id="toc-how-it-works-2">How it
+works</a></li>
+<li><a href="#what-you-get-2" id="toc-what-you-get-2">What you
+get</a></li>
+<li><a href="#what-you-do-next-2" id="toc-what-you-do-next-2">What you
+do next</a></li>
+<li><a href="#how-to-run-the-prompt-2" id="toc-how-to-run-the-prompt-2">How to run the prompt</a></li>
+<li><a href="#comparison-prompt" id="toc-comparison-prompt">Comparison
+prompt</a></li>
+<li><a href="#check-before-moving-on-3" id="toc-check-before-moving-on-3">Check before moving on</a></li>
+</ul></li>
+<li><a href="#step-5-create-the-final-system-map" id="toc-step-5-create-the-final-system-map">Step 5: Create the final
+system map</a>
+<ul>
+<li><a href="#what-this-prompt-does-3" id="toc-what-this-prompt-does-3">What this prompt does</a></li>
+<li><a href="#why-you-run-it-3" id="toc-why-you-run-it-3">Why you run
+it</a></li>
+<li><a href="#how-it-works-3" id="toc-how-it-works-3">How it
+works</a></li>
+<li><a href="#what-you-get-3" id="toc-what-you-get-3">What you
+get</a></li>
+<li><a href="#what-you-do-next-3" id="toc-what-you-do-next-3">What you
+do next</a></li>
+<li><a href="#how-to-run-the-prompt-3" id="toc-how-to-run-the-prompt-3">How to run the prompt</a></li>
+<li><a href="#reconciliation-prompt" id="toc-reconciliation-prompt">Reconciliation prompt</a></li>
+<li><a href="#check-before-moving-on-4" id="toc-check-before-moving-on-4">Check before moving on</a></li>
+</ul></li>
+<li><a href="#step-6-human-acceptance-review" id="toc-step-6-human-acceptance-review">Step 6: Human acceptance
+review</a>
+<ul>
+<li><a href="#what-you-are-doing-1" id="toc-what-you-are-doing-1">What
+you are doing</a></li>
+<li><a href="#why-this-matters-1" id="toc-why-this-matters-1">Why this
+matters</a></li>
+<li><a href="#what-to-read" id="toc-what-to-read">What to read</a></li>
+<li><a href="#acceptance-checklist" id="toc-acceptance-checklist">Acceptance checklist</a></li>
+<li><a href="#if-someone-disagrees-with-the-map" id="toc-if-someone-disagrees-with-the-map">If someone disagrees with the
+map</a></li>
+<li><a href="#acceptance-outcomes" id="toc-acceptance-outcomes">Acceptance outcomes</a></li>
+</ul></li>
+</ul>
+        </nav>
+        <div class="sidebar-note">
+          <span class="status-dot" aria-hidden="true"></span>
+          <p><strong>Six-stage workflow</strong><br>Discovery through human acceptance</p>
+        </div>
+      </div>
+    </aside>
+    <button class="scrim" id="scrim" type="button" aria-label="Close contents"></button>
+
+    <main class="document" id="main-content">
+      <div class="document-meta">
+        <span>Legacy systems</span>
+        <span>Evidence-led workflow</span>
+        <span>2026 edition</span>
+      </div>
+      <article class="playbook-content">
+<section id="a-step-by-step-playbook-for-mapping-a-legacy-application-with-codex-and-claude-code" class="level1">
+<h1>A Step-by-Step Playbook for Mapping a Legacy Application with Codex
+and Claude Code</h1>
+<section id="what-this-playbook-is-for" class="level2">
+<h2>What this playbook is for</h2>
+<p>Use this playbook when an application is spread across several code
+repositories and nobody has a complete, trusted picture of how it all
+fits together.</p>
+<p>You will use Codex and Claude Code to:</p>
+<ol type="1">
+<li>Study the same repositories independently.</li>
+<li>Check each product&#39;s report against the source.</li>
+<li>Compare the checked reports to find meaningful differences.</li>
+<li>Resolve those differences into one final system map.</li>
+<li>Have developers review and accept the final map.</li>
+</ol>
+<p>This work comes before modernization planning. The goal is to
+understand the current system as well as the available evidence
+allows.</p>
+</section>
+<section id="the-most-important-rule" class="level2">
+<h2>The most important rule</h2>
+<p>An honest gap is better than a confident guess.</p>
+<p>The reports must clearly separate:</p>
+<ul>
+<li>What the source directly confirms.</li>
+<li>What the source supports but does not prove.</li>
+<li>What cannot be determined from the available repositories.</li>
+<li>Where credible evidence conflicts.</li>
+</ul>
+<p>Source code may show that an API connection has been built. It does
+not prove that the connection is deployed, enabled, or currently used in
+production.</p>
+</section>
+</section>
+<section id="step-1-prepare-the-workspace" class="level1">
+<h1>Step 1: Prepare the workspace</h1>
+<section id="what-you-are-doing" class="level2">
+<h2>What you are doing</h2>
+<p>Open the common parent folder containing all repositories in Codex
+and Claude Code. Give each product a different output folder.</p>
+<p>That is the only access setup this playbook requires. The discovery
+prompt contains the rules about what the agents may read, where they may
+write, and what they must not change.</p>
+</section>
+<section id="why-this-matters" class="level2">
+<h2>Why this matters</h2>
+<p>Both products need to examine the same code. Separate output folders
+prevent one product from reading or overwriting the other product&#39;s work
+during discovery.</p>
+</section>
+<section id="suggested-folder-structure" class="level2">
+<h2>Suggested folder structure</h2>
+<pre class="text"><code>legacy-system/
+  repository-one/
+  repository-two/
+  repository-three/
+
+  architecture-analysis/
+    codex-discovery/
+    claude-discovery/
+    claude-verifies-codex/
+    codex-verifies-claude/
+    comparison/
+    final-system-map/</code></pre>
+<p>Keep the analysis folders outside the source repositories.</p>
+</section>
+<section id="choose-the-models" class="level2">
+<h2>Choose the models</h2>
+<ul>
+<li>In Codex, use GPT-5.6 Sol at High or higher.</li>
+<li>In Claude Code, use Claude Fable 5 at High or higher.</li>
+</ul>
+</section>
+<section id="keep-the-repositories-stable" class="level2">
+<h2>Keep the repositories stable</h2>
+<p>Start both discovery runs close together. If practical, ask
+developers not to pull changes, switch branches, or edit the
+repositories until both discovery runs finish.</p>
+<p>The prompt tells each agent to record the current branch, the exact
+Git commit ID, and the Git status at the beginning and end of its
+work.</p>
+<p>A Git commit ID identifies the exact saved version of a repository.
+Starting both products at the same time helps keep their views aligned.
+Recording the commit ID catches changes that happen without anyone
+noticing.</p>
+<p>Git status records uncommitted changes. Comparing the starting and
+ending status gives developers a practical way to see whether files or
+Git state changed during the run. This check cannot prove that no
+command was ever attempted, but it can show whether the repository ended
+differently.</p>
+</section>
+<section id="check-before-moving-on" class="level2">
+<h2>Check before moving on</h2>
+<ul>
+<li>Both products can see every repository.</li>
+<li>Both products have their own output folder.</li>
+<li>Both models are set to High or higher.</li>
+<li>Developers know not to change the repositories during discovery when
+that is practical.</li>
+</ul>
+</section>
+</section>
+<section id="step-2-run-independent-discovery" class="level1">
+<h1>Step 2: Run independent discovery</h1>
+<p>Run the same prompt once in Codex and once in Claude Code. Do not
+give either product the other product&#39;s report.</p>
+<section id="what-this-prompt-does" class="level2">
+<h2>What this prompt does</h2>
+<p>The discovery prompt asks each product to examine all the
+repositories and build an evidence-backed picture of the current system.
+It identifies what each repository contains, how the repositories
+connect, how data moves, and what the available source cannot
+establish.</p>
+</section>
+<section id="why-you-run-it" class="level2">
+<h2>Why you run it</h2>
+<p>Developers may understand individual parts of a legacy system without
+understanding the whole system. Two independent discovery runs reduce
+the chance that one model&#39;s assumptions or omissions become the accepted
+picture.</p>
+</section>
+<section id="how-it-works" class="level2">
+<h2>How it works</h2>
+<p>The agent inspects source code, configuration, tests, deployment
+files, infrastructure files, and relevant Git history. It connects
+important conclusions to specific evidence. It records uncertainty
+instead of filling gaps with plausible guesses.</p>
+<p>The prompt separates coverage from gaps:</p>
+<ul>
+<li>Coverage answers, &quot;What did the agent actually examine?&quot;</li>
+<li>Gaps answer, &quot;What did the agent examine but still could not
+determine?&quot;</li>
+</ul>
+<p>This prevents an unexamined area from being mistaken for proof that
+something is absent.</p>
+</section>
+<section id="what-you-get" class="level2">
+<h2>What you get</h2>
+<p>Each discovery run creates five required outputs:</p>
+<ol type="1">
+<li><code>STATUS.md</code>, so interrupted work can continue.</li>
+<li><code>SYSTEM_REPORT.md</code>, the main explanation of the
+application.</li>
+<li><code>repos/[repository-name].md</code>, supporting notes for each
+repository.</li>
+<li><code>COVERAGE.md</code>, showing what was and was not
+examined.</li>
+<li><code>GAPS.md</code>, showing unresolved questions and conflicting
+evidence.</li>
+</ol>
+<p>Later agents can compare and verify the Markdown reports
+directly.</p>
+</section>
+<section id="what-you-do-next" class="level2">
+<h2>What you do next</h2>
+<p>Wait for both discovery runs to finish. Check that both products
+examined the same repositories and exact saved versions. Then start the
+separate verification sessions in Step 3.</p>
+</section>
+<section id="how-to-run-the-prompt" class="level2">
+<h2>How to run the prompt</h2>
+<ol type="1">
+<li>Start a new Codex session from the common parent folder.</li>
+<li>Select GPT-5.6 Sol at High or higher.</li>
+<li>Paste the prompt below and enter the Codex output folder.</li>
+<li>Start a new Claude Code session from the same parent folder.</li>
+<li>Select Claude Fable 5 at High or higher.</li>
+<li>Paste the same prompt and enter the Claude output folder.</li>
+<li>Do not share either discovery report with the other product
+yet.</li>
+</ol>
+</section>
+<section id="discovery-prompt" class="level2">
+<h2>Discovery prompt</h2>
+<pre class="text"><code># Goal
+
+Build an accurate, evidence-backed map of the application represented by every in-scope Git repository under WORKSPACE_ROOT.
+
+This is discovery only. Do not fix, refactor, modernize, or recommend changes.
+
+WORKSPACE_ROOT: [ABSOLUTE PATH TO THE COMMON PARENT FOLDER]
+OUTPUT_DIRECTORY: [ABSOLUTE PATH TO THIS PRODUCT&#39;S DISCOVERY FOLDER]
+
+# Accuracy rules
+
+An honest gap is better than a confident claim that the available evidence cannot support.
+
+For every important claim:
+
+- Cite the repository, exact Git commit ID, file, and line range. Use the closest stable code symbol or configuration key when line numbers are unavailable.
+- Label the claim Confirmed by source, Supported but not proven, Unknown, or Conflicting evidence.
+- Use Confirmed by source only when the available source directly establishes the claim.
+- Use Supported but not proven when evidence points to the claim but does not establish it fully.
+- Use Unknown when the available evidence cannot answer the question.
+- Use Conflicting evidence when credible sources disagree.
+- Search for better evidence before accepting an inference. If the answer remains uncertain, record the gap.
+- Say &quot;not found in the areas examined,&quot; rather than &quot;does not exist.&quot;
+- Treat names, READMEs, comments, and diagrams as evidence of intent. Check them against implementation and configuration where possible.
+- Do not quietly choose one side when evidence conflicts.
+
+Report what the source implements. Do not claim that something is deployed, enabled, currently used, or receiving production traffic without suitable runtime evidence.
+
+# Working boundaries
+
+- Treat every source repository as read-only.
+- Write only inside OUTPUT_DIRECTORY.
+- Do not change source files, configuration, lockfiles, Git state, branches, commits, staging, or stashes.
+- Use safe, read-only inspection commands.
+- Do not connect to production systems, call live application APIs, or change any external system.
+- You may use official technical documentation when it helps you understand a framework, library, or file format. Do not use internet sources as proof of how this application currently behaves.
+- Do not build, run tests, install packages, or start services unless the user separately approves a clearly local investigation.
+- Never display or copy secret values. Record configuration variable names and their apparent purposes only.
+- Ask the user only about a blocker that cannot be resolved from the available repositories or safe inspection. Record non-blocking uncertainty and continue.
+
+# How to work
+
+Use a staged investigation. Keep STATUS.md current so the work can continue after interruption or context loss.
+
+When subagents are available and useful, give them bounded, read-only investigations. Keep cross-repository synthesis, conflict review, and final quality control with the coordinating agent.
+
+Do not report private reasoning. Report conclusions, evidence, conflicting evidence, searches performed, and unresolved questions.
+
+# What to investigate
+
+Establish:
+
+1. Every repository found under WORKSPACE_ROOT, plus its path, branch, exact Git commit ID, starting Git status, main languages, and major directories.
+2. The supported purpose of each repository, its entry points, deployable parts, main modules, interfaces, dependencies, configuration, and tests.
+3. Connections between repositories through APIs, events, queues, jobs, shared databases, shared files, libraries, generated clients, authentication, builds, deployments, infrastructure, and matching configuration.
+4. Which components read or write each database, schema, table, queue, cache, file store, or external store that can be identified.
+5. Important end-to-end flows that can be traced through the available source.
+6. Build, deployment, infrastructure, environment, and operating setup shown by the repositories.
+7. Visible timeout, retry, fallback, and failure behavior for important connections.
+8. Missing repositories, incomplete flows, conflicting contracts, stale documentation, unexamined areas, and questions requiring runtime evidence or human knowledge.
+
+For an important connection between repositories, seek evidence at both ends when both ends are available. Record the source, target, direction, method, data or contract involved, when the connection occurs, evidence, confidence, and visible failure handling.
+
+Do not call code unused or unreachable merely because you did not find a caller. State where you searched and what you did not find.
+
+# Required outputs
+
+Create only these required outputs inside OUTPUT_DIRECTORY:
+
+1. STATUS.md
+   Record completed work, remaining work, blockers, the last completed step, and the exact next step.
+
+2. SYSTEM_REPORT.md
+   Provide a plain-English system overview. Cover repository roles, system boundaries, important components, connections, data and state, end-to-end flows, authentication, build and deployment setup, infrastructure, operating behavior visible in source, and evidence-backed Mermaid diagrams. Clearly label confirmed findings, supported but unproven findings, unknowns, and conflicts.
+
+3. repos/[repository-name].md
+   Create one supporting report per repository. Cover purpose, entry points, deployable parts, modules, interfaces, dependencies, data, configuration, tests, build and deployment evidence, important history, and open questions.
+
+4. COVERAGE.md
+   Record every repository found, its path, branch, exact Git commit ID, starting and ending Git status, areas examined, areas skipped, exclusions, missing referenced repositories, and the search used for important absence claims.
+
+5. GAPS.md
+   Record questions investigated but not answered, conflicting evidence, missing repositories or systems, claims requiring runtime evidence, and claims requiring human knowledge. For each gap, state what was checked and what evidence would answer it.
+
+Do not create additional deliverables unless one of these files would otherwise become unusable. If another file is necessary, explain why in STATUS.md.
+
+# Completion check
+
+Before finishing:
+
+- Every repository found is analyzed or clearly marked blocked.
+- Repository branches and exact Git commit IDs are recorded.
+- Starting and ending Git status are compared.
+- Important claims cite evidence and use the required labels.
+- Cross-repository connections, data movement, build and deployment relationships, and end-to-end flows were actively investigated.
+- Coverage and gaps are kept separate.
+- The reports state what the available source could not establish.
+- All five required outputs agree with one another.
+
+Do not claim complete understanding when important repositories, configuration, runtime systems, or evidence are missing.
+
+# Final response
+
+In plain language, state what you established, where the map is weakest, which gaps matter most, and which report the reader should open first.</code></pre>
+</section>
+<section id="while-the-agents-work" class="level2">
+<h2>While the agents work</h2>
+<p>If an agent stops after planning or is interrupted, tell it:</p>
+<pre class="text"><code>Continue the discovery. Read STATUS.md and carry out the next recorded step. First confirm that the repository versions have not changed. Stop only if you need information or access that I must provide.</code></pre>
+<p>If you answer a factual scope question for one product, give the same
+answer to the other product when it applies.</p>
+</section>
+<section id="check-before-moving-on-1" class="level2">
+<h2>Check before moving on</h2>
+<p>For both discovery folders, confirm:</p>
+<ul>
+<li>All five required outputs exist.</li>
+<li><code>COVERAGE.md</code> lists the same repositories, branches, and
+exact Git commit IDs.</li>
+<li>Every repository has supporting notes or is marked blocked.</li>
+<li><code>GAPS.md</code> separates missing evidence from unexamined
+areas.</li>
+<li>The ending Git status matches the expected starting state.</li>
+</ul>
+<p>If the products examined different versions, correct that before
+verification.</p>
+</section>
+</section>
+<section id="step-3-have-each-product-check-the-other-report" class="level1">
+<h1>Step 3: Have each product check the other report</h1>
+<p>Claude Code will check the Codex report. Codex will check the Claude
+Code report. Use a new session for each verification.</p>
+<section id="what-this-prompt-does-1" class="level2">
+<h2>What this prompt does</h2>
+<p>The verification prompt treats the discovery report as a set of
+claims that must be checked against the source. It checks whether the
+cited evidence supports the wording, whether confidence is too high,
+whether important findings were missed, and whether the stated coverage
+is honest.</p>
+</section>
+<section id="why-you-run-it-1" class="level2">
+<h2>Why you run it</h2>
+<p>A detailed report can still be wrong. Verification tests each report
+before the two reports are compared. This prevents the comparison stage
+from spending time comparing unsupported claims.</p>
+<p>Using the other product as verifier also gives the report a fresh
+reader that did not create it.</p>
+<p>A new session matters because it does not carry the discovery
+session&#39;s earlier assumptions and working conversation.</p>
+</section>
+<section id="how-it-works-1" class="level2">
+<h2>How it works</h2>
+<p>The verifier receives one discovery folder and the same repositories.
+It does not receive its own earlier discovery report. It checks material
+claims directly against the source and records corrections without
+rewriting the original report.</p>
+<p>A material claim is one that would change the reader&#39;s understanding
+of repository purpose, system boundaries, important connections, data
+ownership, end-to-end flows, authentication, build and deployment,
+infrastructure, or major gaps.</p>
+</section>
+<section id="what-you-get-1" class="level2">
+<h2>What you get</h2>
+<p>Each verification produces one file:
+<code>VERIFICATION_REPORT.md</code>.</p>
+<p>That file contains the snapshot check, an overall reliability
+judgment, a table of checked claims, missed findings, coverage problems,
+remaining unknowns, and a starting-to-ending Git status check.</p>
+</section>
+<section id="what-you-do-next-1" class="level2">
+<h2>What you do next</h2>
+<p>If either verifier finds major problems, have a new discovery session
+repair that report before continuing. Once both reports are suitable for
+comparison, move to Step 4.</p>
+</section>
+<section id="how-to-run-the-prompt-1" class="level2">
+<h2>How to run the prompt</h2>
+<p>In Claude Code:</p>
+<ol type="1">
+<li>Start a new session using Claude Fable 5 at High or higher.</li>
+<li>Provide the Codex discovery folder and the repository
+workspace.</li>
+<li>Do not provide Claude&#39;s discovery folder.</li>
+<li>Use the <code>claude-verifies-codex</code> output folder.</li>
+</ol>
+<p>In Codex:</p>
+<ol type="1">
+<li>Start a new session using GPT-5.6 Sol at High or higher.</li>
+<li>Provide the Claude discovery folder and the repository
+workspace.</li>
+<li>Do not provide the Codex discovery folder.</li>
+<li>Use the <code>codex-verifies-claude</code> output folder.</li>
+</ol>
+</section>
+<section id="verification-prompt" class="level2">
+<h2>Verification prompt</h2>
+<p>Use this prompt twice. Change the report and output paths.</p>
+<pre class="text"><code># Goal
+
+Check one discovery report against the exact repository versions it claims to have examined.
+
+Treat every material claim as untrusted until the source supports it. Do not compare this report with another discovery report. Do not rewrite the report.
+
+REPORT_DIRECTORY: [ABSOLUTE PATH TO THE DISCOVERY REPORT BEING CHECKED]
+WORKSPACE_ROOT: [ABSOLUTE PATH TO THE COMMON PARENT FOLDER]
+OUTPUT_DIRECTORY: [ABSOLUTE PATH TO THIS VERIFICATION FOLDER]
+
+# Verdicts
+
+Use one of these verdicts for each material claim:
+
+- Supported
+- Too broad
+- Unsupported
+- Contradicted
+- Cannot verify from available source
+- Citation problem
+- Coverage overstated
+
+# Rules
+
+- Check claims against repository evidence, not architectural plausibility.
+- Do not treat agreement between models as evidence.
+- Do not claim live or production behavior without suitable runtime evidence.
+- Say &quot;not found in the areas checked,&quot; rather than &quot;does not exist.&quot;
+- Treat source repositories as read-only and write only inside OUTPUT_DIRECTORY.
+- Do not connect to production systems, call live application APIs, or change external systems.
+- Official technical documentation may explain a framework or dependency. It cannot prove how this application currently behaves.
+- Do not expose secret values.
+- Do not make modernization recommendations.
+
+# First check
+
+Compare the discovery report&#39;s repository list, branches, exact Git commit IDs, and recorded Git status with the available workspace.
+
+If the repository versions do not match, record the mismatch and stop. The report cannot be fairly verified against different code.
+
+# What to check
+
+Read all five required discovery outputs.
+
+For every material claim:
+
+1. Open the cited evidence.
+2. Decide whether it supports the exact wording and confidence.
+3. Search for nearby or conflicting implementation, configuration, tests, contracts, deployment files, infrastructure files, and relevant history.
+4. Check whether a README, comment, diagram, or name was treated as proof.
+5. Check whether source capability was presented as deployed or current production behavior.
+6. Check important repository connections from both ends when both ends are available.
+7. Check whether an absence statement is supported by the documented coverage and search.
+8. Record better evidence, conflicting evidence, narrower wording, or missing evidence.
+
+Within the areas checked, look for important components, connections, data stores, flows, or conflicts the discovery report missed. Record these separately. Do not silently add them to the original report.
+
+# Required output
+
+Create only OUTPUT_DIRECTORY/VERIFICATION_REPORT.md with these sections:
+
+1. Report and repository versions checked.
+2. Overall reliability of the report.
+3. Material claim audit table containing the report claim, report location, verdict, evidence checked, correction or narrower wording, and evidence still needed.
+4. Important findings missed by the report.
+5. Problems with citations, coverage, gaps, or confidence.
+6. Claims the available source cannot settle.
+7. Starting and ending Git status comparison.
+8. Final judgment:
+   - Suitable for comparison as written.
+   - Suitable after applying the listed corrections.
+   - Needs major discovery work before comparison.
+
+Do not create other deliverables.
+
+# Completion check
+
+- Every material claim was checked or clearly marked as not checked with a reason.
+- Corrections cite source evidence.
+- Missed findings are separate from corrections.
+- Claims requiring runtime or human evidence remain unresolved.
+- Starting and ending Git status were compared.
+
+Do not call the report verified merely because most citations are valid.</code></pre>
+</section>
+<section id="check-before-moving-on-2" class="level2">
+<h2>Check before moving on</h2>
+<ul>
+<li>Both <code>VERIFICATION_REPORT.md</code> files exist.</li>
+<li>Both verifiers checked the same repository versions used during
+discovery.</li>
+<li>Corrections include supporting evidence.</li>
+<li>Missed findings are clearly listed.</li>
+<li>Claims requiring runtime evidence remain unresolved.</li>
+<li>Both reports are suitable for comparison, either as written or with
+the listed corrections.</li>
+</ul>
+</section>
+</section>
+<section id="step-4-compare-the-checked-reports" class="level1">
+<h1>Step 4: Compare the checked reports</h1>
+<p>Use a new session in either Codex or Claude Code. This session
+receives both discovery reports and both verification reports.</p>
+<section id="what-this-prompt-does-2" class="level2">
+<h2>What this prompt does</h2>
+<p>The comparison prompt identifies where the checked reports agree,
+where one contains useful findings the other missed, where confidence
+differs, and where claims still conflict.</p>
+</section>
+<section id="why-you-run-it-2" class="level2">
+<h2>Why you run it</h2>
+<p>Verification asks whether each report is supported. Comparison asks
+how the two checked reports differ. Keeping these jobs separate stops
+model agreement from being mistaken for proof.</p>
+<p>A new session keeps the comparison focused on the four completed
+reports instead of carrying assumptions from an earlier stage.</p>
+</section>
+<section id="how-it-works-2" class="level2">
+<h2>How it works</h2>
+<p>The comparison agent applies the verifier&#39;s corrections before
+comparing the reports. It compares meaning rather than writing style or
+report length. It does not inspect the repositories or decide which
+remaining claim is correct.</p>
+</section>
+<section id="what-you-get-2" class="level2">
+<h2>What you get</h2>
+<p>The comparison creates one file:
+<code>COMPARISON_REPORT.md</code>.</p>
+<p>It explains the overall level of agreement and lists the exact
+conflicts, missing findings, coverage differences, and shared unknowns
+that the final session must address.</p>
+</section>
+<section id="what-you-do-next-2" class="level2">
+<h2>What you do next</h2>
+<p>Review the comparison report. If it shows that the products examined
+different repository versions or that verification was incomplete, fix
+that first. Otherwise, give the comparison report and all earlier
+reports to the final reconciliation session in Step 5.</p>
+</section>
+<section id="how-to-run-the-prompt-2" class="level2">
+<h2>How to run the prompt</h2>
+<ol type="1">
+<li>Start a new session in Codex or Claude Code.</li>
+<li>Use GPT-5.6 Sol or Claude Fable 5 at High or higher.</li>
+<li>Provide both discovery folders and both verification folders.</li>
+<li>Do not ask the agent to inspect the repositories during this
+step.</li>
+<li>Use the <code>comparison</code> output folder.</li>
+</ol>
+</section>
+<section id="comparison-prompt" class="level2">
+<h2>Comparison prompt</h2>
+<pre class="text"><code># Goal
+
+Compare two independently created and independently verified discovery reports. Identify what the final reconciliation session must resolve.
+
+Do not decide which remaining claim is correct. Do not inspect the repositories. Do not merge or rewrite the reports.
+
+CODEX_REPORT_DIRECTORY: [ABSOLUTE PATH]
+CLAUDE_REPORT_DIRECTORY: [ABSOLUTE PATH]
+CLAUDE_VERIFICATION_DIRECTORY: [ABSOLUTE PATH]
+CODEX_VERIFICATION_DIRECTORY: [ABSOLUTE PATH]
+OUTPUT_DIRECTORY: [ABSOLUTE PATH TO THE COMPARISON FOLDER]
+
+# Rules
+
+- Apply the verification corrections before comparing claims.
+- Compare meaning, not writing style, formatting, length, or level of detail.
+- Do not treat agreement as proof.
+- Do not treat omission as contradiction.
+- Do not hide unresolved conflicts.
+- Do not make modernization recommendations.
+
+# Difference types
+
+Use these plain-language types:
+
+- Checked agreement: both corrected reports make the same supported claim.
+- Compatible detail: one report adds supported detail without disagreeing.
+- Missing from one report: one report contains a supported finding the other omitted.
+- Different confidence: both describe the same thing with different certainty.
+- Direct conflict: the corrected claims cannot both be right.
+- Different coverage: the products examined different areas.
+- Shared unknown: neither report could answer the question.
+- Wording difference: the wording differs but the meaning is the same.
+
+# What to compare
+
+Compare:
+
+- Repository lists and exact Git commit IDs.
+- Repository purposes and deployable parts.
+- System boundaries and responsibilities.
+- Connections between repositories.
+- APIs, events, queues, jobs, shared libraries, and generated clients.
+- Data readers, writers, ownership, and shared state.
+- Authentication and authorization boundaries.
+- Build, deployment, infrastructure, and configuration relationships.
+- End-to-end flows.
+- Timeout, retry, fallback, and failure behavior.
+- Coverage, gaps, conflicts, and findings added by the verifiers.
+
+# Required output
+
+Create only OUTPUT_DIRECTORY/COMPARISON_REPORT.md with these sections:
+
+1. Plain-English summary of how closely the checked reports align.
+2. Material difference table containing the Codex position, Claude position, verification correction, difference type, importance, why it matters, and evidence needed to settle it.
+3. Important checked findings present in only one report.
+4. Coverage examined by both products, one product, or neither.
+5. Shared unknowns and the evidence needed to answer them.
+6. Exact reconciliation checklist for the final session.
+7. Overall reconciliation size: small, moderate, or substantial, with a short reason.
+
+Do not create other deliverables.
+
+# Final response
+
+State how closely the checked reports align, the most important remaining differences, and whether final reconciliation appears small, moderate, or substantial.</code></pre>
+</section>
+<section id="check-before-moving-on-3" class="level2">
+<h2>Check before moving on</h2>
+<ul>
+<li>The comparison applies both verification reports.</li>
+<li>Missing information is not called a contradiction.</li>
+<li>Remaining conflicts are stated clearly.</li>
+<li>Coverage differences and shared unknowns remain visible.</li>
+<li>The reconciliation checklist points to exact claims or report
+sections.</li>
+</ul>
+</section>
+</section>
+<section id="step-5-create-the-final-system-map" class="level1">
+<h1>Step 5: Create the final system map</h1>
+<p>Use a new session in Codex or Claude Code. Give it the repositories,
+both discovery reports, both verification reports, and the comparison
+report.</p>
+<section id="what-this-prompt-does-3" class="level2">
+<h2>What this prompt does</h2>
+<p>The reconciliation prompt creates one final description of the
+system. It resolves the comparison checklist against the source, applies
+the verification corrections, and keeps anything that still cannot be
+settled clearly marked.</p>
+</section>
+<section id="why-you-run-it-3" class="level2">
+<h2>Why you run it</h2>
+<p>The two discovery reports will contain overlapping findings,
+different details, and possibly direct conflicts. The final map needs
+one supported version of each important claim. It must rely on evidence
+rather than model agreement or confidence.</p>
+<p>A new session gives the final agent a clean starting point. It has no
+earlier report of its own to defend.</p>
+</section>
+<section id="how-it-works-3" class="level2">
+<h2>How it works</h2>
+<p>The agent reads every earlier report, then inspects the source for
+the items that remain different, uncertain, or important. It uses the
+narrowest wording the evidence supports. It keeps a claim unknown or
+conflicting when the evidence cannot settle it.</p>
+</section>
+<section id="what-you-get-3" class="level2">
+<h2>What you get</h2>
+<p>The final session creates three required files:</p>
+<ol type="1">
+<li><code>FINAL_SYSTEM_MAP.md</code>, the readable description of the
+current system.</li>
+<li><code>COVERAGE.md</code>, the combined record of what was
+examined.</li>
+<li><code>GAPS.md</code>, the remaining unknowns, conflicts, and
+evidence needed.</li>
+</ol>
+<p>The final map includes repository roles, connections, flows, data,
+authentication, build and deployment, infrastructure, diagrams, and the
+important changes made through verification and reconciliation.</p>
+</section>
+<section id="what-you-do-next-3" class="level2">
+<h2>What you do next</h2>
+<p>Give the three final files to the developers and system owners for
+the human acceptance review in Step 6.</p>
+</section>
+<section id="how-to-run-the-prompt-3" class="level2">
+<h2>How to run the prompt</h2>
+<ol type="1">
+<li>Start a new session in Codex or Claude Code.</li>
+<li>Use GPT-5.6 Sol or Claude Fable 5 at High or higher.</li>
+<li>Provide the exact repository workspace.</li>
+<li>Provide both discovery folders, both verification folders, and the
+comparison folder.</li>
+<li>Add any available runtime evidence. Label where it came from and
+when it was collected.</li>
+<li>Use the <code>final-system-map</code> output folder.</li>
+</ol>
+</section>
+<section id="reconciliation-prompt" class="level2">
+<h2>Reconciliation prompt</h2>
+<pre class="text"><code># Goal
+
+Create one final, evidence-backed map of the current system from two discovery reports, two verification reports, their comparison, and the available repositories.
+
+Do not select a claim because both models agree, because one report is longer, or because one explanation sounds cleaner. Use source evidence and any supplied runtime evidence.
+
+WORKSPACE_ROOT: [ABSOLUTE PATH TO THE COMMON PARENT FOLDER]
+CODEX_REPORT_DIRECTORY: [ABSOLUTE PATH]
+CLAUDE_REPORT_DIRECTORY: [ABSOLUTE PATH]
+CLAUDE_VERIFICATION_DIRECTORY: [ABSOLUTE PATH]
+CODEX_VERIFICATION_DIRECTORY: [ABSOLUTE PATH]
+COMPARISON_DIRECTORY: [ABSOLUTE PATH]
+ADDITIONAL_RUNTIME_EVIDENCE: [PATHS OR NONE]
+OUTPUT_DIRECTORY: [ABSOLUTE PATH TO THE FINAL SYSTEM MAP FOLDER]
+
+# Accuracy rules
+
+- Every important final claim needs evidence.
+- Label claims Confirmed by source, Supported but not proven, Unknown, or Conflicting evidence.
+- Do not claim that something is deployed, enabled, currently used, or receiving production traffic without suitable runtime evidence.
+- Agreement between models is useful context, not proof.
+- Omission is not contradiction.
+- Do not infer absence from an area nobody examined.
+- Keep conflicts visible when the available evidence cannot settle them.
+- Do not make modernization recommendations.
+
+# First checks
+
+1. Confirm that discovery and verification used the same repository versions.
+2. Confirm that both verification reports and the comparison report are complete.
+3. Record any additional runtime evidence, where it came from, and when it was collected.
+4. If repository versions do not match, stop and explain the problem.
+
+# How to reconcile
+
+For every important claim and every item in the comparison report&#39;s reconciliation checklist:
+
+1. Find the claim in both discovery reports when present.
+2. Apply the relevant verification findings.
+3. Inspect the cited source and any conflicting source.
+4. Inspect supplied runtime evidence when it is relevant and trustworthy.
+5. Use the narrowest wording the evidence supports.
+6. Keep the claim Unknown or Conflicting evidence when the available evidence cannot decide.
+7. Record why a material claim was removed, narrowed, added, or left unresolved.
+
+Also check high-consequence claims on which the reports agree. Agreement alone does not prove them.
+
+# Required outputs
+
+Create only these files inside OUTPUT_DIRECTORY:
+
+1. FINAL_SYSTEM_MAP.md
+   Provide a plain-English system overview. Cover the role of every repository, system boundaries, deployable parts, important connections, data and state, end-to-end flows, authentication, build and deployment, infrastructure, operating behavior supported by evidence, and evidence-backed Mermaid diagrams. Include a short section listing material claims removed, narrowed, added, or left unresolved during verification and reconciliation.
+
+2. COVERAGE.md
+   Record the final repository list, paths, branches, exact Git commit IDs, areas examined by discovery and verification, areas examined by only one product, areas examined by neither, exclusions, starting and ending Git status, and limits of the investigation.
+
+3. GAPS.md
+   Record every important unanswered question, unresolved conflict, missing repository or external system, claim requiring runtime evidence, and claim requiring human knowledge. For each gap, state what was checked and what evidence would answer it.
+
+Do not create JSON or any other required deliverable.
+
+# Final checks
+
+- Every item in the reconciliation checklist is resolved or kept visibly unknown.
+- Verification corrections are applied.
+- Important claims cite evidence.
+- High-consequence agreed claims were checked.
+- Live behavior is not claimed from source evidence alone.
+- Coverage and gaps remain separate.
+- Starting and ending Git status are compared.
+- The three final files agree with one another.
+- No modernization recommendations appear.
+
+# Final response
+
+In plain language, state what the evidence establishes, what changed through verification and reconciliation, the most important remaining gaps, and which final file the reader should open first.</code></pre>
+</section>
+<section id="check-before-moving-on-4" class="level2">
+<h2>Check before moving on</h2>
+<ul>
+<li>All three final files exist.</li>
+<li>Every comparison checklist item is resolved or remains clearly
+unknown.</li>
+<li>Verification corrections appear in the final map.</li>
+<li>Important claims link to evidence.</li>
+<li>Claims about live use rely on runtime evidence, not source code
+alone.</li>
+<li>Coverage and gaps remain separate.</li>
+<li>The ending Git status matches the expected starting state.</li>
+</ul>
+</section>
+</section>
+<section id="step-6-human-acceptance-review" class="level1">
+<h1>Step 6: Human acceptance review</h1>
+<section id="what-you-are-doing-1" class="level2">
+<h2>What you are doing</h2>
+<p>Developers and system owners are deciding whether the final system
+map is trustworthy enough to use as the shared description of the
+current application.</p>
+<p>They do not need to reread every line of code. They should check the
+major system relationships, test disputed claims, and confirm that
+important limits remain visible.</p>
+</section>
+<section id="why-this-matters-1" class="level2">
+<h2>Why this matters</h2>
+<p>The agents cannot create missing runtime evidence or replace the
+knowledge of people who operate the system. A human must decide whether
+the map is complete and reliable enough for its intended use.</p>
+</section>
+<section id="what-to-read" class="level2">
+<h2>What to read</h2>
+<p>Read in this order:</p>
+<ol type="1">
+<li><code>FINAL_SYSTEM_MAP.md</code></li>
+<li><code>GAPS.md</code></li>
+<li><code>COVERAGE.md</code></li>
+</ol>
+<p>Use the original discovery and verification reports only when you
+need to trace how a conclusion was reached.</p>
+</section>
+<section id="acceptance-checklist" class="level2">
+<h2>Acceptance checklist</h2>
+<ul>
+<li>Are all expected repositories included?</li>
+<li>Did both discovery runs and both verification runs use the intended
+repository versions?</li>
+<li>Do the main repository roles and system boundaries match developer
+understanding?</li>
+<li>Are important connections backed by source evidence?</li>
+<li>Are claims about live use backed by runtime evidence?</li>
+<li>Are missing repositories and external systems visible?</li>
+<li>Are unexamined areas, unanswered questions, and conflicting evidence
+easy to find?</li>
+<li>Do the diagrams match the written explanation?</li>
+<li>Were the verification corrections applied?</li>
+<li>Were modernization recommendations kept out?</li>
+<li>Does the final Git status match the expected starting state?</li>
+</ul>
+</section>
+<section id="if-someone-disagrees-with-the-map" class="level2">
+<h2>If someone disagrees with the map</h2>
+<p>Record:</p>
+<ul>
+<li>The exact claim they disagree with.</li>
+<li>Their proposed correction.</li>
+<li>The evidence supporting their correction.</li>
+<li>Whether that evidence can be inspected.</li>
+</ul>
+<p>Use the explanation to locate and check evidence. If supporting
+evidence is unavailable, label the correction as human-provided
+information. Do not silently replace an evidence-backed claim with an
+unsupported recollection.</p>
+</section>
+<section id="acceptance-outcomes" class="level2">
+<h2>Acceptance outcomes</h2>
+<p>Choose one:</p>
+<ul>
+<li>Accepted: The map is suitable as the evidence-backed description of
+the available system.</li>
+<li>Accepted with open questions: The map is useful, but the listed gaps
+must remain visible.</li>
+<li>More evidence required: Important repositories, runtime evidence, or
+human knowledge are still missing.</li>
+<li>Repeat part of the process: A discovery, verification, comparison,
+or reconciliation step was incomplete or used the wrong repository
+version.</li>
+</ul>
+</section>
+</section>
+      </article>
+      <footer class="legal-footer">
+        <p><strong>A Step-by-Step Playbook for Mapping a Legacy Application with Codex and Claude Code</strong></p>
+        <p>© 2026 Helsingor LLC. All rights reserved.</p>
+      </footer>
+    </main>
+  </div>
+
+  <a class="back-to-top" id="back-to-top" href="#top" aria-label="Back to top">↑</a>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>(() => {
+  const root = document.documentElement;
+  const sidebar = document.getElementById("sidebar");
+  const scrim = document.getElementById("scrim");
+  const menuButton = document.getElementById("menu-button");
+  const closeMenuButton = document.getElementById("close-menu");
+  const progressBar = document.getElementById("reading-progress-bar");
+  const backToTop = document.getElementById("back-to-top");
+  const toast = document.getElementById("toast");
+  const tocSearch = document.getElementById("toc-search");
+  let toastTimer;
+
+  const showToast = (message) => {
+    toast.textContent = message;
+    toast.classList.add("visible");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 1800);
+  };
+
+  const copyText = async (value) => {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return;
+      } catch {
+        // Continue to the offline-safe fallback below.
+      }
+    }
+    const field = document.createElement("textarea");
+    field.value = value;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.inset = "0 auto auto -9999px";
+    document.body.append(field);
+    field.select();
+    const copied = document.execCommand("copy");
+    field.remove();
+    if (!copied) throw new Error("Copy unavailable");
+  };
+
+  const setMenu = (open) => {
+    sidebar.classList.toggle("open", open);
+    scrim.classList.toggle("visible", open);
+    menuButton?.setAttribute("aria-expanded", String(open));
+    document.body.style.overflow = open ? "hidden" : "";
+    if (open) window.setTimeout(() => tocSearch.focus(), 100);
+  };
+
+  menuButton?.addEventListener("click", () => setMenu(true));
+  closeMenuButton?.addEventListener("click", () => setMenu(false));
+  scrim.addEventListener("click", () => setMenu(false));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setMenu(false);
+  });
+
+  document.getElementById("print-button").addEventListener("click", () => window.print());
+
+  const savedTheme = localStorage.getItem("playbook-theme");
+  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = savedTheme || (systemDark ? "dark" : "light");
+  document.getElementById("theme-button").addEventListener("click", () => {
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem("playbook-theme", root.dataset.theme);
+  });
+
+  const stepSections = [...document.querySelectorAll(".playbook-content section.level1")];
+  stepSections.forEach((section, index) => {
+    const heading = section.querySelector(":scope > h1");
+    const match = heading?.textContent.match(/^Step\s+(\d+)/i);
+    section.dataset.step = match ? `Stage ${match[1]} of 6` : "Purpose and principles";
+  });
+
+  const codeBlocks = [...document.querySelectorAll(".playbook-content pre")];
+  codeBlocks.forEach((pre, index) => {
+    const wrapper = pre.parentElement?.classList.contains("sourceCode") ? pre.parentElement : pre;
+    if (wrapper.dataset.enhanced) return;
+    wrapper.dataset.enhanced = "true";
+    const section = pre.closest("section.level2");
+    const sectionTitle = section?.querySelector(":scope > h2")?.textContent || "";
+    const isPrompt = /prompt/i.test(sectionTitle);
+
+    const label = document.createElement("span");
+    label.className = "code-label";
+    label.textContent = isPrompt ? "Ready-to-use prompt" : "Reference";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "copy-button";
+    button.textContent = isPrompt ? "Copy prompt" : "Copy";
+    button.setAttribute("aria-label", `Copy code block ${index + 1}`);
+    button.addEventListener("click", async () => {
+      try {
+        await copyText(pre.textContent);
+        button.textContent = "Copied";
+        showToast(isPrompt ? "Prompt copied" : "Copied");
+        window.setTimeout(() => { button.textContent = isPrompt ? "Copy prompt" : "Copy"; }, 1600);
+      } catch {
+        showToast("Select the text to copy");
+      }
+    });
+    wrapper.append(label, button);
+  });
+
+  const checklistHeadings = [...document.querySelectorAll(".playbook-content h2")]
+    .filter((heading) => /^(check before moving on|acceptance checklist)$/i.test(heading.textContent.trim()));
+
+  checklistHeadings.forEach((heading, groupIndex) => {
+    const list = heading.nextElementSibling;
+    if (!list || list.tagName !== "UL") return;
+    list.classList.add("checklist");
+    [...list.children].forEach((item, itemIndex) => {
+      const key = `playbook-check-${groupIndex}-${itemIndex}`;
+      const original = item.innerHTML;
+      item.innerHTML = "";
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = localStorage.getItem(key) === "true";
+      checkbox.addEventListener("change", () => localStorage.setItem(key, String(checkbox.checked)));
+      const text = document.createElement("span");
+      text.innerHTML = original;
+      label.append(checkbox, text);
+      item.append(label);
+    });
+  });
+
+  document.getElementById("reset-checks").addEventListener("click", () => {
+    document.querySelectorAll(".checklist input").forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+    Object.keys(localStorage).filter((key) => key.startsWith("playbook-check-")).forEach((key) => localStorage.removeItem(key));
+    showToast("Checklist progress reset");
+  });
+
+  const tocLinks = [...document.querySelectorAll("#toc-nav a[href^='#']")];
+  const linkById = new Map(tocLinks.map((link) => [decodeURIComponent(link.hash.slice(1)), link]));
+  const observedHeadings = [...document.querySelectorAll(".playbook-content h1[id], .playbook-content h2[id]")];
+  const observer = new IntersectionObserver((entries) => {
+    const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    if (!visible) return;
+    tocLinks.forEach((link) => link.classList.remove("active"));
+    const activeLink = linkById.get(visible.target.id);
+    activeLink?.classList.add("active");
+  }, { rootMargin: "-18% 0px -72% 0px", threshold: 0 });
+  observedHeadings.forEach((heading) => observer.observe(heading));
+
+  tocLinks.forEach((link) => link.addEventListener("click", () => setMenu(false)));
+
+  tocSearch.addEventListener("input", () => {
+    const query = tocSearch.value.trim().toLowerCase();
+    document.querySelectorAll("#toc-nav li").forEach((item) => item.classList.remove("filtered-out"));
+    if (!query) return;
+    document.querySelectorAll("#toc-nav li").forEach((item) => {
+      const ownLink = item.querySelector(":scope > a");
+      const childMatch = [...item.querySelectorAll("a")].some((link) => link.textContent.toLowerCase().includes(query));
+      if (!ownLink?.textContent.toLowerCase().includes(query) && !childMatch) item.classList.add("filtered-out");
+    });
+  });
+
+  const updateScroll = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const percentage = max > 0 ? Math.min(100, Math.max(0, window.scrollY / max * 100)) : 0;
+    progressBar.style.width = `${percentage}%`;
+    backToTop.classList.toggle("visible", window.scrollY > 900);
+  };
+  window.addEventListener("scroll", updateScroll, { passive: true });
+  updateScroll();
+})();
+</script>
+</body>
+</html>
