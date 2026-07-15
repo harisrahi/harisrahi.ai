@@ -237,6 +237,7 @@ h2.sec#agentnotes{color:var(--accent-deep)}
     <div class="navlabel"><span class="t">Candidates</span><span class="c" id="navCount"></span></div>
     <ul id="nav"></ul>
 
+    <a class="railjump" data-target="nearmisses">◆ Near-misses<span class="arw">→</span></a>
     <a class="railjump" data-target="agentnotes">◆ Agent Notes<span class="arw">→</span></a>
 
     <div class="legend">
@@ -283,7 +284,7 @@ h2.sec#agentnotes{color:var(--accent-deep)}
     <div id="cards"></div>
 
     <footer>
-      <h2 class="sec">Notable near-misses excluded</h2>
+      <h2 class="sec" id="nearmisses">Notable near-misses excluded</h2>
       <div class="nm"><b>Karen Alexander</b> — "Technology Senior Sourcing Manager," Accenture (NYC). Strong IT-procurement background, but title sits at/above the Senior Manager line; excluded pending title confirmation.</div>
       <div class="nm"><b>Ryan Mittman</b>, <b>Andrea Kratochvil</b> — Senior Manager, Accenture Sourcing &amp; Procurement. Above the seniority cutoff.</div>
       <div class="nm"><b>Kim Nowakowski</b> — "Senior Strategy Manager, Accenture Strategy." Likely at/above Senior Manager; also more operating-model/strategy than hands-on tech sourcing.</div>
@@ -465,11 +466,11 @@ document.getElementById("seg").addEventListener("click",e=>{
   document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("active"));
   b.classList.add("active"); curFilter=b.dataset.filter; renderAll();
 });
-/* rail jump link (Agent Notes) */
-document.querySelector(".railjump").addEventListener("click",function(){
+/* rail jump links (Near-misses, Agent Notes) */
+document.querySelectorAll(".railjump").forEach(j=>j.addEventListener("click",function(){
   const el=document.getElementById(this.dataset.target);
   if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
-});
+}));
 
 /* progress + back-to-top */
 const prog=document.getElementById("prog"),toTop=document.getElementById("toTop");
