@@ -36,7 +36,9 @@
       </div>
       <div class="field">
         <label for="message">What would you like help with?</label>
-        <textarea id="message" name="message" rows="5" required maxlength="5000"></textarea>
+        <textarea id="message" name="message" rows="5" required maxlength="5000"
+                  aria-describedby="message-count"></textarea>
+        <p id="message-count" class="character-count">5,000 characters maximum</p>
       </div>
       <div class="form-action">
         <button type="submit">Send enquiry</button>
@@ -46,5 +48,20 @@
   </main>
 
   <footer><div class="wrap">harisrahi.ai is operated by Helsingor LLC. © 2026 Helsingor LLC</div></footer>
+  <script>
+    const messageField = document.getElementById('message');
+    const messageCount = document.getElementById('message-count');
+    const numberFormat = new Intl.NumberFormat('en-GB');
+
+    function updateMessageCount() {
+      const used = numberFormat.format(messageField.value.length);
+      const limit = numberFormat.format(messageField.maxLength);
+      messageCount.textContent = `${used}/${limit} characters`;
+    }
+
+    messageField.addEventListener('input', updateMessageCount);
+    window.addEventListener('pageshow', updateMessageCount);
+    updateMessageCount();
+  </script>
 </body>
 </html>
