@@ -5,6 +5,8 @@
   --muted: #4f5a54;
   --line: #c8ccc2;
   --accent: #8b2f23;
+  --page-width: 1232px;
+  --page-padding: clamp(20px, 4vw, 50px);
   --serif: "Playfair Display", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --sans: "Hanken Grotesk", "Avenir Next", "Helvetica Neue", Helvetica, sans-serif;
 }
@@ -19,7 +21,7 @@ body {
   color: var(--ink);
   font: 1.05rem/1.55 var(--sans);
 }
-.wrap { width: min(100%, 1232px); padding-inline: clamp(20px, 4vw, 50px); margin-inline: auto; }
+.wrap { width: min(100%, var(--page-width)); padding-inline: var(--page-padding); margin-inline: auto; }
 header { border-bottom: 1px solid var(--line); }
 .topbar {
   min-height: 72px;
@@ -58,13 +60,17 @@ input, textarea {
   font: inherit;
 }
 .message-editor {
+  /* Let a wider message use the spare space to the right of the form. */
+  --outer-margin: max(0px, calc((100vw - var(--page-width)) / 2));
+  --extra-room: clamp(0px, calc(var(--outer-margin) + var(--page-padding) - 1.5rem), 20rem);
+  margin-inline-end: calc(0px - var(--extra-room));
   container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, max-content);
 }
 textarea {
   resize: both;
-  width: 100cqi;
+  width: calc(100cqi - max(var(--extra-room), min(3rem, 10cqi)));
   min-width: min(12rem, 100cqi);
   max-width: 100cqi;
   min-height: 120px;
