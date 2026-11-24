@@ -27,7 +27,11 @@ function prepareReceipt(form) {
   if (!window.crypto?.randomUUID) return;
   const reference = crypto.randomUUID();
   form.elements.reference.value = reference;
-  if (rememberReceipt({ reference, email: form.elements.email.value.trim() })) {
+  if (rememberReceipt({
+    reference,
+    email: form.elements.email.value.trim(),
+    message: form.elements.message.value
+  })) {
     destination.hash = 'receipt-' + reference;
     form.action = destination.href;
   }
@@ -39,11 +43,11 @@ function showReceipt(panel) {
   if (incoming) {
     history.replaceState({ ...history.state, enquiryReference: reference }, '', location.pathname + location.search);
   }
-  const receipt = readReceipt(reference);
-  if (!receipt) return;
-
-  const summary = document.getElementById('reply-summary');
+  let receipt = readReceipt(reference);
   const address = document.getElementById('reply-address');
+  const message = document.getElementById('submitted-message');
+  const messageDetails = document.getElementById('message-details');
+  const fallback = document.getElementById('correction-fallback');
   const edit = document.getElementById('change-email');
   const form = document.getElementById('email-correction');
   const input = form.elements.email;
@@ -51,19 +55,37 @@ function showReceipt(panel) {
   const cancel = document.getElementById('cancel-correction');
   const status = document.getElementById('correction-status');
 
-  address.textContent = receipt.email;
-  document.getElementById('correction-fallback').hidden = true;
-  panel.hidden = false;
+  function renderReceipt() {
+    form.hidden = true;
+    // If a storage write failed, do not restore a stale address on reload.
+    const unavailable = !receipt || (history.state?.enquiryCorrected && !receipt.corrected);
+    panel.hidden = Boolean(unavailable);
+    fallback.hidden = !unavailable || Boolean(history.state?.enquiryCorrected);
+    if (unavailable) return;
+    address.textContent = receipt.email;
+    messageDetails.hidden = typeof receipt.message !== 'string';
+    message.textContent = receipt.message || '';
+    edit.hidden = Boolean(receipt.corrected);
+    status.textContent = receipt.corrected ? 'Correction sent.' : '';
+  }
+  renderReceipt();
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) {
+      receipt = readReceipt(reference);
+      renderReceipt();
+    }
+  });
 
   function closeEditor() {
     form.hidden = true;
-    summary.hidden = false;
+    edit.hidden = false;
     edit.focus();
   }
   edit.addEventListener('click', () => {
+    if (!receipt || receipt.corrected) return;
     input.value = receipt.email;
     status.textContent = '';
-    summary.hidden = true;
+    edit.hidden = true;
     form.hidden = false;
     input.focus();
   });
@@ -73,7 +95,7 @@ function showReceipt(panel) {
   });
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (send.disabled) return;
+    if (!receipt || receipt.corrected || send.disabled) return;
     const email = input.value.trim();
     if (email === receipt.email) {
       status.textContent = 'That’s already your reply email.';
@@ -81,24 +103,22 @@ function showReceipt(panel) {
       return;
     }
 
-    const body = new URLSearchParams({
-      'form-name': 'inquiry',
-      'bot-field': form.elements['bot-field'].value,
-      reference,
-      email,
-      message: 'Reply email correction for enquiry ' + reference + '.\nPrevious reply email: ' +
-        receipt.email + '\nPlease reply to: ' + email
-    });
+    form.elements.reference.value = reference;
+    form.elements.message.value = 'Reply email correction for enquiry ' + reference +
+      '.\nPrevious reply email: ' + receipt.email + '\nPlease reply to: ' + email;
+    const body = new URLSearchParams(new FormData(form));
+    body.set('form-name', form.name);
     send.disabled = cancel.disabled = input.readOnly = true;
     status.textContent = 'Sending correction…';
     try {
       const response = await fetch(form.action, { method: 'POST', body, mode: 'same-origin' });
       if (!response.ok) throw new Error('Correction was not confirmed');
       receipt.email = email;
-      address.textContent = email;
+      receipt.corrected = true;
       if (readReceipt(reference)) rememberReceipt(receipt);
-      status.textContent = 'Correction sent.';
-      closeEditor();
+      history.replaceState({ ...history.state, enquiryCorrected: true }, '');
+      renderReceipt();
+      status.focus();
     } catch {
       status.textContent = 'Delivery could not be confirmed. Please try again.';
     } finally {

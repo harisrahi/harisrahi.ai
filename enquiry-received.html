@@ -13,17 +13,26 @@
   <header>
     <div class="wrap topbar"><a class="brand" href="/">Haris Rahi</a></div>
   </header>
-  <main class="wrap inquiry">
+  <main class="wrap inquiry receipt-layout">
     <div class="introduction">
       <h1>Enquiry received.</h1>
       <p>Thank you for getting in touch. I’ll reply by email.</p>
-      <section id="reply-details" class="reply-details" aria-label="Reply address" hidden>
-        <div id="reply-summary">
-          <h2>Your reply email</h2>
-          <p class="reply-address" dir="auto" id="reply-address"></p>
-          <button class="text-action" id="change-email" type="button">Change email</button>
-        </div>
-        <form id="email-correction" method="post" action="/enquiry-received" hidden>
+      <details id="correction-fallback" class="correction-fallback">
+        <summary>Need to correct your email?</summary>
+        <p><a href="/enquiry">Send a follow-up enquiry</a> with your correct email and mention the address you entered originally.</p>
+      </details>
+    </div>
+    <section id="reply-details" class="reply-details" aria-labelledby="receipt-heading" hidden>
+      <h2 id="receipt-heading">Your enquiry</h2>
+      <div class="receipt-field">
+        <h3>Your reply email</h3>
+        <p class="reply-address" dir="auto" id="reply-address"></p>
+        <button class="text-action" id="change-email" type="button" aria-controls="email-correction">Change email</button>
+        <form id="email-correction" name="reply-email-correction" method="post" action="/enquiry-received"
+              data-netlify="true" netlify-honeypot="bot-field" hidden>
+          <input type="hidden" name="subject" value="Reply email correction" data-remove-prefix>
+          <input type="hidden" name="reference">
+          <input type="hidden" name="message">
           <p hidden aria-hidden="true">
             <label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off"></label>
           </p>
@@ -36,14 +45,14 @@
             <button class="text-action" id="cancel-correction" type="button">Cancel</button>
           </div>
         </form>
-        <p id="correction-status" class="correction-status" role="status"></p>
-      </section>
-      <details id="correction-fallback" class="correction-fallback">
-        <summary>Need to correct your email?</summary>
-        <p><a href="/enquiry">Send a follow-up enquiry</a> with your correct email and mention the address you entered originally.</p>
-      </details>
-      <a class="return" href="/">Back to main site</a>
-    </div>
+        <p id="correction-status" class="correction-status" role="status" tabindex="-1"></p>
+      </div>
+      <div class="receipt-field" id="message-details" hidden>
+        <h3>Your message</h3>
+        <p id="submitted-message" class="submitted-message" dir="auto"></p>
+      </div>
+    </section>
+    <div class="receipt-navigation"><a class="return" href="/">Back to main site</a></div>
   </main>
   <footer><div class="wrap">harisrahi.ai is operated by Helsingor LLC. © 2026 Helsingor LLC · <a href="/privacy.html">Privacy Notice</a></div></footer>
 </body>

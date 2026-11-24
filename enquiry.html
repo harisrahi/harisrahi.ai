@@ -25,6 +25,7 @@
 
     <form id="enquiry-form" name="inquiry" method="POST" action="/enquiry-received"
           data-netlify="true" netlify-honeypot="bot-field" aria-label="Send an enquiry">
+      <input type="hidden" name="subject" value="New enquiry" data-remove-prefix>
       <input type="hidden" name="reference">
       <p hidden aria-hidden="true">
         <label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off"></label>
