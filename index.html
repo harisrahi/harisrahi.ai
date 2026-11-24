@@ -160,6 +160,10 @@
       justify-self: end;
     }
 
+    .mobile-enquire {
+      display: none;
+    }
+
     .button {
       display: inline-flex;
       min-height: 44px;
@@ -230,6 +234,17 @@
 
     .dark .kicker {
       color: #d7b56b;
+    }
+
+    .hero .kicker a {
+      display: inline-block;
+      text-decoration-thickness: 1px;
+      text-underline-offset: .2em;
+    }
+
+    .hero .kicker a:hover,
+    .hero .kicker a:focus-visible {
+      color: var(--bone);
     }
 
     h1,
@@ -639,6 +654,13 @@
       grid-column: 1;
     }
 
+    .proof-copy .proof-link {
+      justify-self: start;
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+    }
+
     .proof-body p + p {
       border-top: 1px solid rgba(247, 247, 243, 0.14);
       padding-top: 16px;
@@ -745,6 +767,12 @@
       border-bottom: 1px solid var(--ink);
       padding: 36px 0 22px;
       background: linear-gradient(90deg, rgba(139, 47, 35, 0.055), transparent 58%);
+    }
+
+    #ai-evaluation,
+    #colleague-note,
+    #proof {
+      scroll-margin-top: var(--sticky-header-height, calc(var(--nav-h) + 24px));
     }
 
     .solution-category-index {
@@ -1074,32 +1102,40 @@
 
       .nav-inner {
         min-height: auto;
-        grid-template-columns: 1fr;
-        gap: 2px;
-        padding-top: 7px;
-        padding-bottom: 7px;
+        grid-template-columns: 1fr auto;
+        gap: 0 12px;
+        padding-block: 2px 4px;
       }
 
       .brand {
+        justify-self: start;
         font-size: 0.96rem;
         line-height: 1.05;
       }
 
+      .mobile-enquire {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        color: var(--accent);
+        font-size: .88rem;
+        font-weight: 700;
+        text-underline-offset: .2em;
+      }
+
       .nav-links {
-        grid-column: auto;
-        order: initial;
+        grid-column: 1 / -1;
         flex-wrap: wrap;
-        gap: 2px 12px;
+        gap: 2px clamp(8px, 3vw, 18px);
         overflow-x: visible;
-        padding-bottom: 0;
       }
 
       .nav-links a {
         display: inline-flex;
-        min-height: 24px;
+        min-height: 34px;
         align-items: center;
         padding: 2px 0;
-        font-size: 0.69rem;
+        font-size: clamp(.72rem, 3.2vw, .84rem);
         line-height: 1.15;
       }
 
@@ -1215,6 +1251,18 @@
       }
     }
 
+    @media (max-width: 445px) {
+      .hero .kicker {
+        display: grid;
+        justify-items: start;
+        gap: 8px;
+      }
+
+      .hero .kicker .separator {
+        display: none;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *,
       *::before,
@@ -1223,6 +1271,11 @@
         transition: none !important;
       }
     }
+
+    .colleague-note { margin: 6px 0 0; padding-top: 22px; border-top: 1px solid var(--line); }
+    .colleague-note blockquote { margin: 0 0 10px; font: 400 clamp(1.25rem, 2vw, 1.55rem)/1.38 var(--serif); text-wrap: pretty; }
+    .colleague-note figcaption { margin: 0; font: 700 .94rem/1.5 var(--sans); color: var(--muted); }
+    .colleague-note a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); font: 700 .94rem/1.45 var(--sans); text-underline-offset: .22em; }
   </style>
 </head>
 <body>
@@ -1231,15 +1284,13 @@
   <header class="site-nav" aria-label="Primary">
     <div class="nav-inner">
       <a class="brand" href="#main" aria-label="Haris Rahi home">Haris Rahi</a>
+      <a class="mobile-enquire" href="/enquiry">Enquire</a>
       <nav class="nav-links" aria-label="Page sections">
-        <a href="#problem">Problem</a>
         <a href="#approach">Approach</a>
         <a href="#how-it-works">How It Works</a>
         <a href="#proof">Proof</a>
         <a href="#solutions">Solutions</a>
-        <a href="#principles">Principles</a>
         <a href="#faq">FAQ</a>
-        <a href="#contact">Start Here</a>
       </nav>
       <div class="nav-cta">
         <a class="button" href="/enquiry">Start a conversation</a>
@@ -1251,7 +1302,7 @@
     <section class="hero section dark" id="hero" aria-labelledby="hero-title">
       <div class="section-inner">
         <div class="hero-copy">
-          <p class="kicker">AI fluency instruction · Vendor-neutral AI evaluation</p>
+          <p class="kicker"><span>AI fluency instruction</span><span class="separator"> · </span><a href="#ai-evaluation">Vendor-neutral AI evaluation</a></p>
           <h1 id="hero-title">Don't rent AI expertise. Build it inside your team.</h1>
           <p class="lede">I'm an independent AI practitioner and advisor. Since 2023 I've been building AI solutions, deploying them into production, and teaching the people who use them. I work directly with multidisciplinary teams across procurement, legal ops, sales enablement, finance, and operations.</p>
           <div class="hero-actions" aria-label="Hero actions">
@@ -1298,6 +1349,11 @@
           <p>My cohorts start using AI on real work by Day 2, including people who've never touched it. As they get better, their output quality rises, and a good number of them start building their own agents and solutions.</p>
           <p>Applying AI to today's work is a start, but AI transformation comes when the work itself gets redesigned around what AI now makes possible. That redesign only happens from inside the work, done by the people who own it.</p>
           <p>AI hype gets people burned. AI doom keeps them on the sidelines. Neither builds skill. I show teams where AI earns trust and where it doesn't. I work as a player-coach, in the trenches, building real tools alongside the team while they learn to build their own. The team keeps the tools and the know-how that made them.</p>
+          <figure class="colleague-note" id="colleague-note">
+            <blockquote>“You have been instrumental in my AI journey and I have learned so much from watching you and getting your feedback on how to improve my work.”</blockquote>
+            <figcaption>Faza B.</figcaption>
+            <a href="/testimonials">Read the testimonials</a>
+          </figure>
         </div>
       </div>
     </section>
@@ -1353,6 +1409,7 @@
           <p class="kicker">Proof</p>
           <h2 id="proof-title">Everything I teach, I did first.</h2>
           <p class="lede">My method was proven inside one of the world's largest consultancies.</p>
+          <a class="proof-link" href="/testimonials?from=proof">Read the testimonials</a>
         </div>
         <aside class="proof-ledger" aria-label="Outcomes and proof points">
           <div class="proof-record">
@@ -1429,7 +1486,7 @@
             <h3>Frontline Coaching:</h3>
             <p>A thinking partner for team leads coaching frontline agents whose day-to-day performance drives call center KPIs. It helps leads diagnose performance issues instead of settling for surface-level explanations, and cuts down on unnecessary escalations.</p>
           </article>
-          <div class="solution-category">
+          <div class="solution-category" id="ai-evaluation" tabindex="-1">
             <span class="solution-category-index">03</span>
             <h3>AI Evaluation &amp; Vendor Selection</h3>
           </div>
@@ -1568,14 +1625,21 @@
 
   <script>
     const sectionLinks = Array.from(document.querySelectorAll(".nav-links a"));
-    const sections = sectionLinks
-      .map((link) => document.querySelector(link.getAttribute("href")))
-      .filter(Boolean);
+    const sections = document.querySelectorAll("main > section[id]");
     const nav = document.querySelector(".site-nav");
 
     function currentNavOffset() {
       if (!nav) return 0;
       return getComputedStyle(nav).position === "sticky" ? nav.getBoundingClientRect().height : 0;
+    }
+
+    function syncHeaderHeight() {
+      document.documentElement.style.setProperty("--sticky-header-height", currentNavOffset() + "px");
+    }
+
+    syncHeaderHeight();
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(syncHeaderHeight).observe(nav);
     }
 
     function scrollToHash(hash, behavior = "auto") {
@@ -1591,11 +1655,15 @@
 
     document.querySelectorAll('a[href^="#"]').forEach((link) => {
       link.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         const hash = link.getAttribute("href");
         if (!hash || !document.querySelector(hash)) return;
         event.preventDefault();
         history.pushState(null, "", hash);
         scrollToHash(hash);
+        if (hash === "#ai-evaluation") {
+          document.getElementById("ai-evaluation").focus({ preventScroll: true });
+        }
       });
     });
 
