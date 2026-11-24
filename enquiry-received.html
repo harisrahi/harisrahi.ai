@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#f7f7f3">
   <title>Enquiry received | Haris Rahi</title>
   <link rel="stylesheet" href="/assets/enquiry.css">
+  <script defer src="/assets/enquiry-receipt.js"></script>
 </head>
 <body>
   <header>
@@ -16,6 +17,31 @@
     <div class="introduction">
       <h1>Enquiry received.</h1>
       <p>Thank you for getting in touch. I’ll reply by email.</p>
+      <section id="reply-details" class="reply-details" aria-label="Reply address" hidden>
+        <div id="reply-summary">
+          <h2>Your reply email</h2>
+          <p class="reply-address" dir="auto" id="reply-address"></p>
+          <button class="text-action" id="change-email" type="button">Change email</button>
+        </div>
+        <form id="email-correction" method="post" action="/enquiry-received" hidden>
+          <p hidden aria-hidden="true">
+            <label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+          </p>
+          <label for="corrected-email">Correct reply email</label>
+          <input id="corrected-email" name="email" type="email" autocomplete="email"
+                 autocapitalize="none" spellcheck="false" required maxlength="254"
+                 pattern="[^@\s]+@[^@\s]+\.[^@\s]+" title="Enter an email address such as name@example.com.">
+          <div class="form-action">
+            <button type="submit">Send correction</button>
+            <button class="text-action" id="cancel-correction" type="button">Cancel</button>
+          </div>
+        </form>
+        <p id="correction-status" class="correction-status" role="status"></p>
+      </section>
+      <details id="correction-fallback" class="correction-fallback">
+        <summary>Need to correct your email?</summary>
+        <p><a href="/enquiry">Send a follow-up enquiry</a> with your correct email and mention the address you entered originally.</p>
+      </details>
       <a class="return" href="/">Back to main site</a>
     </div>
   </main>

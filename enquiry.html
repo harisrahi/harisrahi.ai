@@ -7,6 +7,7 @@
   <meta name="description" content="Contact Haris Rahi about AI instruction, building with your team, or evaluating an AI purchase.">
   <title>Start a conversation | Haris Rahi</title>
   <link rel="stylesheet" href="/assets/enquiry.css">
+  <script defer src="/assets/enquiry-receipt.js"></script>
 </head>
 <body>
   <header>
@@ -22,8 +23,9 @@
       <p class="enquiry-prompt">Tell me about the work your team is trying to improve or an AI purchase you’re considering.</p>
     </div>
 
-    <form name="inquiry" method="POST" action="/enquiry-received"
+    <form id="enquiry-form" name="inquiry" method="POST" action="/enquiry-received"
           data-netlify="true" netlify-honeypot="bot-field" aria-label="Send an enquiry">
+      <input type="hidden" name="reference">
       <p hidden aria-hidden="true">
         <label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off"></label>
       </p>
