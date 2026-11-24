@@ -19,7 +19,7 @@
   <main class="wrap inquiry">
     <div class="introduction">
       <h1>Start a conversation.</h1>
-      <p>Tell me about the work your team is trying to improve or an AI purchase you’re considering.</p>
+      <p class="enquiry-prompt">Tell me about the work your team is trying to improve or an AI purchase you’re considering.</p>
     </div>
 
     <form name="inquiry" method="POST" action="/enquiry-received"
@@ -35,7 +35,11 @@
                pattern="[^@\s]+@[^@\s]+\.[^@\s]+" title="Enter an email address such as name@example.com.">
       </div>
       <div class="field">
-        <label for="message">What would you like help with?</label>
+        <div class="message-heading">
+          <label for="message">What would you like help with?</label>
+          <button type="button" class="size-toggle" id="message-size" aria-controls="message"
+                  aria-expanded="false" aria-label="Expand message box" hidden>Expand</button>
+        </div>
         <div class="message-editor">
           <textarea id="message" name="message" rows="5" required maxlength="5000"
                     aria-describedby="message-count"></textarea>
@@ -53,6 +57,7 @@
   <script>
     const messageField = document.getElementById('message');
     const messageCount = document.getElementById('message-count');
+    const sizeToggle = document.getElementById('message-size');
     const numberFormat = new Intl.NumberFormat('en-GB');
 
     function updateMessageCount() {
@@ -64,6 +69,14 @@
     messageField.addEventListener('input', updateMessageCount);
     window.addEventListener('pageshow', updateMessageCount);
     updateMessageCount();
+
+    sizeToggle.addEventListener('click', () => {
+      const expanded = messageField.classList.toggle('expanded');
+      sizeToggle.setAttribute('aria-expanded', String(expanded));
+      sizeToggle.textContent = expanded ? 'Restore' : 'Expand';
+      sizeToggle.setAttribute('aria-label', expanded ? 'Restore size of message box' : 'Expand message box');
+    });
+    sizeToggle.hidden = false;
   </script>
 </body>
 </html>
