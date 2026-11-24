@@ -236,17 +236,6 @@
       color: #d7b56b;
     }
 
-    .hero .kicker a {
-      display: inline-block;
-      text-decoration-thickness: 1px;
-      text-underline-offset: .2em;
-    }
-
-    .hero .kicker a:hover,
-    .hero .kicker a:focus-visible {
-      color: var(--bone);
-    }
-
     h1,
     h2,
     h3 {
@@ -1302,7 +1291,7 @@
     <section class="hero section dark" id="hero" aria-labelledby="hero-title">
       <div class="section-inner">
         <div class="hero-copy">
-          <p class="kicker"><span>AI fluency instruction</span><span class="separator"> · </span><a href="#ai-evaluation">Vendor-neutral AI evaluation</a></p>
+          <p class="kicker"><span>AI fluency instruction</span><span class="separator"> · </span><span>Vendor-neutral AI evaluation</span></p>
           <h1 id="hero-title">Don't rent AI expertise. Build it inside your team.</h1>
           <p class="lede">I'm an independent AI practitioner and advisor. Since 2023 I've been building AI solutions, deploying them into production, and teaching the people who use them. I work directly with multidisciplinary teams across procurement, legal ops, sales enablement, finance, and operations.</p>
           <div class="hero-actions" aria-label="Hero actions">
@@ -1409,7 +1398,7 @@
           <p class="kicker">Proof</p>
           <h2 id="proof-title">Everything I teach, I did first.</h2>
           <p class="lede">My method was proven inside one of the world's largest consultancies.</p>
-          <a class="proof-link" href="/testimonials?from=proof">Read the testimonials</a>
+          <a class="proof-link" href="/testimonials#from-proof">Read the testimonials</a>
         </div>
         <aside class="proof-ledger" aria-label="Outcomes and proof points">
           <div class="proof-record">
@@ -1661,9 +1650,6 @@
         event.preventDefault();
         history.pushState(null, "", hash);
         scrollToHash(hash);
-        if (hash === "#ai-evaluation") {
-          document.getElementById("ai-evaluation").focus({ preventScroll: true });
-        }
       });
     });
 

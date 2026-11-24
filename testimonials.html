@@ -34,11 +34,20 @@
       border-bottom: 1px solid var(--line);
     }
     .top, .closing { display: flex; align-items: center; justify-content: space-between; gap: 22px; }
-    .top { min-height: 68px; }
+    .top { min-height: 68px; gap: 8px 16px; flex-wrap: wrap; }
+    .return-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0 clamp(12px, 3vw, 24px); }
     .brand { font: 700 1.12rem/1.2 var(--serif); text-decoration: none; color: var(--ink); }
     .back { color: var(--muted); font-size: .9rem; }
     .top a { display: inline-flex; align-items: center; min-height: 44px; }
-    main { scroll-margin-top: 69px; }
+    main, #title { scroll-margin-top: 69px; }
+    .skip.proof-only { display: none; }
+    /* Older browsers still expose both ordinary section links. */
+    @supports selector(body:has(main:target)) {
+      .top .proof-only { display: none; }
+      :is(body:target, body:has(main:target)) .approach-only { display: none; }
+      :is(body:target, body:has(main:target)) .top .proof-only { display: inline-flex; }
+      :is(body:target, body:has(main:target)) .skip.proof-only { display: block; }
+    }
     .opening { background: var(--bone); border-bottom: 1px solid var(--line); }
     .spread, .record { display: grid; grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr); column-gap: clamp(44px, 6vw, 88px); }
     .spread { padding-block: clamp(68px, 7vw, 104px); align-items: start; }
@@ -63,9 +72,22 @@
     .next .action:focus-visible { outline-color: var(--paper); }
     footer { font-size: .83rem; color: var(--muted); }
     footer .wrap { padding-block: 20px; }
+    @media (min-width: 371px) and (max-width: 445px) {
+      .top { padding-inline: 16px; column-gap: 10px; }
+      .top .brand { font-size: 1rem; }
+      .return-links { column-gap: 12px; }
+      .top .back { font-size: .875rem; }
+    }
+    @media (max-width: 370px) {
+      .top { gap: 0; padding-block: 4px; }
+      .return-links { width: 100%; justify-content: space-between; }
+      main, #title { scroll-margin-top: 98px; }
+    }
+    @media (min-width: 371px) and (max-width: 730px) {
+      main, #title { scroll-margin-top: 59px; }
+    }
     @media (max-width: 730px) {
       .top { min-height: 58px; }
-      main { scroll-margin-top: 59px; }
       .spread, .record { grid-template-columns: 1fr; }
       .spread { padding-block: 36px; gap: 30px; }
       h1 { font-size: clamp(2.65rem, 9vw, 3.5rem); }
@@ -80,18 +102,23 @@
     }
   </style>
 </head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
+<body id="from-proof">
+  <a class="skip approach-only" href="#title">Skip to content</a>
+  <a class="skip proof-only" href="#main">Skip to content</a>
   <header>
     <nav class="wrap top" aria-label="Site">
       <a class="brand" href="/">Haris Rahi</a>
-      <a class="back" href="/#colleague-note">Back to Approach</a>
+      <div class="return-links">
+        <a class="back approach-only" href="/#colleague-note">Back to Approach</a>
+        <a class="back proof-only" href="/#proof">Back to Proof</a>
+        <a class="back" href="/">Back to main site</a>
+      </div>
     </nav>
   </header>
   <main id="main" tabindex="-1">
     <section class="opening" aria-labelledby="title">
       <div class="wrap spread">
-        <h1 id="title"><span>Working with</span> Haris on AI</h1>
+        <h1 id="title" tabindex="-1"><span>Working with</span> Haris on AI</h1>
         <figure class="featured">
           <blockquote>“You make AI look easy, and you gave me that little nudge of confidence to try it out and incorporate it in my daily routine at work.”</blockquote>
           <figcaption>Smiljana S.</figcaption>
@@ -143,12 +170,5 @@
     </section>
   </main>
   <footer><div class="wrap">harisrahi.ai is operated by Helsingor LLC. © 2026 Helsingor LLC · <a href="/privacy">Privacy Notice</a></div></footer>
-  <script>
-    if (new URLSearchParams(location.search).get("from") === "proof") {
-      const backLink = document.querySelector(".back");
-      backLink.href = "/#proof";
-      backLink.textContent = "Back to Proof";
-    }
-  </script>
 </body>
 </html>

@@ -1,3 +1,4 @@
 /inquiry                 /enquiry              301
 /inquiry.html            /enquiry              301
 /assets/inquiry.css      /assets/enquiry.css   301
+/testimonials from=proof /testimonials-legacy-proof.html 200!
