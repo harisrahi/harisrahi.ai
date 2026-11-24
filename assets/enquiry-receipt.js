@@ -106,6 +106,9 @@ function showReceipt(panel) {
     form.elements.reference.value = reference;
     form.elements.message.value = 'Reply email correction for enquiry ' + reference +
       '.\nPrevious reply email: ' + receipt.email + '\nPlease reply to: ' + email;
+    if (typeof receipt.message === 'string') {
+      form.elements.message.value += '\n\nOriginal enquiry\n' + receipt.message;
+    }
     const body = new URLSearchParams(new FormData(form));
     body.set('form-name', form.name);
     send.disabled = cancel.disabled = input.readOnly = true;
