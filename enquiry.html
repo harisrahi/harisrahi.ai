@@ -36,9 +36,11 @@
       </div>
       <div class="field">
         <label for="message">What would you like help with?</label>
-        <textarea id="message" name="message" rows="5" required maxlength="5000"
-                  aria-describedby="message-count"></textarea>
-        <p id="message-count" class="character-count">5,000 characters maximum</p>
+        <div class="message-editor">
+          <textarea id="message" name="message" rows="5" required maxlength="5000"
+                    aria-describedby="message-count"></textarea>
+          <p id="message-count" class="character-count">5,000 characters maximum</p>
+        </div>
       </div>
       <div class="form-action">
         <button type="submit">Send enquiry</button>

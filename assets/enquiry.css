@@ -57,7 +57,18 @@ input, textarea {
   color: var(--ink);
   font: inherit;
 }
-textarea { resize: vertical; min-height: 120px; }
+.message-editor {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: minmax(0, max-content);
+}
+textarea {
+  resize: both;
+  width: 100cqi;
+  min-width: min(12rem, 100cqi);
+  max-width: 100cqi;
+  min-height: 120px;
+}
 .character-count {
   margin: 6px 0 0;
   color: var(--muted);
