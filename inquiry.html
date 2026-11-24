@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f3">
+  <meta name="description" content="Contact Haris Rahi about AI instruction, building with your team, or evaluating an AI purchase.">
+  <title>Start a conversation | Haris Rahi</title>
+  <link rel="stylesheet" href="assets/inquiry.css">
+</head>
+<body>
+  <header>
+    <nav class="wrap topbar" aria-label="Site navigation">
+      <a class="brand" href="index.html">Haris Rahi</a>
+      <a href="index.html#contact">Back to main site</a>
+    </nav>
+  </header>
+
+  <main class="wrap inquiry">
+    <div class="introduction">
+      <h1>Start a conversation.</h1>
+      <p>Tell me about the work your team is trying to improve or an AI purchase you’re considering. I’ll reply by email.</p>
+    </div>
+
+    <form name="inquiry" method="POST" action="/inquiry-received.html"
+          data-netlify="true" netlify-honeypot="bot-field" aria-label="Send an inquiry">
+      <p hidden aria-hidden="true">
+        <label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+      </p>
+      <p class="field-note">Both fields are required.</p>
+      <div class="field">
+        <label for="email">Your email</label>
+        <input id="email" name="email" type="email" autocomplete="email"
+               autocapitalize="none" spellcheck="false" required maxlength="254"
+               pattern="[^@\s]+@[^@\s]+\.[^@\s]+" title="Enter an email address such as name@example.com.">
+      </div>
+      <div class="field">
+        <label for="message">What would you like help with?</label>
+        <textarea id="message" name="message" rows="5" required maxlength="5000"></textarea>
+      </div>
+      <div class="form-action">
+        <button type="submit">Send inquiry</button>
+        <a href="privacy.html">Privacy notice</a>
+      </div>
+    </form>
+  </main>
+
+  <footer><div class="wrap">harisrahi.ai is operated by Helsingor LLC. © 2026 Helsingor LLC</div></footer>
+</body>
+</html>
