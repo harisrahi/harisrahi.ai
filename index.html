@@ -758,6 +758,8 @@
       background: linear-gradient(90deg, rgba(139, 47, 35, 0.055), transparent 58%);
     }
 
+    #problem,
+    #principles,
     #ai-evaluation,
     #colleague-note,
     #proof {
@@ -1264,7 +1266,9 @@
     .colleague-note { margin: 6px 0 0; padding-top: 22px; border-top: 1px solid var(--line); }
     .colleague-note blockquote { margin: 0 0 10px; font: 400 clamp(1.25rem, 2vw, 1.55rem)/1.38 var(--serif); text-wrap: pretty; }
     .colleague-note figcaption { margin: 0; font: 700 .94rem/1.5 var(--sans); color: var(--muted); }
-    .colleague-note a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); font: 700 .94rem/1.45 var(--sans); text-underline-offset: .22em; }
+    .colleague-note a,
+    .section-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); font: 700 .94rem/1.45 var(--sans); text-underline-offset: .22em; }
+    .section-link { justify-self: start; text-wrap: balance; }
   </style>
 </head>
 <body>
@@ -1311,7 +1315,7 @@
       </div>
     </section>
 
-    <section class="section" id="problem" aria-labelledby="problem-title">
+    <section class="section" id="problem" aria-labelledby="problem-title" tabindex="-1">
       <div class="section-inner">
         <div class="section-header">
           <div>
@@ -1337,7 +1341,10 @@
         <div class="approach-body">
           <p>My cohorts start using AI on real work by Day 2, including people who've never touched it. As they get better, their output quality rises, and a good number of them start building their own agents and solutions.</p>
           <p>Applying AI to today's work is a start, but AI transformation comes when the work itself gets redesigned around what AI now makes possible. That redesign only happens from inside the work, done by the people who own it.</p>
-          <p>AI hype gets people burned. AI doom keeps them on the sidelines. Neither builds skill. I show teams where AI earns trust and where it doesn't. I work as a player-coach, in the trenches, building real tools alongside the team while they learn to build their own. The team keeps the tools and the know-how that made them.</p>
+          <div>
+            <p>AI hype gets people burned. AI doom keeps them on the sidelines. Neither builds skill. I show teams where AI earns trust and where it doesn't. I work as a player-coach, in the trenches, building real tools alongside the team while they learn to build their own. The team keeps the tools and the know-how that made them.</p>
+            <a class="section-link" href="#principles">How I think about AI</a>
+          </div>
           <figure class="colleague-note" id="colleague-note">
             <blockquote>“You have been instrumental in my AI journey and I have learned so much from watching you and getting your feedback on how to improve my work.”</blockquote>
             <figcaption>Faza B.</figcaption>
@@ -1495,7 +1502,7 @@
       </div>
     </section>
 
-    <section class="section dark" id="principles" aria-labelledby="principles-title">
+    <section class="section dark" id="principles" aria-labelledby="principles-title" tabindex="-1">
       <div class="section-inner principles-layout">
         <div>
           <p class="kicker">How I Think</p>
@@ -1527,6 +1534,7 @@
             <summary><h3>Q: Why hire you if the goal is independence?</h3></summary>
             <div class="faq-content">
               <p><strong>A:</strong> You bring me in to make your team independent. If you bring me back later, it should be for new work or new teams.</p>
+              <a class="section-link" href="#problem">Why teams stay dependent on outside AI help</a>
             </div>
           </details>
           <details class="faq-item">
@@ -1642,7 +1650,7 @@
       });
     }
 
-    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    document.querySelectorAll('a[href^="#"]:not(.section-link)').forEach((link) => {
       link.addEventListener("click", (event) => {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         const hash = link.getAttribute("href");
